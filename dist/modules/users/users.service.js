@@ -21,8 +21,8 @@ let UsersService = class UsersService {
     constructor(usersRepository) {
         this.usersRepository = usersRepository;
     }
-    create(createUserDto) {
-        const user = this.usersRepository.create(createUserDto);
+    create(userData) {
+        const user = this.usersRepository.create(userData);
         return this.usersRepository.save(user);
     }
     findAll() {
@@ -34,6 +34,12 @@ let UsersService = class UsersService {
             throw new common_1.NotFoundException(`User with ID ${id} not found`);
         }
         return user;
+    }
+    async findOneByEmail(email) {
+        return this.usersRepository.findOne({
+            where: { email },
+            select: ['id', 'email', 'password_hash', 'first_name', 'middle_name', 'last_name', 'is_active', 'created_at', 'updated_at'] // Need to select password to check it during login
+        });
     }
     async remove(id) {
         const result = await this.usersRepository.delete(id);

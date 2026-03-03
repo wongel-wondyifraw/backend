@@ -14,7 +14,12 @@ async function bootstrap() {
     app.useLogger(app.get(nestjs_pino_1.Logger));
     // 2. Security: Set security headers
     app.use((0, helmet_1.default)());
+    app.enableCors({
+        origin: 'http://localhost:5173', // Your frontend URL
+        credentials: true,
+    });
     // 3. Scalability: Enable API Versioning (e.g., /v1/users)
+    app.setGlobalPrefix('api');
     app.enableVersioning({
         type: common_1.VersioningType.URI,
         defaultVersion: '1',

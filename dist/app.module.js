@@ -13,6 +13,7 @@ const typeorm_1 = require("@nestjs/typeorm");
 const nestjs_pino_1 = require("nestjs-pino");
 const throttler_1 = require("@nestjs/throttler");
 const users_module_1 = require("./modules/users/users.module");
+const auth_module_1 = require("./modules/auth/auth.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -51,16 +52,17 @@ exports.AppModule = AppModule = __decorate([
                 inject: [config_1.ConfigService],
                 useFactory: (config) => ({
                     type: 'postgres',
-                    host: config.get('DB_HOST', 'localhost'),
-                    port: config.get('DB_PORT', 5432),
-                    username: config.get('DB_USERNAME', 'postgres'),
-                    password: config.get('DB_PASSWORD', 'postgres'),
-                    database: config.get('DB_DATABASE', 'Shepherd_one'),
+                    host: config.get('DB_HOST'),
+                    port: config.get('DB_PORT'),
+                    username: config.get('DB_USERNAME'),
+                    password: config.get('DB_PASSWORD'),
+                    database: config.get('DB_NAME'),
                     autoLoadEntities: true,
-                    synchronize: config.get('NODE_ENV') !== 'production', // Don't use true in production
+                    synchronize: config.get('DB_SYNCHRONIZE') === 'true', // True for initial dev, false otherwise
                 }),
             }),
             users_module_1.UsersModule,
+            auth_module_1.AuthModule,
         ],
         controllers: [],
         providers: [],

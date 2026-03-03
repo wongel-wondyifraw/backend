@@ -12,8 +12,13 @@ async function bootstrap() {
 
     // 2. Security: Set security headers
     app.use(helmet());
+    app.enableCors({
+        origin: 'http://localhost:5173', // Your frontend URL
+        credentials: true,
+    });
 
     // 3. Scalability: Enable API Versioning (e.g., /v1/users)
+    app.setGlobalPrefix('api');
     app.enableVersioning({
         type: VersioningType.URI,
         defaultVersion: '1',

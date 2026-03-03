@@ -4,6 +4,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { LoggerModule } from 'nestjs-pino';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { UsersModule } from './modules/users/users.module';
+import { AuthModule } from './modules/auth/auth.module';
 
 @Module({
     imports: [
@@ -39,16 +40,17 @@ import { UsersModule } from './modules/users/users.module';
             inject: [ConfigService],
             useFactory: (config: ConfigService) => ({
                 type: 'postgres',
-                host: config.get<string>('DB_HOST', 'localhost'),
-                port: config.get<number>('DB_PORT', 5432),
-                username: config.get<string>('DB_USERNAME', 'postgres'),
-                password: config.get<string>('DB_PASSWORD', 'postgres'),
-                database: config.get<string>('DB_DATABASE', 'Shepherd_one'),
+                host: config.get<string>('DB_HOST'),
+                port: config.get<number>('DB_PORT'),
+                username: config.get<string>('DB_USERNAME'),
+                password: config.get<string>('DB_PASSWORD'),
+                database: config.get<string>('DB_NAME'),
                 autoLoadEntities: true,
-                synchronize: config.get('NODE_ENV') !== 'production', // Don't use true in production
+                synchronize: config.get<string>('DB_SYNCHRONIZE') === 'true', // True for initial dev, false otherwise
             }),
         }),
         UsersModule,
+        AuthModule,
     ],
     controllers: [],
     providers: [],

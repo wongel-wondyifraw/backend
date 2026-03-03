@@ -1,7 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { CreateUserDto } from './dto/create-user.dto';
 import { User } from './entities/user.entity';
 
 @Injectable()
@@ -11,8 +10,8 @@ export class UsersService {
         private readonly usersRepository: Repository<User>,
     ) { }
 
-    create(createUserDto: CreateUserDto): Promise<User> {
-        const user = this.usersRepository.create(createUserDto);
+    create(userData: Partial<User>): Promise<User> {
+        const user = this.usersRepository.create(userData);
         return this.usersRepository.save(user);
     }
 
@@ -26,6 +25,13 @@ export class UsersService {
             throw new NotFoundException(`User with ID ${id} not found`);
         }
         return user;
+    }
+
+    async findOneByEmail(email: string): Promise<User | null> {
+        return this.usersRepository.findOne({
+            where: { email },
+            select: ['id', 'email', 'password_hash', 'first_name', 'middle_name', 'last_name', 'is_active', 'created_at', 'updated_at'] // Need to select password to check it during login
+        });
     }
 
     async remove(id: string): Promise<void> {
