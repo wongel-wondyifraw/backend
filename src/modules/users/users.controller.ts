@@ -1,7 +1,7 @@
-import { Controller, Get, UseGuards, Request, Post, UseInterceptors, UploadedFile, Param, NotFoundException, Body, Patch } from '@nestjs/common';
+import { Controller, Get, UseGuards, Request, Post, UseInterceptors, UploadedFile, Param, NotFoundException, Body, Patch, ParseUUIDPipe } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
-import { extname, join } from 'path';
+import { extname } from 'path';
 import { UsersService } from './users.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
@@ -29,8 +29,14 @@ export class UsersController {
     }
 
     @UseGuards(JwtAuthGuard)
+    @Patch('change-password')
+    async changePassword(@Request() req: any, @Body() body: any) {
+        return this.usersService.changePassword(req.user.id, body);
+    }
+
+    @UseGuards(JwtAuthGuard)
     @Patch(':id')
-    async update(@Param('id') id: string, @Body() userData: any) {
+    async update(@Param('id', ParseUUIDPipe) id: string, @Body() userData: any) {
         return this.usersService.update(id, userData);
     }
 
@@ -53,7 +59,7 @@ export class UsersController {
             cb(null, true);
         },
     }))
-    async uploadAvatar(@Param('id') id: string, @UploadedFile() file: any) {
+    async uploadAvatar(@Param('id', ParseUUIDPipe) id: string, @UploadedFile() file: any) {
         if (!file) {
             throw new NotFoundException('File not found');
         }

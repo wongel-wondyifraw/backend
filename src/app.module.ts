@@ -38,6 +38,8 @@ import { AuthModule } from './modules/auth/auth.module';
                                 if (sanitizedBody) {
                                     if (sanitizedBody.password) sanitizedBody.password = '***';
                                     if (sanitizedBody.token) sanitizedBody.token = '***';
+                                    if (sanitizedBody.currentPassword) sanitizedBody.currentPassword = '[REDACTED]';
+                                    if (sanitizedBody.newPassword) sanitizedBody.newPassword = '[REDACTED]';
                                 }
                                 return {
                                     id: req.id,

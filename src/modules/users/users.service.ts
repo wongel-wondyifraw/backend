@@ -1,4 +1,5 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
+import * as bcrypt from 'bcrypt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
@@ -34,8 +35,34 @@ export class UsersService {
         });
     }
 
-    async update(id: string, userData: Partial<User>): Promise<User> {
-        await this.usersRepository.update(id, userData);
+    async update(id: string, userData: any): Promise<User> {
+        const { currentPassword, newPassword, ...otherData } = userData;
+        const updateObject: Partial<User> = { ...otherData };
+
+        if (currentPassword && newPassword) {
+            // Fetch user with password_hash
+            const user = await this.usersRepository.findOne({
+                where: { id },
+                select: ['id', 'password_hash'],
+            });
+
+            if (!user) {
+                throw new NotFoundException('User not found');
+            }
+
+            // Validate current password
+            const isMatch = await bcrypt.compare(currentPassword, user.password_hash);
+            if (!isMatch) {
+                throw new ForbiddenException('Current password is incorrect');
+            }
+
+            // Hash new password and add to update object
+            const salt = await bcrypt.genSalt(10);
+            updateObject.password_hash = await bcrypt.hash(newPassword, salt);
+        }
+
+        // Perform update with only valid entity properties
+        await this.usersRepository.update(id, updateObject);
         return this.findOne(id);
     }
 
@@ -43,6 +70,35 @@ export class UsersService {
         const user = await this.findOne(id);
         user.avatar_url = avatarUrl;
         return this.usersRepository.save(user);
+    }
+
+    async changePassword(userId: string, changePasswordDto: any): Promise<{ message: string }> {
+        const { currentPassword, newPassword } = changePasswordDto;
+
+        // Fetch user with password_hash (it's hidden by default)
+        const user = await this.usersRepository.findOne({
+            where: { id: userId },
+            select: ['id', 'password_hash'],
+        });
+
+        if (!user) {
+            throw new NotFoundException('User not found');
+        }
+
+        // Validate current password
+        const isMatch = await bcrypt.compare(currentPassword, user.password_hash);
+        if (!isMatch) {
+            throw new ForbiddenException('Current password is incorrect');
+        }
+
+        // Hash new password
+        const salt = await bcrypt.genSalt(10);
+        const newHash = await bcrypt.hash(newPassword, salt);
+
+        // Update database with ONLY the new hash
+        await this.usersRepository.update(userId, { password_hash: newHash });
+
+        return { message: 'Password changed successfully' };
     }
 
     async remove(id: string): Promise<void> {
