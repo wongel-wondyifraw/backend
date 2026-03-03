@@ -30,7 +30,7 @@ export class UsersService {
     async findOneByEmail(email: string): Promise<User | null> {
         return this.usersRepository.findOne({
             where: { email },
-            select: ['id', 'email', 'password_hash', 'first_name', 'middle_name', 'last_name', 'is_active', 'created_at', 'updated_at'] // Need to select password to check it during login
+            select: ['id', 'email', 'password_hash', 'first_name', 'middle_name', 'last_name', 'is_active', 'created_at', 'updated_at', 'role'] // Need to select password to check it during login
         });
     }
 
