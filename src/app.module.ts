@@ -24,9 +24,33 @@ import { AuthModule } from './modules/auth/auth.module';
                             : {
                                 target: 'pino-pretty',
                                 options: {
-                                    singleLine: true,
+                                    colorize: true,
+                                    singleLine: false,
+                                    translateTime: 'SYS:HH:MM:ss',
+                                    ignore: 'req.headers,res.headers,req.remoteAddress,req.remotePort',
                                 },
                             },
+                        serializers: {
+                            req: (req) => {
+                                const sanitizedBody = req.raw.body ? { ...req.raw.body } : undefined;
+                                if (sanitizedBody) {
+                                    if (sanitizedBody.password) sanitizedBody.password = '***';
+                                    if (sanitizedBody.token) sanitizedBody.token = '***';
+                                }
+                                return {
+                                    id: req.id,
+                                    method: req.method,
+                                    url: req.url,
+                                    body: sanitizedBody,
+                                };
+                            },
+                            res: (res) => ({
+                                statusCode: res.statusCode,
+                            }),
+                        },
+                        customProps: (req, res) => ({
+                            context: 'HTTP',
+                        }),
                     },
                 };
             },
