@@ -34,6 +34,17 @@ export class UsersService {
         });
     }
 
+    async update(id: string, userData: Partial<User>): Promise<User> {
+        await this.usersRepository.update(id, userData);
+        return this.findOne(id);
+    }
+
+    async updateAvatar(id: string, avatarUrl: string): Promise<User> {
+        const user = await this.findOne(id);
+        user.avatar_url = avatarUrl;
+        return this.usersRepository.save(user);
+    }
+
     async remove(id: string): Promise<void> {
         const result = await this.usersRepository.delete(id);
         if (result.affected === 0) {

@@ -30,6 +30,8 @@ exports.AppModule = AppModule = __decorate([
                     const isProduction = config.get('NODE_ENV') === 'production';
                     return {
                         pinoHttp: {
+                            autoLogging: true, // Ensure autologging is enabled for the middleware
+                            quietReqLogger: true, // Suppress the 'PinoLogger is marked as a scoped provider' warning if possible
                             level: isProduction ? 'info' : 'debug',
                             transport: isProduction
                                 ? undefined

@@ -8,10 +8,17 @@ const common_1 = require("@nestjs/common");
 const nestjs_pino_1 = require("nestjs-pino");
 const helmet_1 = __importDefault(require("helmet"));
 const app_module_1 = require("./app.module");
+const http_exception_filter_1 = require("./common/filters/http-exception.filter");
 async function bootstrap() {
-    const app = await core_1.NestFactory.create(app_module_1.AppModule, { bufferLogs: true });
+    const app = await core_1.NestFactory.create(app_module_1.AppModule, {
+        bufferLogs: true,
+    });
     // 1. Logging: Use Pino instead of default console
-    app.useLogger(app.get(nestjs_pino_1.Logger));
+    const logger = app.get(nestjs_pino_1.Logger);
+    app.useLogger(logger);
+    // Register Global Exception Filter
+    // Using singleton Logger instead of PinoLogger to avoid InvalidClassScopeException
+    app.useGlobalFilters(new http_exception_filter_1.HttpExceptionFilter(logger));
     // 2. Security: Set security headers
     app.use((0, helmet_1.default)());
     app.enableCors({

@@ -41,6 +41,15 @@ let UsersService = class UsersService {
             select: ['id', 'email', 'password_hash', 'first_name', 'middle_name', 'last_name', 'is_active', 'created_at', 'updated_at', 'role'] // Need to select password to check it during login
         });
     }
+    async update(id, userData) {
+        await this.usersRepository.update(id, userData);
+        return this.findOne(id);
+    }
+    async updateAvatar(id, avatarUrl) {
+        const user = await this.findOne(id);
+        user.avatar_url = avatarUrl;
+        return this.usersRepository.save(user);
+    }
     async remove(id) {
         const result = await this.usersRepository.delete(id);
         if (result.affected === 0) {
