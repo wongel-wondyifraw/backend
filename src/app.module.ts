@@ -3,8 +3,6 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { LoggerModule } from 'nestjs-pino';
 import { ThrottlerModule } from '@nestjs/throttler';
-import { ServeStaticModule } from '@nestjs/serve-static';
-import { join } from 'path';
 import { UsersModule } from './modules/users/users.module';
 import { AuthModule } from './modules/auth/auth.module';
 
@@ -18,8 +16,8 @@ import { AuthModule } from './modules/auth/auth.module';
                 const isProduction = config.get('NODE_ENV') === 'production';
                 return {
                     pinoHttp: {
-                        autoLogging: true, // Ensure autologging is enabled for the middleware
-                        quietReqLogger: true, // Suppress the 'PinoLogger is marked as a scoped provider' warning if possible
+                        autoLogging: true,
+                        quietReqLogger: true,
                         level: isProduction ? 'info' : 'debug',
                         transport: isProduction
                             ? undefined
@@ -76,12 +74,8 @@ import { AuthModule } from './modules/auth/auth.module';
                 password: config.get<string>('DB_PASSWORD'),
                 database: config.get<string>('DB_NAME'),
                 autoLoadEntities: true,
-                synchronize: config.get<string>('DB_SYNCHRONIZE') === 'true', // True for initial dev, false otherwise
+                synchronize: config.get<string>('DB_SYNCHRONIZE') === 'true',
             }),
-        }),
-        ServeStaticModule.forRoot({
-            rootPath: join(__dirname, '..', 'uploads'),
-            serveRoot: '/uploads',
         }),
         UsersModule,
         AuthModule,
