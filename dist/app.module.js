@@ -12,6 +12,8 @@ const config_1 = require("@nestjs/config");
 const typeorm_1 = require("@nestjs/typeorm");
 const nestjs_pino_1 = require("nestjs-pino");
 const throttler_1 = require("@nestjs/throttler");
+const serve_static_1 = require("@nestjs/serve-static");
+const path_1 = require("path");
 const users_module_1 = require("./modules/users/users.module");
 const auth_module_1 = require("./modules/auth/auth.module");
 let AppModule = class AppModule {
@@ -60,6 +62,10 @@ exports.AppModule = AppModule = __decorate([
                     autoLoadEntities: true,
                     synchronize: config.get('DB_SYNCHRONIZE') === 'true', // True for initial dev, false otherwise
                 }),
+            }),
+            serve_static_1.ServeStaticModule.forRoot({
+                rootPath: (0, path_1.join)(__dirname, '..', 'uploads'),
+                serveRoot: '/uploads',
             }),
             users_module_1.UsersModule,
             auth_module_1.AuthModule,
