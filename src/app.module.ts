@@ -5,6 +5,7 @@ import { LoggerModule } from 'nestjs-pino';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { UsersModule } from './modules/users/users.module';
 import { AuthModule } from './modules/auth/auth.module';
+import { MembersModule } from './modules/members/members.module';
 
 @Module({
     imports: [
@@ -79,6 +80,7 @@ import { AuthModule } from './modules/auth/auth.module';
         }),
         UsersModule,
         AuthModule,
+        MembersModule,
     ],
     controllers: [],
     providers: [],
