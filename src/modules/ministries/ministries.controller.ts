@@ -36,4 +36,27 @@ export class MinistriesController {
     async remove(@Param('id', ParseUUIDPipe) id: string) {
         return this.ministriesService.remove(id);
     }
+
+    // ==================== Ministry Members ====================
+
+    @Get(':id/members')
+    async getMinistryMembers(@Param('id', ParseUUIDPipe) id: string) {
+        return this.ministriesService.getMinistryMembers(id);
+    }
+
+    @Post(':id/members/:memberId')
+    async addMember(
+        @Param('id', ParseUUIDPipe) id: string,
+        @Param('memberId', ParseUUIDPipe) memberId: string,
+    ) {
+        return this.ministriesService.addMember(id, memberId);
+    }
+
+    @Delete(':id/members/:memberId')
+    async removeMember(
+        @Param('id', ParseUUIDPipe) id: string,
+        @Param('memberId', ParseUUIDPipe) memberId: string,
+    ) {
+        return this.ministriesService.removeMember(id, memberId);
+    }
 }

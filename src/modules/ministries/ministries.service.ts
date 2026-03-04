@@ -1,7 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Ministry } from './entities/ministry.entity';
+import { MinistryMember } from './entities/ministry-member.entity';
 import { CreateMinistryDto } from './dto/create-ministry.dto';
 import { UpdateMinistryDto } from './dto/update-ministry.dto';
 
@@ -10,7 +11,11 @@ export class MinistriesService {
     constructor(
         @InjectRepository(Ministry)
         private readonly ministriesRepository: Repository<Ministry>,
+        @InjectRepository(MinistryMember)
+        private readonly ministryMembersRepository: Repository<MinistryMember>,
     ) { }
+
+    // ==================== Ministry CRUD ====================
 
     async create(createMinistryDto: CreateMinistryDto): Promise<Ministry> {
         const ministry = this.ministriesRepository.create(createMinistryDto);
@@ -41,5 +46,47 @@ export class MinistriesService {
         if (result.affected === 0) {
             throw new NotFoundException(`Ministry with ID ${id} not found`);
         }
+    }
+
+    // ==================== Ministry Members ====================
+
+    async addMember(ministryId: string, memberId: string): Promise<MinistryMember> {
+        // Check if already exists
+        const existing = await this.ministryMembersRepository.findOne({
+            where: { ministry_id: ministryId, member_id: memberId },
+        });
+        if (existing) {
+            throw new ConflictException('Member is already in this ministry');
+        }
+
+        const record = this.ministryMembersRepository.create({
+            ministry_id: ministryId,
+            member_id: memberId,
+        });
+        return this.ministryMembersRepository.save(record);
+    }
+
+    async removeMember(ministryId: string, memberId: string): Promise<void> {
+        const result = await this.ministryMembersRepository.delete({
+            ministry_id: ministryId,
+            member_id: memberId,
+        });
+        if (result.affected === 0) {
+            throw new NotFoundException('Member not found in this ministry');
+        }
+    }
+
+    async getMinistryMembers(ministryId: string): Promise<MinistryMember[]> {
+        return this.ministryMembersRepository.find({
+            where: { ministry_id: ministryId },
+            order: { joined_at: 'DESC' },
+        });
+    }
+
+    async getMemberMinistries(memberId: string): Promise<MinistryMember[]> {
+        return this.ministryMembersRepository.find({
+            where: { member_id: memberId },
+            order: { joined_at: 'DESC' },
+        });
     }
 }
