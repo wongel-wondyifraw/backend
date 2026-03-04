@@ -54,6 +54,10 @@ const fs = __importStar(require("fs"));
 const users_service_1 = require("./users.service");
 const jwt_auth_guard_1 = require("../auth/guards/jwt-auth.guard");
 const nestjs_pino_1 = require("nestjs-pino");
+const create_user_dto_1 = require("./dto/create-user.dto");
+const update_profile_dto_1 = require("./dto/update-profile.dto");
+const change_password_dto_1 = require("./dto/change-password.dto");
+const update_user_dto_1 = require("./dto/update-user.dto");
 let UsersController = class UsersController {
     constructor(usersService, logger) {
         this.usersService = usersService;
@@ -67,14 +71,20 @@ let UsersController = class UsersController {
         // req.user is set by the JwtStrategy's validate method
         return this.usersService.findOne(req.user.id);
     }
-    async updateProfile(req, userData) {
-        return this.usersService.update(req.user.id, userData);
+    async updateProfile(req, updateProfileDto) {
+        return this.usersService.update(req.user.id, updateProfileDto);
     }
-    async changePassword(req, body) {
-        return this.usersService.changePassword(req.user.id, body);
+    async changePassword(req, changePasswordDto) {
+        return this.usersService.changePassword(req.user.id, changePasswordDto);
     }
-    async update(id, userData) {
-        return this.usersService.update(id, userData);
+    async update(id, updateUserDto) {
+        return this.usersService.update(id, updateUserDto);
+    }
+    async create(createUserDto) {
+        return this.usersService.create(createUserDto);
+    }
+    async remove(id) {
+        return this.usersService.remove(id);
     }
     async uploadAvatar(id, file) {
         try {
@@ -124,7 +134,7 @@ __decorate([
     __param(0, (0, common_1.Request)()),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:paramtypes", [Object, update_profile_dto_1.UpdateProfileDto]),
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "updateProfile", null);
 __decorate([
@@ -133,7 +143,7 @@ __decorate([
     __param(0, (0, common_1.Request)()),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:paramtypes", [Object, change_password_dto_1.ChangePasswordDto]),
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "changePassword", null);
 __decorate([
@@ -142,9 +152,25 @@ __decorate([
     __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:paramtypes", [String, update_user_dto_1.UpdateUserDto]),
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "update", null);
+__decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, common_1.Post)(),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [create_user_dto_1.CreateUserDto]),
+    __metadata("design:returntype", Promise)
+], UsersController.prototype, "create", null);
+__decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, common_1.Delete)(':id'),
+    __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], UsersController.prototype, "remove", null);
 __decorate([
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     (0, common_1.Post)(':id/upload-avatar'),

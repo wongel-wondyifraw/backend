@@ -55,7 +55,11 @@ let UsersService = class UsersService {
     constructor(usersRepository) {
         this.usersRepository = usersRepository;
     }
-    create(userData) {
+    async create(userData) {
+        if (userData.password_hash) {
+            const salt = await bcrypt.genSalt();
+            userData.password_hash = await bcrypt.hash(userData.password_hash, salt);
+        }
         const user = this.usersRepository.create(userData);
         return this.usersRepository.save(user);
     }

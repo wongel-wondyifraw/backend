@@ -1,4 +1,4 @@
-import { Controller, Get, UseGuards, Request, Post, UseInterceptors, UploadedFile, Param, NotFoundException, Body, Patch, ParseUUIDPipe } from '@nestjs/common';
+import { Controller, Get, UseGuards, Request, Post, UseInterceptors, UploadedFile, Param, NotFoundException, Body, Patch, ParseUUIDPipe, Delete } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
@@ -6,6 +6,10 @@ import * as fs from 'fs';
 import { UsersService } from './users.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { PinoLogger } from 'nestjs-pino';
+import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateProfileDto } from './dto/update-profile.dto';
+import { ChangePasswordDto } from './dto/change-password.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
 
 @Controller('users')
 export class UsersController {
@@ -31,20 +35,32 @@ export class UsersController {
 
     @UseGuards(JwtAuthGuard)
     @Patch('profile')
-    async updateProfile(@Request() req: any, @Body() userData: any) {
-        return this.usersService.update(req.user.id, userData);
+    async updateProfile(@Request() req: any, @Body() updateProfileDto: UpdateProfileDto) {
+        return this.usersService.update(req.user.id, updateProfileDto);
     }
 
     @UseGuards(JwtAuthGuard)
     @Patch('change-password')
-    async changePassword(@Request() req: any, @Body() body: any) {
-        return this.usersService.changePassword(req.user.id, body);
+    async changePassword(@Request() req: any, @Body() changePasswordDto: ChangePasswordDto) {
+        return this.usersService.changePassword(req.user.id, changePasswordDto);
     }
 
     @UseGuards(JwtAuthGuard)
     @Patch(':id')
-    async update(@Param('id', ParseUUIDPipe) id: string, @Body() userData: any) {
-        return this.usersService.update(id, userData);
+    async update(@Param('id', ParseUUIDPipe) id: string, @Body() updateUserDto: UpdateUserDto) {
+        return this.usersService.update(id, updateUserDto);
+    }
+
+    @UseGuards(JwtAuthGuard)
+    @Post()
+    async create(@Body() createUserDto: CreateUserDto) {
+        return this.usersService.create(createUserDto);
+    }
+
+    @UseGuards(JwtAuthGuard)
+    @Delete(':id')
+    async remove(@Param('id', ParseUUIDPipe) id: string) {
+        return this.usersService.remove(id);
     }
 
     @UseGuards(JwtAuthGuard)

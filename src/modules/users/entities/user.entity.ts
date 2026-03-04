@@ -14,6 +14,12 @@ export class User {
     @Column()
     last_name: string;
 
+    @Column({ nullable: true })
+    avatar_url: string;
+
+    @Column({ default: 'member' })
+    role: string;
+
     @Column({ unique: true })
     email: string;
 
@@ -22,11 +28,6 @@ export class User {
 
     @Column({ default: true })
     is_active: boolean;
-    @Column({ default: 'user' })
-    role: string;
-
-    @Column({ nullable: true })
-    avatar_url: string;
 
     @CreateDateColumn()
     created_at: Date;
