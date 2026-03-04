@@ -56,19 +56,23 @@ let UsersService = class UsersService {
         this.usersRepository = usersRepository;
     }
     async create(createUserDto) {
-        const { password_hash, avatar, ...rest } = createUserDto;
+        // 1. Extract specifically what we need to transform
+        const { password_hash, avatar, avatar_url, ...rest } = createUserDto;
+        // 2. Build the entity data object manually to ensure avatar_url is included
         const userData = {
             ...rest,
+            avatar_url: avatar_url, // Mapping the string path specifically
             is_active: rest.is_active === 'true' || rest.is_active === true,
             created_at: rest.created_at || new Date(),
         };
+        // 3. Handle Password Hashing
         if (password_hash) {
             const salt = await bcrypt.genSalt();
             userData.password_hash = await bcrypt.hash(password_hash, salt);
         }
+        // 4. Save to Database
         const user = this.usersRepository.create(userData);
-        const savedUser = await this.usersRepository.save(user);
-        return savedUser;
+        return await this.usersRepository.save(user);
     }
     findAll() {
         return this.usersRepository.find();

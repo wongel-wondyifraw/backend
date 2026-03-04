@@ -74,6 +74,10 @@ export class UsersController {
         const userId = randomUUID();
         let avatarUrl = null;
 
+        console.log('--- CREATE USER ---');
+        console.log('File received:', file ? { originalname: file.originalname, path: file.path, size: file.size } : 'NO FILE');
+        console.log('Body received:', JSON.stringify(createUserDto));
+
         // 2. If a file was uploaded, move it to the final location immediately
         if (file) {
             const fileExt = extname(file.originalname);
@@ -91,6 +95,9 @@ export class UsersController {
                 if (fs.existsSync(file.path)) {
                     fs.copyFileSync(file.path, targetPath);
                     fs.unlinkSync(file.path);
+                    console.log('Avatar file moved to:', targetPath);
+                } else {
+                    console.error('Temp file does not exist at:', file.path);
                 }
                 avatarUrl = `uploads/images/${filename}`;
             } catch (err) {
@@ -98,6 +105,8 @@ export class UsersController {
                 // We'll continue even if file processing fails, but avatarUrl remains null
             }
         }
+
+        console.log('avatar_url to save:', avatarUrl);
 
         // 3. Create the user record with the pre-generated ID and avatar_url
         const user = await this.usersService.create({
