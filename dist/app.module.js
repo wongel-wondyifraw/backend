@@ -15,6 +15,7 @@ const throttler_1 = require("@nestjs/throttler");
 const users_module_1 = require("./modules/users/users.module");
 const auth_module_1 = require("./modules/auth/auth.module");
 const members_module_1 = require("./modules/members/members.module");
+const ministries_module_1 = require("./modules/ministries/ministries.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -97,6 +98,7 @@ exports.AppModule = AppModule = __decorate([
             users_module_1.UsersModule,
             auth_module_1.AuthModule,
             members_module_1.MembersModule,
+            ministries_module_1.MinistriesModule,
         ],
         controllers: [],
         providers: [],
