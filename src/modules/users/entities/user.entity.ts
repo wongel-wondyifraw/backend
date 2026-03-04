@@ -17,7 +17,10 @@ export class User {
     @Column({ nullable: true })
     avatar_url: string;
 
-    @Column({ default: 'member' })
+    @Column({ nullable: true })
+    title: string;
+
+    @Column({ default: 'staff' })
     role: string;
 
     @Column({ unique: true })

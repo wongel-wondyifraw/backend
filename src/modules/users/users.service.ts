@@ -12,13 +12,23 @@ export class UsersService {
         private readonly usersRepository: Repository<User>,
     ) { }
 
-    async create(userData: Partial<User>): Promise<User> {
-        if (userData.password_hash) {
+    async create(createUserDto: any): Promise<User> {
+        const { password_hash, avatar, ...rest } = createUserDto;
+
+        const userData: Partial<User> = {
+            ...rest,
+            is_active: rest.is_active === 'true' || rest.is_active === true,
+            created_at: rest.created_at || new Date(),
+        };
+
+        if (password_hash) {
             const salt = await bcrypt.genSalt();
-            userData.password_hash = await bcrypt.hash(userData.password_hash, salt);
+            userData.password_hash = await bcrypt.hash(password_hash, salt);
         }
+
         const user = this.usersRepository.create(userData);
-        return this.usersRepository.save(user);
+        const savedUser = await this.usersRepository.save(user);
+        return savedUser;
     }
 
 
@@ -72,10 +82,9 @@ export class UsersService {
         return this.findOne(id);
     }
 
-    async updateAvatar(id: string, avatarUrl: string): Promise<User> {
-        const user = await this.findOne(id);
-        user.avatar_url = avatarUrl;
-        return this.usersRepository.save(user);
+    async updateAvatar(id: string, avatarUrl: string): Promise<void> {
+        console.log(`Updating avatar for user ${id} to: ${avatarUrl}`);
+        await this.usersRepository.update(id, { avatar_url: avatarUrl });
     }
 
     async changePassword(userId: string, changePasswordDto: any): Promise<{ message: string }> {

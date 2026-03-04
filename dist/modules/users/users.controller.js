@@ -50,6 +50,7 @@ const common_1 = require("@nestjs/common");
 const platform_express_1 = require("@nestjs/platform-express");
 const multer_1 = require("multer");
 const path_1 = require("path");
+const crypto_1 = require("crypto");
 const fs = __importStar(require("fs"));
 const users_service_1 = require("./users.service");
 const jwt_auth_guard_1 = require("../auth/guards/jwt-auth.guard");
@@ -80,8 +81,41 @@ let UsersController = class UsersController {
     async update(id, updateUserDto) {
         return this.usersService.update(id, updateUserDto);
     }
-    async create(createUserDto) {
-        return this.usersService.create(createUserDto);
+    async create(createUserDto, file) {
+        // 1. Generate the UUID for the new user
+        const userId = (0, crypto_1.randomUUID)();
+        let avatarUrl = null;
+        // 2. If a file was uploaded, move it to the final location immediately
+        if (file) {
+            const fileExt = (0, path_1.extname)(file.originalname);
+            const filename = `${userId}${fileExt}`;
+            const targetPath = (0, path_1.join)(process.cwd(), 'uploads/images', filename);
+            try {
+                // Ensure directory exists
+                const uploadDir = (0, path_1.join)(process.cwd(), 'uploads/images');
+                if (!fs.existsSync(uploadDir)) {
+                    fs.mkdirSync(uploadDir, { recursive: true });
+                }
+                // Move file - use copy + unlink for cross-partition reliability
+                if (fs.existsSync(file.path)) {
+                    fs.copyFileSync(file.path, targetPath);
+                    fs.unlinkSync(file.path);
+                }
+                avatarUrl = `uploads/images/${filename}`;
+            }
+            catch (err) {
+                console.error('Error processing avatar during creation:', err);
+                // We'll continue even if file processing fails, but avatarUrl remains null
+            }
+        }
+        // 3. Create the user record with the pre-generated ID and avatar_url
+        const user = await this.usersService.create({
+            ...createUserDto,
+            id: userId,
+            avatar_url: avatarUrl,
+            created_at: new Date(), // Explicitly set created_at as requested
+        });
+        return user;
     }
     async remove(id) {
         return this.usersService.remove(id);
@@ -91,7 +125,7 @@ let UsersController = class UsersController {
             if (!file) {
                 throw new common_1.NotFoundException('File not found');
             }
-            const avatarUrl = `/uploads/images/${file.filename}`;
+            const avatarUrl = `uploads/images/${file.filename}`;
             await this.usersService.updateAvatar(id, avatarUrl);
             return {
                 message: 'Avatar uploaded successfully',
@@ -158,9 +192,25 @@ __decorate([
 __decorate([
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     (0, common_1.Post)(),
+    (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)('avatar', {
+        storage: (0, multer_1.diskStorage)({
+            destination: (req, file, cb) => {
+                const uploadPath = (0, path_1.join)(process.cwd(), 'uploads/images');
+                if (!fs.existsSync(uploadPath)) {
+                    fs.mkdirSync(uploadPath, { recursive: true });
+                }
+                cb(null, uploadPath);
+            },
+            filename: (req, file, cb) => {
+                const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+                cb(null, `temp-${uniqueSuffix}${(0, path_1.extname)(file.originalname)}`);
+            },
+        }),
+    })),
     __param(0, (0, common_1.Body)()),
+    __param(1, (0, common_1.UploadedFile)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [create_user_dto_1.CreateUserDto]),
+    __metadata("design:paramtypes", [create_user_dto_1.CreateUserDto, Object]),
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "create", null);
 __decorate([

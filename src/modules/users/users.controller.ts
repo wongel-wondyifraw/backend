@@ -1,7 +1,8 @@
 import { Controller, Get, UseGuards, Request, Post, UseInterceptors, UploadedFile, Param, NotFoundException, Body, Patch, ParseUUIDPipe, Delete } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
-import { extname } from 'path';
+import { join, extname } from 'path';
+import { randomUUID } from 'crypto';
 import * as fs from 'fs';
 import { UsersService } from './users.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -53,8 +54,60 @@ export class UsersController {
 
     @UseGuards(JwtAuthGuard)
     @Post()
-    async create(@Body() createUserDto: CreateUserDto) {
-        return this.usersService.create(createUserDto);
+    @UseInterceptors(FileInterceptor('avatar', {
+        storage: diskStorage({
+            destination: (req, file, cb) => {
+                const uploadPath = join(process.cwd(), 'uploads/images');
+                if (!fs.existsSync(uploadPath)) {
+                    fs.mkdirSync(uploadPath, { recursive: true });
+                }
+                cb(null, uploadPath);
+            },
+            filename: (req, file, cb) => {
+                const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+                cb(null, `temp-${uniqueSuffix}${extname(file.originalname)}`);
+            },
+        }),
+    }))
+    async create(@Body() createUserDto: CreateUserDto, @UploadedFile() file: any) {
+        // 1. Generate the UUID for the new user
+        const userId = randomUUID();
+        let avatarUrl = null;
+
+        // 2. If a file was uploaded, move it to the final location immediately
+        if (file) {
+            const fileExt = extname(file.originalname);
+            const filename = `${userId}${fileExt}`;
+            const targetPath = join(process.cwd(), 'uploads/images', filename);
+
+            try {
+                // Ensure directory exists
+                const uploadDir = join(process.cwd(), 'uploads/images');
+                if (!fs.existsSync(uploadDir)) {
+                    fs.mkdirSync(uploadDir, { recursive: true });
+                }
+
+                // Move file - use copy + unlink for cross-partition reliability
+                if (fs.existsSync(file.path)) {
+                    fs.copyFileSync(file.path, targetPath);
+                    fs.unlinkSync(file.path);
+                }
+                avatarUrl = `uploads/images/${filename}`;
+            } catch (err) {
+                console.error('Error processing avatar during creation:', err);
+                // We'll continue even if file processing fails, but avatarUrl remains null
+            }
+        }
+
+        // 3. Create the user record with the pre-generated ID and avatar_url
+        const user = await this.usersService.create({
+            ...createUserDto,
+            id: userId,
+            avatar_url: avatarUrl,
+            created_at: new Date(), // Explicitly set created_at as requested
+        });
+
+        return user;
     }
 
     @UseGuards(JwtAuthGuard)
@@ -93,7 +146,7 @@ export class UsersController {
             if (!file) {
                 throw new NotFoundException('File not found');
             }
-            const avatarUrl = `/uploads/images/${file.filename}`;
+            const avatarUrl = `uploads/images/${file.filename}`;
             await this.usersService.updateAvatar(id, avatarUrl);
             return {
                 message: 'Avatar uploaded successfully',
