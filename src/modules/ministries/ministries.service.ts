@@ -83,6 +83,7 @@ export class MinistriesService {
     async getMinistryMembers(ministryId: string): Promise<MinistryMember[]> {
         return this.ministryMembersRepository.find({
             where: { ministry_id: ministryId },
+            relations: ['member'],
             order: { joined_at: 'DESC' },
         });
     }
