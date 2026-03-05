@@ -1,4 +1,6 @@
-import { Entity, Column, PrimaryColumn, CreateDateColumn } from 'typeorm';
+import { Entity, Column, PrimaryColumn, CreateDateColumn, ManyToOne, JoinColumn } from 'typeorm';
+import { Ministry } from './ministry.entity';
+import { Member } from '../../members/entities/member.entity';
 
 @Entity('ministry_members')
 export class MinistryMember {
@@ -10,4 +12,12 @@ export class MinistryMember {
 
     @CreateDateColumn()
     joined_at: Date;
+
+    @ManyToOne(() => Ministry, { onDelete: 'CASCADE' })
+    @JoinColumn({ name: 'ministry_id' })
+    ministry: Ministry;
+
+    @ManyToOne(() => Member, { onDelete: 'CASCADE' })
+    @JoinColumn({ name: 'member_id' })
+    member: Member;
 }

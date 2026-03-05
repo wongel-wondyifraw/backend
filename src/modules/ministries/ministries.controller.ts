@@ -59,4 +59,10 @@ export class MinistriesController {
     ) {
         return this.ministriesService.removeMember(id, memberId);
     }
+
+    // Get all ministries a specific member belongs to
+    @Get('member/:memberId/ministries')
+    async getMemberMinistries(@Param('memberId', ParseUUIDPipe) memberId: string) {
+        return this.ministriesService.getMemberMinistries(memberId);
+    }
 }

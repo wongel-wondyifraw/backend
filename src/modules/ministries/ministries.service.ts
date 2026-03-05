@@ -83,6 +83,7 @@ export class MinistriesService {
     async getMinistryMembers(ministryId: string): Promise<MinistryMember[]> {
         return this.ministryMembersRepository.find({
             where: { ministry_id: ministryId },
+            relations: ['member'],
             order: { joined_at: 'DESC' },
         });
     }
@@ -90,6 +91,7 @@ export class MinistriesService {
     async getMemberMinistries(memberId: string): Promise<MinistryMember[]> {
         return this.ministryMembersRepository.find({
             where: { member_id: memberId },
+            relations: ['ministry'],
             order: { joined_at: 'DESC' },
         });
     }
