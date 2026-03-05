@@ -81,6 +81,7 @@ let MinistriesService = class MinistriesService {
     async getMinistryMembers(ministryId) {
         return this.ministryMembersRepository.find({
             where: { ministry_id: ministryId },
+            relations: ['member'],
             order: { joined_at: 'DESC' },
         });
     }
