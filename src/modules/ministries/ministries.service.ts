@@ -24,12 +24,16 @@ export class MinistriesService {
 
     async findAll(): Promise<Ministry[]> {
         return this.ministriesRepository.find({
+            relations: ['leader'],
             order: { created_at: 'DESC' },
         });
     }
 
     async findOne(id: string): Promise<Ministry> {
-        const ministry = await this.ministriesRepository.findOne({ where: { id } });
+        const ministry = await this.ministriesRepository.findOne({
+            where: { id },
+            relations: ['leader'],
+        });
         if (!ministry) {
             throw new NotFoundException(`Ministry with ID ${id} not found`);
         }
