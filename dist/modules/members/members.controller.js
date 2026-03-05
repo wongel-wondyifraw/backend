@@ -18,9 +18,11 @@ const members_service_1 = require("./members.service");
 const create_member_dto_1 = require("./dto/create-member.dto");
 const update_member_dto_1 = require("./dto/update-member.dto");
 const jwt_auth_guard_1 = require("../auth/guards/jwt-auth.guard");
+const ministries_service_1 = require("../ministries/ministries.service");
 let MembersController = class MembersController {
-    constructor(membersService) {
+    constructor(membersService, ministriesService) {
         this.membersService = membersService;
+        this.ministriesService = ministriesService;
     }
     async create(createMemberDto) {
         return this.membersService.create(createMemberDto);
@@ -36,6 +38,9 @@ let MembersController = class MembersController {
     }
     async remove(id) {
         return this.membersService.remove(id);
+    }
+    async getMemberMinistries(id) {
+        return this.ministriesService.getMemberMinistries(id);
     }
 };
 exports.MembersController = MembersController;
@@ -74,8 +79,16 @@ __decorate([
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], MembersController.prototype, "remove", null);
+__decorate([
+    (0, common_1.Get)(':id/ministries'),
+    __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], MembersController.prototype, "getMemberMinistries", null);
 exports.MembersController = MembersController = __decorate([
     (0, common_1.Controller)('members'),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
-    __metadata("design:paramtypes", [members_service_1.MembersService])
+    __metadata("design:paramtypes", [members_service_1.MembersService,
+        ministries_service_1.MinistriesService])
 ], MembersController);

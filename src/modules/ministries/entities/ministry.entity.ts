@@ -1,5 +1,6 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, ManyToOne, OneToMany, JoinColumn } from 'typeorm';
 import { Member } from '../../members/entities/member.entity';
+import { MinistryMember } from './ministry-member.entity';
 
 @Entity('ministries')
 export class Ministry {
@@ -27,4 +28,7 @@ export class Ministry {
 
     @UpdateDateColumn()
     updated_at: Date;
+
+    @OneToMany(() => MinistryMember, (ministryMember) => ministryMember.ministry)
+    ministry_members: MinistryMember[];
 }

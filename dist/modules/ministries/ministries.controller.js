@@ -37,6 +37,16 @@ let MinistriesController = class MinistriesController {
     async remove(id) {
         return this.ministriesService.remove(id);
     }
+    // ==================== Ministry Members ====================
+    async getMinistryMembers(id) {
+        return this.ministriesService.getMinistryMembers(id);
+    }
+    async addMember(id, memberId) {
+        return this.ministriesService.addMember(id, memberId);
+    }
+    async removeMember(id, memberId) {
+        return this.ministriesService.removeMember(id, memberId);
+    }
 };
 exports.MinistriesController = MinistriesController;
 __decorate([
@@ -74,6 +84,29 @@ __decorate([
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], MinistriesController.prototype, "remove", null);
+__decorate([
+    (0, common_1.Get)(':id/members'),
+    __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], MinistriesController.prototype, "getMinistryMembers", null);
+__decorate([
+    (0, common_1.Post)(':id/members/:memberId'),
+    __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
+    __param(1, (0, common_1.Param)('memberId', common_1.ParseUUIDPipe)),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:returntype", Promise)
+], MinistriesController.prototype, "addMember", null);
+__decorate([
+    (0, common_1.Delete)(':id/members/:memberId'),
+    __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
+    __param(1, (0, common_1.Param)('memberId', common_1.ParseUUIDPipe)),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:returntype", Promise)
+], MinistriesController.prototype, "removeMember", null);
 exports.MinistriesController = MinistriesController = __decorate([
     (0, common_1.Controller)('ministries'),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),

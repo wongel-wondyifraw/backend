@@ -11,6 +11,8 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Member = void 0;
 const typeorm_1 = require("typeorm");
+const ministry_entity_1 = require("../../ministries/entities/ministry.entity");
+const ministry_member_entity_1 = require("../../ministries/entities/ministry-member.entity");
 let Member = class Member {
 };
 exports.Member = Member;
@@ -66,6 +68,14 @@ __decorate([
     (0, typeorm_1.UpdateDateColumn)(),
     __metadata("design:type", Date)
 ], Member.prototype, "updated_at", void 0);
+__decorate([
+    (0, typeorm_1.OneToMany)(() => ministry_entity_1.Ministry, (ministry) => ministry.leader),
+    __metadata("design:type", Array)
+], Member.prototype, "led_ministries", void 0);
+__decorate([
+    (0, typeorm_1.OneToMany)(() => ministry_member_entity_1.MinistryMember, (ministryMember) => ministryMember.member),
+    __metadata("design:type", Array)
+], Member.prototype, "ministry_members", void 0);
 exports.Member = Member = __decorate([
     (0, typeorm_1.Entity)('members')
 ], Member);
