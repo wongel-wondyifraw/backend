@@ -25,7 +25,7 @@ export class MembersService {
         if (avatar && avatar.buffer) {
             const avatarName = `${member.id}${extname(avatar.originalname)}`;
             const fullPath = join(baseDir, 'images', avatarName);
-            
+
             await fs.mkdir(join(baseDir, 'images'), { recursive: true });
             await fs.writeFile(fullPath, avatar.buffer);
             updateData.image_url = `/uploads/images/${avatarName}`;
@@ -36,7 +36,7 @@ export class MembersService {
             const timestamp = Date.now();
             const docName = `${member.id}_${timestamp}${extname(doc.originalname)}`;
             const fullPath = join(baseDir, 'documents', docName);
-            
+
             await fs.mkdir(join(baseDir, 'documents'), { recursive: true });
             await fs.writeFile(fullPath, doc.buffer);
             updateData.document_url = `/uploads/documents/${docName}`;
@@ -58,7 +58,10 @@ export class MembersService {
     }
 
     async findOne(id: string): Promise<Member> {
-        const member = await this.membersRepository.findOne({ where: { id } });
+        const member = await this.membersRepository.findOne({
+            where: { id },
+            relations: ['ministry_members', 'ministry_members.ministry']
+        });
         if (!member) {
             throw new NotFoundException(`Member with ID ${id} not found`);
         }
