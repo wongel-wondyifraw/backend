@@ -113,7 +113,42 @@ let MembersController = class MembersController {
     async findOne(id) {
         return this.membersService.findOne(id);
     }
-    async update(id, updateMemberDto) {
+    async update(id, updateMemberDto, files) {
+        var _a, _b;
+        // Process avatar file
+        if ((_a = files === null || files === void 0 ? void 0 : files.avatar) === null || _a === void 0 ? void 0 : _a[0]) {
+            const file = files.avatar[0];
+            const fileExt = (0, path_1.extname)(file.originalname);
+            const filename = `${id}${fileExt}`;
+            const targetPath = (0, path_1.join)(process.cwd(), 'uploads/images', filename);
+            try {
+                if (fs.existsSync(file.path)) {
+                    fs.copyFileSync(file.path, targetPath);
+                    fs.unlinkSync(file.path);
+                }
+                updateMemberDto.image_url = `uploads/images/${filename}`;
+            }
+            catch (err) {
+                console.error('Error processing member avatar:', err);
+            }
+        }
+        // Process document (church letter) file
+        if ((_b = files === null || files === void 0 ? void 0 : files.document) === null || _b === void 0 ? void 0 : _b[0]) {
+            const file = files.document[0];
+            const fileExt = (0, path_1.extname)(file.originalname);
+            const filename = `${id}-letter${fileExt}`;
+            const targetPath = (0, path_1.join)(process.cwd(), 'uploads/documents', filename);
+            try {
+                if (fs.existsSync(file.path)) {
+                    fs.copyFileSync(file.path, targetPath);
+                    fs.unlinkSync(file.path);
+                }
+                updateMemberDto.document_url = `uploads/documents/${filename}`;
+            }
+            catch (err) {
+                console.error('Error processing member document:', err);
+            }
+        }
         return this.membersService.update(id, updateMemberDto);
     }
     async remove(id) {
@@ -166,10 +201,30 @@ __decorate([
 ], MembersController.prototype, "findOne", null);
 __decorate([
     (0, common_1.Patch)(':id'),
+    (0, common_1.UseInterceptors)((0, platform_express_1.FileFieldsInterceptor)([
+        { name: 'avatar', maxCount: 1 },
+        { name: 'document', maxCount: 1 },
+    ], {
+        storage: (0, multer_1.diskStorage)({
+            destination: (req, file, cb) => {
+                const subfolder = file.fieldname === 'avatar' ? 'images' : 'documents';
+                const uploadPath = (0, path_1.join)(process.cwd(), 'uploads', subfolder);
+                if (!fs.existsSync(uploadPath)) {
+                    fs.mkdirSync(uploadPath, { recursive: true });
+                }
+                cb(null, uploadPath);
+            },
+            filename: (req, file, cb) => {
+                const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+                cb(null, `temp-${uniqueSuffix}${(0, path_1.extname)(file.originalname)}`);
+            },
+        }),
+    })),
     __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
     __param(1, (0, common_1.Body)()),
+    __param(2, (0, common_1.UploadedFiles)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, update_member_dto_1.UpdateMemberDto]),
+    __metadata("design:paramtypes", [String, update_member_dto_1.UpdateMemberDto, Object]),
     __metadata("design:returntype", Promise)
 ], MembersController.prototype, "update", null);
 __decorate([
