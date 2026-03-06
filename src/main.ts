@@ -6,12 +6,21 @@ import { join } from 'path';
 import helmet from 'helmet';
 import { AppModule } from './app.module';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
+import * as fs from 'fs';
 
 async function bootstrap() {
+    // Ensure upload folders exist before the app starts
+    const folders = ['uploads/images', 'uploads/documents'];
+    folders.forEach(folder => {
+        const path = join(process.cwd(), folder);
+        if (!fs.existsSync(path)) {
+            fs.mkdirSync(path, { recursive: true });
+        }
+    });
+
     const app = await NestFactory.create<NestExpressApplication>(AppModule, {
         bufferLogs: true,
     });
-
     // 1. Logging: Use Pino instead of default console
     const logger = app.get(Logger);
     app.useLogger(logger);
@@ -53,7 +62,7 @@ async function bootstrap() {
     app.useGlobalPipes(new ValidationPipe({
         whitelist: true,
         transform: true, // This allows @Transform to run
-        forbidNonWhitelisted: true,
+        forbidNonWhitelisted: false, // Don't throw error for extra fields, just strip them
         transformOptions: {
             enableImplicitConversion: true, // Automatically converts primitives (numbers, booleans)
         },

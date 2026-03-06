@@ -33,10 +33,6 @@ export class CreateMemberDto {
 
     @IsString()
     @IsOptional()
-    image_url?: string;
-
-    @IsString()
-    @IsOptional()
     address?: string;
 
     @IsDateString()
@@ -51,10 +47,6 @@ export class CreateMemberDto {
     @IsOptional()
     status?: string;
 
-    /**
-     * baptized is sent as a string "yes"/"no" or "true"/"false" via FormData.
-     * This @Transform logic converts it to a real Boolean before @IsBoolean checks it.
-     */
     @IsOptional()
     @Transform(({ value }) => {
         if (value === 'true' || value === 'yes') return true;
@@ -67,4 +59,15 @@ export class CreateMemberDto {
     @IsDateString()
     @IsOptional()
     joined_date?: string;
+
+    // --- ADD THESE TO FIX THE 400 ERROR ---
+
+    @IsOptional()
+    avatar?: any; // To allow the 'avatar' field from FormData
+
+    @IsOptional()
+    document?: any; // To allow the 'document' field from FormData
+    
+    // Note: We use 'any' because the class-validator doesn't 
+    // validate the File object itself here; the Interceptor handles that.
 }

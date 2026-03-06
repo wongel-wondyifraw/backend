@@ -19,13 +19,16 @@ const create_member_dto_1 = require("./dto/create-member.dto");
 const update_member_dto_1 = require("./dto/update-member.dto");
 const jwt_auth_guard_1 = require("../auth/guards/jwt-auth.guard");
 const ministries_service_1 = require("../ministries/ministries.service");
+const file_fields_interceptor_1 = require("@nestjs/platform-express/multer/interceptors/file-fields.interceptor");
 let MembersController = class MembersController {
     constructor(membersService, ministriesService) {
         this.membersService = membersService;
         this.ministriesService = ministriesService;
     }
-    async create(createMemberDto) {
-        return this.membersService.create(createMemberDto);
+    // members.controller.ts
+    async create(createMemberDto, files) {
+        var _a, _b;
+        return this.membersService.create(createMemberDto, (_a = files.avatar) === null || _a === void 0 ? void 0 : _a[0], (_b = files.document) === null || _b === void 0 ? void 0 : _b[0]);
     }
     async findAll() {
         return this.membersService.findAll();
@@ -46,9 +49,14 @@ let MembersController = class MembersController {
 exports.MembersController = MembersController;
 __decorate([
     (0, common_1.Post)(),
+    (0, common_1.UseInterceptors)((0, file_fields_interceptor_1.FileFieldsInterceptor)([
+        { name: 'avatar', maxCount: 1 },
+        { name: 'document', maxCount: 1 },
+    ])),
     __param(0, (0, common_1.Body)()),
+    __param(1, (0, common_1.UploadedFiles)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [create_member_dto_1.CreateMemberDto]),
+    __metadata("design:paramtypes", [create_member_dto_1.CreateMemberDto, Object]),
     __metadata("design:returntype", Promise)
 ], MembersController.prototype, "create", null);
 __decorate([
