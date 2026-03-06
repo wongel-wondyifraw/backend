@@ -28,8 +28,10 @@ let MembersService = class MembersService {
         });
         return this.membersRepository.save(member);
     }
-    async findAll() {
+    async findAll(options) {
+        const whereClause = (options === null || options === void 0 ? void 0 : options.baptized) !== undefined ? { baptized: options.baptized } : {};
         return this.membersRepository.find({
+            where: whereClause,
             order: { created_at: 'DESC' },
         });
     }

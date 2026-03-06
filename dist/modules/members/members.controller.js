@@ -107,7 +107,10 @@ let MembersController = class MembersController {
             document_url: documentUrl,
         }, memberId);
     }
-    async findAll() {
+    async findAll(baptized) {
+        if (baptized === 'true') {
+            return this.membersService.findAll({ baptized: true });
+        }
         return this.membersService.findAll();
     }
     async findOne(id) {
@@ -188,8 +191,9 @@ __decorate([
 ], MembersController.prototype, "create", null);
 __decorate([
     (0, common_1.Get)(),
+    __param(0, (0, common_1.Query)('baptized')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
+    __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], MembersController.prototype, "findAll", null);
 __decorate([
