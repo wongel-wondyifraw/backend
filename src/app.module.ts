@@ -3,10 +3,10 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { LoggerModule } from 'nestjs-pino';
 import { ThrottlerModule } from '@nestjs/throttler';
-import { ServeStaticModule } from '@nestjs/serve-static';
-import { join } from 'path';
 import { UsersModule } from './modules/users/users.module';
 import { AuthModule } from './modules/auth/auth.module';
+import { MembersModule } from './modules/members/members.module';
+import { MinistriesModule } from './modules/ministries/ministries.module';
 
 @Module({
     imports: [
@@ -18,15 +18,43 @@ import { AuthModule } from './modules/auth/auth.module';
                 const isProduction = config.get('NODE_ENV') === 'production';
                 return {
                     pinoHttp: {
+                        autoLogging: true,
+                        quietReqLogger: true,
                         level: isProduction ? 'info' : 'debug',
                         transport: isProduction
                             ? undefined
                             : {
                                 target: 'pino-pretty',
                                 options: {
-                                    singleLine: true,
+                                    colorize: true,
+                                    singleLine: false,
+                                    translateTime: 'SYS:HH:MM:ss',
+                                    ignore: 'req.headers,res.headers,req.remoteAddress,req.remotePort',
                                 },
                             },
+                        serializers: {
+                            req: (req) => {
+                                const sanitizedBody = req.raw.body ? { ...req.raw.body } : undefined;
+                                if (sanitizedBody) {
+                                    if (sanitizedBody.password) sanitizedBody.password = '***';
+                                    if (sanitizedBody.token) sanitizedBody.token = '***';
+                                    if (sanitizedBody.currentPassword) sanitizedBody.currentPassword = '[REDACTED]';
+                                    if (sanitizedBody.newPassword) sanitizedBody.newPassword = '[REDACTED]';
+                                }
+                                return {
+                                    id: req.id,
+                                    method: req.method,
+                                    url: req.url,
+                                    body: sanitizedBody,
+                                };
+                            },
+                            res: (res) => ({
+                                statusCode: res.statusCode,
+                            }),
+                        },
+                        customProps: (req, res) => ({
+                            context: 'HTTP',
+                        }),
                     },
                 };
             },
@@ -48,15 +76,13 @@ import { AuthModule } from './modules/auth/auth.module';
                 password: config.get<string>('DB_PASSWORD'),
                 database: config.get<string>('DB_NAME'),
                 autoLoadEntities: true,
-                synchronize: config.get<string>('DB_SYNCHRONIZE') === 'true', // True for initial dev, false otherwise
+                synchronize: config.get<string>('DB_SYNCHRONIZE') === 'true',
             }),
-        }),
-        ServeStaticModule.forRoot({
-            rootPath: join(__dirname, '..', 'uploads'),
-            serveRoot: '/uploads',
         }),
         UsersModule,
         AuthModule,
+        MembersModule,
+        MinistriesModule,
     ],
     controllers: [],
     providers: [],

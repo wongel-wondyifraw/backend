@@ -18,14 +18,44 @@ __decorate([
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsNotEmpty)(),
     __metadata("design:type", String)
-], CreateUserDto.prototype, "firstName", void 0);
+], CreateUserDto.prototype, "first_name", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], CreateUserDto.prototype, "middle_name", void 0);
 __decorate([
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsNotEmpty)(),
     __metadata("design:type", String)
-], CreateUserDto.prototype, "lastName", void 0);
+], CreateUserDto.prototype, "last_name", void 0);
 __decorate([
     (0, class_validator_1.IsEmail)(),
     (0, class_validator_1.IsNotEmpty)(),
     __metadata("design:type", String)
 ], CreateUserDto.prototype, "email", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsNotEmpty)(),
+    (0, class_validator_1.MinLength)(6),
+    __metadata("design:type", String)
+], CreateUserDto.prototype, "password_hash", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsNotEmpty)(),
+    __metadata("design:type", String)
+], CreateUserDto.prototype, "role", void 0);
+__decorate([
+    (0, class_validator_1.ValidateIf)(o => o.role === 'minister' || o.role === 'staff'),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsNotEmpty)({ message: 'Title is mandatory for Ministers and Staff' }),
+    __metadata("design:type", String)
+], CreateUserDto.prototype, "title", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Object)
+], CreateUserDto.prototype, "is_active", void 0);
+__decorate([
+    (0, class_validator_1.Allow)(),
+    __metadata("design:type", Object)
+], CreateUserDto.prototype, "avatar", void 0);

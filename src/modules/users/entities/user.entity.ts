@@ -14,6 +14,15 @@ export class User {
     @Column()
     last_name: string;
 
+    @Column({ nullable: true })
+    avatar_url: string;
+
+    @Column({ nullable: true })
+    title: string;
+
+    @Column({ default: 'staff' })
+    role: string;
+
     @Column({ unique: true })
     email: string;
 

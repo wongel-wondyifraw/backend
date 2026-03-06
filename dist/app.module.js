@@ -12,10 +12,10 @@ const config_1 = require("@nestjs/config");
 const typeorm_1 = require("@nestjs/typeorm");
 const nestjs_pino_1 = require("nestjs-pino");
 const throttler_1 = require("@nestjs/throttler");
-const serve_static_1 = require("@nestjs/serve-static");
-const path_1 = require("path");
 const users_module_1 = require("./modules/users/users.module");
 const auth_module_1 = require("./modules/auth/auth.module");
+const members_module_1 = require("./modules/members/members.module");
+const ministries_module_1 = require("./modules/ministries/ministries.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -30,15 +30,47 @@ exports.AppModule = AppModule = __decorate([
                     const isProduction = config.get('NODE_ENV') === 'production';
                     return {
                         pinoHttp: {
+                            autoLogging: true,
+                            quietReqLogger: true,
                             level: isProduction ? 'info' : 'debug',
                             transport: isProduction
                                 ? undefined
                                 : {
                                     target: 'pino-pretty',
                                     options: {
-                                        singleLine: true,
+                                        colorize: true,
+                                        singleLine: false,
+                                        translateTime: 'SYS:HH:MM:ss',
+                                        ignore: 'req.headers,res.headers,req.remoteAddress,req.remotePort',
                                     },
                                 },
+                            serializers: {
+                                req: (req) => {
+                                    const sanitizedBody = req.raw.body ? { ...req.raw.body } : undefined;
+                                    if (sanitizedBody) {
+                                        if (sanitizedBody.password)
+                                            sanitizedBody.password = '***';
+                                        if (sanitizedBody.token)
+                                            sanitizedBody.token = '***';
+                                        if (sanitizedBody.currentPassword)
+                                            sanitizedBody.currentPassword = '[REDACTED]';
+                                        if (sanitizedBody.newPassword)
+                                            sanitizedBody.newPassword = '[REDACTED]';
+                                    }
+                                    return {
+                                        id: req.id,
+                                        method: req.method,
+                                        url: req.url,
+                                        body: sanitizedBody,
+                                    };
+                                },
+                                res: (res) => ({
+                                    statusCode: res.statusCode,
+                                }),
+                            },
+                            customProps: (req, res) => ({
+                                context: 'HTTP',
+                            }),
                         },
                     };
                 },
@@ -60,15 +92,13 @@ exports.AppModule = AppModule = __decorate([
                     password: config.get('DB_PASSWORD'),
                     database: config.get('DB_NAME'),
                     autoLoadEntities: true,
-                    synchronize: config.get('DB_SYNCHRONIZE') === 'true', // True for initial dev, false otherwise
+                    synchronize: config.get('DB_SYNCHRONIZE') === 'true',
                 }),
-            }),
-            serve_static_1.ServeStaticModule.forRoot({
-                rootPath: (0, path_1.join)(__dirname, '..', 'uploads'),
-                serveRoot: '/uploads',
             }),
             users_module_1.UsersModule,
             auth_module_1.AuthModule,
+            members_module_1.MembersModule,
+            ministries_module_1.MinistriesModule,
         ],
         controllers: [],
         providers: [],

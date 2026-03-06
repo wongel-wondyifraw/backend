@@ -31,6 +31,18 @@ __decorate([
     __metadata("design:type", String)
 ], User.prototype, "last_name", void 0);
 __decorate([
+    (0, typeorm_1.Column)({ nullable: true }),
+    __metadata("design:type", String)
+], User.prototype, "avatar_url", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ nullable: true }),
+    __metadata("design:type", String)
+], User.prototype, "title", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ default: 'staff' }),
+    __metadata("design:type", String)
+], User.prototype, "role", void 0);
+__decorate([
     (0, typeorm_1.Column)({ unique: true }),
     __metadata("design:type", String)
 ], User.prototype, "email", void 0);
