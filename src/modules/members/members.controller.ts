@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Patch, Delete, Body, Param, ParseUUIDPipe, UseGuards, UseInterceptors, UploadedFiles } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Delete, Body, Param, ParseUUIDPipe, UseGuards, UseInterceptors, UploadedFiles, Query } from '@nestjs/common';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { join, extname } from 'path';
@@ -90,7 +90,10 @@ export class MembersController {
     }
 
     @Get()
-    async findAll() {
+    async findAll(@Query('baptized') baptized?: string) {
+        if (baptized === 'true') {
+            return this.membersService.findAll({ baptized: true });
+        }
         return this.membersService.findAll();
     }
 

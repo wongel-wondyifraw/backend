@@ -7,6 +7,7 @@ import { UsersModule } from './modules/users/users.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { MembersModule } from './modules/members/members.module';
 import { MinistriesModule } from './modules/ministries/ministries.module';
+import { MinistersModule } from './modules/ministers/ministers.module';
 
 @Module({
     imports: [
@@ -83,6 +84,7 @@ import { MinistriesModule } from './modules/ministries/ministries.module';
         AuthModule,
         MembersModule,
         MinistriesModule,
+        MinistersModule,
     ],
     controllers: [],
     providers: [],

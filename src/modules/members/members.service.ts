@@ -20,8 +20,10 @@ export class MembersService {
         return this.membersRepository.save(member);
     }
 
-    async findAll(): Promise<Member[]> {
+    async findAll(options?: { baptized?: boolean }): Promise<Member[]> {
+        const whereClause = options?.baptized !== undefined ? { baptized: options.baptized } : {};
         return this.membersRepository.find({
+            where: whereClause,
             order: { created_at: 'DESC' },
         });
     }
