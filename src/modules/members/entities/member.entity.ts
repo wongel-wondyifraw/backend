@@ -37,6 +37,9 @@ export class Member {
     @Column({ default: 'active' })
     status: string;
 
+    @Column({ default: false })
+    baptized: boolean;
+
     @CreateDateColumn()
     created_at: Date;
 

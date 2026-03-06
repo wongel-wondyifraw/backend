@@ -43,10 +43,15 @@ async function bootstrap() {
         defaultVersion: '1',
     });
     // 5. Validation: Global sanitization of inputs
+    // backend/src/main.ts - Update section 5
+    // 5. Validation: Global sanitization of inputs
     app.useGlobalPipes(new common_1.ValidationPipe({
         whitelist: true,
-        transform: true,
+        transform: true, // This allows @Transform to run
         forbidNonWhitelisted: true,
+        transformOptions: {
+            enableImplicitConversion: true, // Automatically converts primitives (numbers, booleans)
+        },
     }));
     await app.listen(3000);
 }

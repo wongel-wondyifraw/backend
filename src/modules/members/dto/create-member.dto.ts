@@ -1,4 +1,14 @@
-import { IsEmail, IsNotEmpty, IsOptional, IsString, IsDateString } from 'class-validator';
+// backend/src/members/dto/create-member.dto.ts
+
+import {
+    IsEmail,
+    IsNotEmpty,
+    IsOptional,
+    IsString,
+    IsDateString,
+    IsBoolean
+} from 'class-validator';
+import { Transform } from 'class-transformer';
 
 export class CreateMemberDto {
     @IsString()
@@ -40,4 +50,21 @@ export class CreateMemberDto {
     @IsString()
     @IsOptional()
     status?: string;
+
+    /**
+     * baptized is sent as a string "yes"/"no" or "true"/"false" via FormData.
+     * This @Transform logic converts it to a real Boolean before @IsBoolean checks it.
+     */
+    @IsOptional()
+    @Transform(({ value }) => {
+        if (value === 'true' || value === 'yes') return true;
+        if (value === 'false' || value === 'no') return false;
+        return value;
+    })
+    @IsBoolean()
+    baptized?: boolean;
+
+    @IsDateString()
+    @IsOptional()
+    joined_date?: string;
 }
