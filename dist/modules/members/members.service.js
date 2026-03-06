@@ -31,7 +31,10 @@ let MembersService = class MembersService {
         });
     }
     async findOne(id) {
-        const member = await this.membersRepository.findOne({ where: { id } });
+        const member = await this.membersRepository.findOne({
+            where: { id },
+            relations: ['ministry_members', 'ministry_members.ministry']
+        });
         if (!member) {
             throw new common_1.NotFoundException(`Member with ID ${id} not found`);
         }

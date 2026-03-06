@@ -24,7 +24,10 @@ export class MembersService {
     }
 
     async findOne(id: string): Promise<Member> {
-        const member = await this.membersRepository.findOne({ where: { id } });
+        const member = await this.membersRepository.findOne({
+            where: { id },
+            relations: ['ministry_members', 'ministry_members.ministry']
+        });
         if (!member) {
             throw new NotFoundException(`Member with ID ${id} not found`);
         }
