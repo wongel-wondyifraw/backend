@@ -12,8 +12,11 @@ export class MembersService {
         private readonly membersRepository: Repository<Member>,
     ) { }
 
-    async create(createMemberDto: CreateMemberDto): Promise<Member> {
-        const member = this.membersRepository.create(createMemberDto);
+    async create(createMemberDto: CreateMemberDto, memberId?: string): Promise<Member> {
+        const member = this.membersRepository.create({
+            ...createMemberDto,
+            ...(memberId ? { id: memberId } : {}),
+        });
         return this.membersRepository.save(member);
     }
 
@@ -24,7 +27,10 @@ export class MembersService {
     }
 
     async findOne(id: string): Promise<Member> {
-        const member = await this.membersRepository.findOne({ where: { id } });
+        const member = await this.membersRepository.findOne({
+            where: { id },
+            relations: ['ministry_members', 'ministry_members.ministry']
+        });
         if (!member) {
             throw new NotFoundException(`Member with ID ${id} not found`);
         }

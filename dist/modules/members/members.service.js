@@ -21,8 +21,11 @@ let MembersService = class MembersService {
     constructor(membersRepository) {
         this.membersRepository = membersRepository;
     }
-    async create(createMemberDto) {
-        const member = this.membersRepository.create(createMemberDto);
+    async create(createMemberDto, memberId) {
+        const member = this.membersRepository.create({
+            ...createMemberDto,
+            ...(memberId ? { id: memberId } : {}),
+        });
         return this.membersRepository.save(member);
     }
     async findAll() {
@@ -31,7 +34,10 @@ let MembersService = class MembersService {
         });
     }
     async findOne(id) {
-        const member = await this.membersRepository.findOne({ where: { id } });
+        const member = await this.membersRepository.findOne({
+            where: { id },
+            relations: ['ministry_members', 'ministry_members.ministry']
+        });
         if (!member) {
             throw new common_1.NotFoundException(`Member with ID ${id} not found`);
         }

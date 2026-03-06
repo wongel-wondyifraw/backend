@@ -37,6 +37,10 @@ export class CreateMemberDto {
 
     @IsString()
     @IsOptional()
+    document_url?: string;
+
+    @IsString()
+    @IsOptional()
     address?: string;
 
     @IsDateString()

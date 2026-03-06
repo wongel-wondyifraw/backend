@@ -26,6 +26,9 @@ export class Member {
     image_url: string;
 
     @Column({ nullable: true })
+    document_url: string;
+
+    @Column({ nullable: true })
     address: string;
 
     @Column({ type: 'date', nullable: true })
