@@ -100,10 +100,66 @@ export class MembersController {
     }
 
     @Patch(':id')
+    @UseInterceptors(FileFieldsInterceptor([
+        { name: 'avatar', maxCount: 1 },
+        { name: 'document', maxCount: 1 },
+    ], {
+        storage: diskStorage({
+            destination: (req, file, cb) => {
+                const subfolder = file.fieldname === 'avatar' ? 'images' : 'documents';
+                const uploadPath = join(process.cwd(), 'uploads', subfolder);
+                if (!fs.existsSync(uploadPath)) {
+                    fs.mkdirSync(uploadPath, { recursive: true });
+                }
+                cb(null, uploadPath);
+            },
+            filename: (req, file, cb) => {
+                const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+                cb(null, `temp-${uniqueSuffix}${extname(file.originalname)}`);
+            },
+        }),
+    }))
     async update(
         @Param('id', ParseUUIDPipe) id: string,
         @Body() updateMemberDto: UpdateMemberDto,
+        @UploadedFiles() files: { avatar?: Express.Multer.File[]; document?: Express.Multer.File[] },
     ) {
+        // Process avatar file
+        if (files?.avatar?.[0]) {
+            const file = files.avatar[0];
+            const fileExt = extname(file.originalname);
+            const filename = `${id}${fileExt}`;
+            const targetPath = join(process.cwd(), 'uploads/images', filename);
+
+            try {
+                if (fs.existsSync(file.path)) {
+                    fs.copyFileSync(file.path, targetPath);
+                    fs.unlinkSync(file.path);
+                }
+                updateMemberDto.image_url = `uploads/images/${filename}`;
+            } catch (err) {
+                console.error('Error processing member avatar:', err);
+            }
+        }
+
+        // Process document (church letter) file
+        if (files?.document?.[0]) {
+            const file = files.document[0];
+            const fileExt = extname(file.originalname);
+            const filename = `${id}-letter${fileExt}`;
+            const targetPath = join(process.cwd(), 'uploads/documents', filename);
+
+            try {
+                if (fs.existsSync(file.path)) {
+                    fs.copyFileSync(file.path, targetPath);
+                    fs.unlinkSync(file.path);
+                }
+                updateMemberDto.document_url = `uploads/documents/${filename}`;
+            } catch (err) {
+                console.error('Error processing member document:', err);
+            }
+        }
+
         return this.membersService.update(id, updateMemberDto);
     }
 
