@@ -1,6 +1,7 @@
-import { Controller, Get, Post, Body, Param, Delete, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
 import { MinistersService } from './ministers.service';
 import { CreateMinisterDto } from './dto/create-minister.dto';
+import { UpdateMinisterDto } from './dto/update-minister.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
 @Controller('ministers')
@@ -21,6 +22,11 @@ export class MinistersController {
     @Get(':id')
     findOne(@Param('id') id: string) {
         return this.ministersService.findOne(id);
+    }
+
+    @Patch(':id')
+    update(@Param('id') id: string, @Body() updateMinisterDto: UpdateMinisterDto) {
+        return this.ministersService.update(id, updateMinisterDto);
     }
 
     @Delete(':id')

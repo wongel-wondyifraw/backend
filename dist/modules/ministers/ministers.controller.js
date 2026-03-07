@@ -16,6 +16,7 @@ exports.MinistersController = void 0;
 const common_1 = require("@nestjs/common");
 const ministers_service_1 = require("./ministers.service");
 const create_minister_dto_1 = require("./dto/create-minister.dto");
+const update_minister_dto_1 = require("./dto/update-minister.dto");
 const jwt_auth_guard_1 = require("../auth/guards/jwt-auth.guard");
 let MinistersController = class MinistersController {
     constructor(ministersService) {
@@ -29,6 +30,9 @@ let MinistersController = class MinistersController {
     }
     findOne(id) {
         return this.ministersService.findOne(id);
+    }
+    update(id, updateMinisterDto) {
+        return this.ministersService.update(id, updateMinisterDto);
     }
     remove(id) {
         return this.ministersService.remove(id);
@@ -55,6 +59,14 @@ __decorate([
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", void 0)
 ], MinistersController.prototype, "findOne", null);
+__decorate([
+    (0, common_1.Patch)(':id'),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, update_minister_dto_1.UpdateMinisterDto]),
+    __metadata("design:returntype", void 0)
+], MinistersController.prototype, "update", null);
 __decorate([
     (0, common_1.Delete)(':id'),
     __param(0, (0, common_1.Param)('id')),

@@ -159,6 +159,33 @@ let MinistersService = class MinistersService {
         }
         return minister;
     }
+    async update(minister_id, updateMinisterDto) {
+        const minister = await this.ministersRepository.findOne({ where: { minister_id } });
+        if (!minister) {
+            throw new common_1.NotFoundException(`Minister not found`);
+        }
+        const user = await this.usersRepository.findOne({ where: { id: minister.user_id } });
+        if (!user) {
+            throw new common_1.NotFoundException(`Associated user account not found`);
+        }
+        const { title, password, email } = updateMinisterDto;
+        if (title !== undefined) {
+            user.title = title;
+        }
+        if (email && email !== user.email) {
+            const existingUser = await this.usersRepository.findOne({ where: { email } });
+            if (existingUser) {
+                throw new common_1.ConflictException(`An account with email ${email} already exists.`);
+            }
+            user.email = email;
+        }
+        if (password) {
+            const salt = await bcrypt.genSalt(10);
+            user.password_hash = await bcrypt.hash(password, salt);
+        }
+        await this.usersRepository.save(user);
+        return this.findOne(minister_id);
+    }
     async remove(minister_id) {
         const minister = await this.ministersRepository.findOne({ where: { minister_id } });
         if (!minister) {

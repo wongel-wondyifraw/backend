@@ -1,8 +1,9 @@
-import { Injectable, NotFoundException, BadRequestException, InternalServerErrorException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, InternalServerErrorException, ConflictException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Minister } from './entities/minister.entity';
 import { CreateMinisterDto } from './dto/create-minister.dto';
+import { UpdateMinisterDto } from './dto/update-minister.dto';
 import { Member } from '../members/entities/member.entity';
 import { User } from '../users/entities/user.entity';
 import * as bcrypt from 'bcrypt';
@@ -134,6 +135,41 @@ export class MinistersService {
             throw new NotFoundException(`Minister not found`);
         }
         return minister;
+    }
+
+    async update(minister_id: string, updateMinisterDto: UpdateMinisterDto) {
+        const minister = await this.ministersRepository.findOne({ where: { minister_id } });
+        if (!minister) {
+            throw new NotFoundException(`Minister not found`);
+        }
+
+        const user = await this.usersRepository.findOne({ where: { id: minister.user_id } });
+        if (!user) {
+            throw new NotFoundException(`Associated user account not found`);
+        }
+
+        const { title, password, email } = updateMinisterDto;
+
+        if (title !== undefined) {
+            user.title = title;
+        }
+
+        if (email && email !== user.email) {
+            const existingUser = await this.usersRepository.findOne({ where: { email } });
+            if (existingUser) {
+                throw new ConflictException(`An account with email ${email} already exists.`);
+            }
+            user.email = email;
+        }
+
+        if (password) {
+            const salt = await bcrypt.genSalt(10);
+            user.password_hash = await bcrypt.hash(password, salt);
+        }
+
+        await this.usersRepository.save(user);
+
+        return this.findOne(minister_id);
     }
 
     async remove(minister_id: string) {
