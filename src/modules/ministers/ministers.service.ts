@@ -137,10 +137,21 @@ export class MinistersService {
     }
 
     async remove(minister_id: string) {
-        const result = await this.ministersRepository.delete({ minister_id });
-        if (result.affected === 0) {
+        const minister = await this.ministersRepository.findOne({ where: { minister_id } });
+        if (!minister) {
             throw new NotFoundException(`Minister not found`);
         }
-        return { message: 'Minister deleted successfully' };
+
+        const userId = minister.user_id;
+
+        // Delete the minister link record first to avoid foreign key constraints
+        await this.ministersRepository.delete({ minister_id });
+
+        // Delete the associated user record
+        if (userId) {
+            await this.usersRepository.delete({ id: userId });
+        }
+
+        return { message: 'Minister and associated user deleted successfully' };
     }
 }
