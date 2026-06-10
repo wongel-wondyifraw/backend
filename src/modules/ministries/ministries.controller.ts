@@ -1,8 +1,9 @@
-import { Controller, Get, Post, Patch, Delete, Body, Param, ParseUUIDPipe, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Delete, Body, Param, ParseUUIDPipe, UseGuards, Query } from '@nestjs/common';
 import { MinistriesService } from './ministries.service';
 import { CreateMinistryDto } from './dto/create-ministry.dto';
 import { UpdateMinistryDto } from './dto/update-ministry.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { PaginationQueryDto } from '../../common/dto/pagination-query.dto';
 
 @Controller('ministries')
 @UseGuards(JwtAuthGuard)
@@ -15,8 +16,8 @@ export class MinistriesController {
     }
 
     @Get()
-    async findAll() {
-        return this.ministriesService.findAll();
+    async findAll(@Query() query: PaginationQueryDto) {
+        return this.ministriesService.findAllPaginated(query.page, query.limit, query.search);
     }
 
     @Get(':id')

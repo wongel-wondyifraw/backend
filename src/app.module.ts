@@ -7,6 +7,8 @@ import { UsersModule } from './modules/users/users.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { MembersModule } from './modules/members/members.module';
 import { MinistriesModule } from './modules/ministries/ministries.module';
+import { DashboardModule } from './modules/dashboard/dashboard.module';
+import { AdminSeedService } from './database/admin-seed.service';
 
 @Module({
     imports: [
@@ -83,8 +85,9 @@ import { MinistriesModule } from './modules/ministries/ministries.module';
         AuthModule,
         MembersModule,
         MinistriesModule,
+        DashboardModule,
     ],
     controllers: [],
-    providers: [],
+    providers: [AdminSeedService],
 })
 export class AppModule { }

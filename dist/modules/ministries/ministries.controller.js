@@ -18,6 +18,7 @@ const ministries_service_1 = require("./ministries.service");
 const create_ministry_dto_1 = require("./dto/create-ministry.dto");
 const update_ministry_dto_1 = require("./dto/update-ministry.dto");
 const jwt_auth_guard_1 = require("../auth/guards/jwt-auth.guard");
+const pagination_query_dto_1 = require("../../common/dto/pagination-query.dto");
 let MinistriesController = class MinistriesController {
     constructor(ministriesService) {
         this.ministriesService = ministriesService;
@@ -25,8 +26,8 @@ let MinistriesController = class MinistriesController {
     async create(createMinistryDto) {
         return this.ministriesService.create(createMinistryDto);
     }
-    async findAll() {
-        return this.ministriesService.findAll();
+    async findAll(query) {
+        return this.ministriesService.findAllPaginated(query.page, query.limit, query.search);
     }
     async findOne(id) {
         return this.ministriesService.findOne(id);
@@ -58,8 +59,9 @@ __decorate([
 ], MinistriesController.prototype, "create", null);
 __decorate([
     (0, common_1.Get)(),
+    __param(0, (0, common_1.Query)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
+    __metadata("design:paramtypes", [pagination_query_dto_1.PaginationQueryDto]),
     __metadata("design:returntype", Promise)
 ], MinistriesController.prototype, "findAll", null);
 __decorate([

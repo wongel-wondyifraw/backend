@@ -19,6 +19,7 @@ const create_member_dto_1 = require("./dto/create-member.dto");
 const update_member_dto_1 = require("./dto/update-member.dto");
 const jwt_auth_guard_1 = require("../auth/guards/jwt-auth.guard");
 const ministries_service_1 = require("../ministries/ministries.service");
+const pagination_query_dto_1 = require("../../common/dto/pagination-query.dto");
 let MembersController = class MembersController {
     constructor(membersService, ministriesService) {
         this.membersService = membersService;
@@ -27,8 +28,8 @@ let MembersController = class MembersController {
     async create(createMemberDto) {
         return this.membersService.create(createMemberDto);
     }
-    async findAll() {
-        return this.membersService.findAll();
+    async findAll(query) {
+        return this.membersService.findAllPaginated(query.page, query.limit, query.search);
     }
     async findOne(id) {
         return this.membersService.findOne(id);
@@ -53,8 +54,9 @@ __decorate([
 ], MembersController.prototype, "create", null);
 __decorate([
     (0, common_1.Get)(),
+    __param(0, (0, common_1.Query)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
+    __metadata("design:paramtypes", [pagination_query_dto_1.PaginationQueryDto]),
     __metadata("design:returntype", Promise)
 ], MembersController.prototype, "findAll", null);
 __decorate([

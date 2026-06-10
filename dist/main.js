@@ -8,12 +8,16 @@ const common_1 = require("@nestjs/common");
 const nestjs_pino_1 = require("nestjs-pino");
 const path_1 = require("path");
 const helmet_1 = __importDefault(require("helmet"));
+const config_1 = require("@nestjs/config");
 const app_module_1 = require("./app.module");
 const http_exception_filter_1 = require("./common/filters/http-exception.filter");
 async function bootstrap() {
     const app = await core_1.NestFactory.create(app_module_1.AppModule, {
         bufferLogs: true,
     });
+    const config = app.get(config_1.ConfigService);
+    const port = config.get('PORT', 3001);
+    const frontendUrl = config.get('FRONTEND_URL', 'http://localhost:3000');
     // 1. Logging: Use Pino instead of default console
     const logger = app.get(nestjs_pino_1.Logger);
     app.useLogger(logger);
@@ -25,7 +29,7 @@ async function bootstrap() {
         crossOriginEmbedderPolicy: false,
     }));
     app.enableCors({
-        origin: 'http://localhost:5173', // Your frontend URL
+        origin: frontendUrl,
         credentials: true,
     });
     // 3. Static Assets: Serve from project root (use process.cwd() for reliable pathing)
@@ -33,7 +37,7 @@ async function bootstrap() {
         prefix: '/uploads',
         setHeaders: (res) => {
             res.set('Cross-Origin-Resource-Policy', 'cross-origin');
-            res.set('Access-Control-Allow-Origin', 'http://localhost:5173');
+            res.set('Access-Control-Allow-Origin', frontendUrl);
         },
     });
     // 4. Scalability: Enable API Versioning (e.g., /v1/users)
@@ -53,6 +57,7 @@ async function bootstrap() {
             enableImplicitConversion: true, // Automatically converts primitives (numbers, booleans)
         },
     }));
-    await app.listen(3000);
+    await app.listen(port);
+    logger.log(`Backend running on http://localhost:${port}`);
 }
 bootstrap();

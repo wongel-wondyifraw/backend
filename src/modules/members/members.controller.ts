@@ -1,9 +1,10 @@
-import { Controller, Get, Post, Patch, Delete, Body, Param, ParseUUIDPipe, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Delete, Body, Param, ParseUUIDPipe, UseGuards, Query } from '@nestjs/common';
 import { MembersService } from './members.service';
 import { CreateMemberDto } from './dto/create-member.dto';
 import { UpdateMemberDto } from './dto/update-member.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { MinistriesService } from '../ministries/ministries.service';
+import { PaginationQueryDto } from '../../common/dto/pagination-query.dto';
 
 @Controller('members')
 @UseGuards(JwtAuthGuard)
@@ -19,8 +20,8 @@ export class MembersController {
     }
 
     @Get()
-    async findAll() {
-        return this.membersService.findAll();
+    async findAll(@Query() query: PaginationQueryDto) {
+        return this.membersService.findAllPaginated(query.page, query.limit, query.search);
     }
 
     @Get(':id')

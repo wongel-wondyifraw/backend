@@ -56,23 +56,33 @@ let UsersService = class UsersService {
         this.usersRepository = usersRepository;
     }
     async create(createUserDto) {
-        // 1. Extract specifically what we need to transform
-        const { password_hash, avatar, avatar_url, ...rest } = createUserDto;
-        // 2. Build the entity data object manually to ensure avatar_url is included
+        var _a;
+        const { password_hash, avatar, avatar_url, password, ...rest } = createUserDto;
         const userData = {
             ...rest,
-            avatar_url: avatar_url, // Mapping the string path specifically
+            email: (_a = rest.email) === null || _a === void 0 ? void 0 : _a.trim().toLowerCase(),
+            avatar_url: avatar_url,
             is_active: rest.is_active === 'true' || rest.is_active === true,
             created_at: rest.created_at || new Date(),
         };
-        // 3. Handle Password Hashing
-        if (password_hash) {
-            const salt = await bcrypt.genSalt();
-            userData.password_hash = await bcrypt.hash(password_hash, salt);
+        const plainPassword = password_hash !== null && password_hash !== void 0 ? password_hash : password;
+        if (plainPassword) {
+            userData.password_hash = await this.hashPassword(plainPassword);
         }
-        // 4. Save to Database
         const user = this.usersRepository.create(userData);
         return await this.usersRepository.save(user);
+    }
+    async setPasswordFromPlain(userId, plainPassword) {
+        await this.usersRepository.update(userId, {
+            password_hash: await this.hashPassword(plainPassword),
+        });
+    }
+    async hashPassword(value) {
+        if (/^\$2[aby]?\$/.test(value)) {
+            return value;
+        }
+        const salt = await bcrypt.genSalt();
+        return bcrypt.hash(value, salt);
     }
     findAll() {
         return this.usersRepository.find();
@@ -85,9 +95,10 @@ let UsersService = class UsersService {
         return user;
     }
     async findOneByEmail(email) {
+        const normalizedEmail = email.trim().toLowerCase();
         return this.usersRepository.findOne({
-            where: { email },
-            select: ['id', 'email', 'password_hash', 'first_name', 'middle_name', 'last_name', 'is_active', 'created_at', 'updated_at', 'role'] // Need to select password to check it during login
+            where: { email: normalizedEmail },
+            select: ['id', 'email', 'password_hash', 'first_name', 'middle_name', 'last_name', 'is_active', 'created_at', 'updated_at', 'role', 'avatar_url'],
         });
     }
     async update(id, userData) {

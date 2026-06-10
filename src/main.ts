@@ -4,6 +4,7 @@ import { NestExpressApplication } from '@nestjs/platform-express';
 import { Logger } from 'nestjs-pino';
 import { join } from 'path';
 import helmet from 'helmet';
+import { ConfigService } from '@nestjs/config';
 import { AppModule } from './app.module';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 
@@ -11,6 +12,10 @@ async function bootstrap() {
     const app = await NestFactory.create<NestExpressApplication>(AppModule, {
         bufferLogs: true,
     });
+
+    const config = app.get(ConfigService);
+    const port = config.get<number>('PORT', 3001);
+    const frontendUrl = config.get<string>('FRONTEND_URL', 'http://localhost:3000');
 
     // 1. Logging: Use Pino instead of default console
     const logger = app.get(Logger);
@@ -26,7 +31,7 @@ async function bootstrap() {
     }));
 
     app.enableCors({
-        origin: 'http://localhost:5173', // Your frontend URL
+        origin: frontendUrl,
         credentials: true,
     });
 
@@ -35,7 +40,7 @@ async function bootstrap() {
         prefix: '/uploads',
         setHeaders: (res) => {
             res.set('Cross-Origin-Resource-Policy', 'cross-origin');
-            res.set('Access-Control-Allow-Origin', 'http://localhost:5173');
+            res.set('Access-Control-Allow-Origin', frontendUrl);
         },
     });
 
@@ -58,6 +63,7 @@ async function bootstrap() {
             enableImplicitConversion: true, // Automatically converts primitives (numbers, booleans)
         },
     }));
-    await app.listen(3000);
+    await app.listen(port);
+    logger.log(`Backend running on http://localhost:${port}`);
 }
 bootstrap();

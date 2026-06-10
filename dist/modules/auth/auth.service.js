@@ -52,18 +52,33 @@ let AuthService = class AuthService {
         this.usersService = usersService;
         this.jwtService = jwtService;
     }
+    parseFullName(fullName) {
+        const parts = fullName.trim().split(/\s+/).filter(Boolean);
+        if (parts.length === 0) {
+            return { first_name: 'User', middle_name: '', last_name: 'User' };
+        }
+        if (parts.length === 1) {
+            return { first_name: parts[0], middle_name: '', last_name: parts[0] };
+        }
+        return {
+            first_name: parts[0],
+            middle_name: parts.slice(1, -1).join(' '),
+            last_name: parts[parts.length - 1],
+        };
+    }
     async register(registerDto) {
-        const existingUser = await this.usersService.findOneByEmail(registerDto.email);
+        const email = registerDto.email.trim().toLowerCase();
+        const existingUser = await this.usersService.findOneByEmail(email);
         if (existingUser) {
             throw new common_1.ConflictException('Email already exists');
         }
-        const salt = await bcrypt.genSalt();
-        const hashedPassword = await bcrypt.hash(registerDto.password, salt);
         const newUser = await this.usersService.create({
-            ...registerDto,
-            password_hash: hashedPassword,
+            ...this.parseFullName(registerDto.fullName),
+            email,
+            password: registerDto.password,
+            role: 'staff',
+            is_active: true,
         });
-        // Remove password before returning
         delete newUser.password_hash;
         return {
             message: 'User registered successfully',
@@ -71,9 +86,13 @@ let AuthService = class AuthService {
         };
     }
     async login(loginDto) {
-        const user = await this.usersService.findOneByEmail(loginDto.email);
+        const email = loginDto.email.trim().toLowerCase();
+        const user = await this.usersService.findOneByEmail(email);
         if (!user) {
             throw new common_1.UnauthorizedException('Invalid credentials');
+        }
+        if (!user.is_active) {
+            throw new common_1.UnauthorizedException('Account is inactive');
         }
         const isPasswordValid = await bcrypt.compare(loginDto.password, user.password_hash);
         if (!isPasswordValid) {

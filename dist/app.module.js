@@ -16,6 +16,8 @@ const users_module_1 = require("./modules/users/users.module");
 const auth_module_1 = require("./modules/auth/auth.module");
 const members_module_1 = require("./modules/members/members.module");
 const ministries_module_1 = require("./modules/ministries/ministries.module");
+const dashboard_module_1 = require("./modules/dashboard/dashboard.module");
+const admin_seed_service_1 = require("./database/admin-seed.service");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -99,8 +101,9 @@ exports.AppModule = AppModule = __decorate([
             auth_module_1.AuthModule,
             members_module_1.MembersModule,
             ministries_module_1.MinistriesModule,
+            dashboard_module_1.DashboardModule,
         ],
         controllers: [],
-        providers: [],
+        providers: [admin_seed_service_1.AdminSeedService],
     })
 ], AppModule);

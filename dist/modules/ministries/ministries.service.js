@@ -28,6 +28,24 @@ let MinistriesService = class MinistriesService {
         const ministry = this.ministriesRepository.create(createMinistryDto);
         return this.ministriesRepository.save(ministry);
     }
+    async findAllPaginated(page = 1, limit = 20, search) {
+        const qb = this.ministriesRepository.createQueryBuilder('ministry')
+            .leftJoinAndSelect('ministry.leader', 'leader');
+        if (search === null || search === void 0 ? void 0 : search.trim()) {
+            const pattern = `%${search.trim().toLowerCase()}%`;
+            qb.where('LOWER(ministry.name) LIKE :pattern', { pattern });
+        }
+        qb.orderBy('ministry.created_at', 'DESC');
+        qb.skip((page - 1) * limit).take(limit);
+        const [data, total] = await qb.getManyAndCount();
+        return {
+            data,
+            total,
+            page,
+            limit,
+            totalPages: Math.ceil(total / limit) || 1,
+        };
+    }
     async findAll() {
         return this.ministriesRepository.find({
             relations: ['leader'],

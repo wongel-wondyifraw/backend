@@ -5,6 +5,7 @@ import { Ministry } from './entities/ministry.entity';
 import { MinistryMember } from './entities/ministry-member.entity';
 import { CreateMinistryDto } from './dto/create-ministry.dto';
 import { UpdateMinistryDto } from './dto/update-ministry.dto';
+import { PaginatedResult } from '../../common/interfaces/paginated-result.interface';
 
 @Injectable()
 export class MinistriesService {
@@ -20,6 +21,29 @@ export class MinistriesService {
     async create(createMinistryDto: CreateMinistryDto): Promise<Ministry> {
         const ministry = this.ministriesRepository.create(createMinistryDto);
         return this.ministriesRepository.save(ministry);
+    }
+
+    async findAllPaginated(page = 1, limit = 20, search?: string): Promise<PaginatedResult<Ministry>> {
+        const qb = this.ministriesRepository.createQueryBuilder('ministry')
+            .leftJoinAndSelect('ministry.leader', 'leader');
+
+        if (search?.trim()) {
+            const pattern = `%${search.trim().toLowerCase()}%`;
+            qb.where('LOWER(ministry.name) LIKE :pattern', { pattern });
+        }
+
+        qb.orderBy('ministry.created_at', 'DESC');
+        qb.skip((page - 1) * limit).take(limit);
+
+        const [data, total] = await qb.getManyAndCount();
+
+        return {
+            data,
+            total,
+            page,
+            limit,
+            totalPages: Math.ceil(total / limit) || 1,
+        };
     }
 
     async findAll(): Promise<Ministry[]> {

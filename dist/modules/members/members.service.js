@@ -25,6 +25,23 @@ let MembersService = class MembersService {
         const member = this.membersRepository.create(createMemberDto);
         return this.membersRepository.save(member);
     }
+    async findAllPaginated(page = 1, limit = 20, search) {
+        const qb = this.membersRepository.createQueryBuilder('member');
+        if (search === null || search === void 0 ? void 0 : search.trim()) {
+            const pattern = `%${search.trim().toLowerCase()}%`;
+            qb.where('LOWER(member.first_name) LIKE :pattern OR LOWER(member.last_name) LIKE :pattern OR LOWER(member.email) LIKE :pattern OR member.phone LIKE :pattern OR LOWER(member.address) LIKE :pattern', { pattern });
+        }
+        qb.orderBy('member.created_at', 'DESC');
+        qb.skip((page - 1) * limit).take(limit);
+        const [data, total] = await qb.getManyAndCount();
+        return {
+            data,
+            total,
+            page,
+            limit,
+            totalPages: Math.ceil(total / limit) || 1,
+        };
+    }
     async findAll() {
         return this.membersRepository.find({
             order: { created_at: 'DESC' },
