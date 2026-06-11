@@ -53,12 +53,12 @@ const path_1 = require("path");
 const crypto_1 = require("crypto");
 const fs = __importStar(require("fs"));
 const users_service_1 = require("./users.service");
-const jwt_auth_guard_1 = require("../auth/guards/jwt-auth.guard");
 const nestjs_pino_1 = require("nestjs-pino");
 const create_user_dto_1 = require("./dto/create-user.dto");
 const update_profile_dto_1 = require("./dto/update-profile.dto");
 const change_password_dto_1 = require("./dto/change-password.dto");
 const update_user_dto_1 = require("./dto/update-user.dto");
+const permissions_decorator_1 = require("../../common/decorators/permissions.decorator");
 let UsersController = class UsersController {
     constructor(usersService, logger) {
         this.usersService = usersService;
@@ -69,8 +69,7 @@ let UsersController = class UsersController {
         return this.usersService.findAll();
     }
     async getProfile(req) {
-        // req.user is set by the JwtStrategy's validate method
-        return this.usersService.findOne(req.user.id);
+        return this.usersService.findOne(req.user.id, true);
     }
     async updateProfile(req, updateProfileDto) {
         return this.usersService.update(req.user.id, updateProfileDto);
@@ -82,46 +81,32 @@ let UsersController = class UsersController {
         return this.usersService.update(id, updateUserDto);
     }
     async create(createUserDto, file) {
-        // 1. Generate the UUID for the new user
         const userId = (0, crypto_1.randomUUID)();
         let avatarUrl = null;
-        console.log('--- CREATE USER ---');
-        console.log('File received:', file ? { originalname: file.originalname, path: file.path, size: file.size } : 'NO FILE');
-        console.log('Body received:', JSON.stringify(createUserDto));
-        // 2. If a file was uploaded, move it to the final location immediately
         if (file) {
             const fileExt = (0, path_1.extname)(file.originalname);
             const filename = `${userId}${fileExt}`;
             const targetPath = (0, path_1.join)(process.cwd(), 'uploads/images', filename);
             try {
-                // Ensure directory exists
                 const uploadDir = (0, path_1.join)(process.cwd(), 'uploads/images');
                 if (!fs.existsSync(uploadDir)) {
                     fs.mkdirSync(uploadDir, { recursive: true });
                 }
-                // Move file - use copy + unlink for cross-partition reliability
                 if (fs.existsSync(file.path)) {
                     fs.copyFileSync(file.path, targetPath);
                     fs.unlinkSync(file.path);
-                    console.log('Avatar file moved to:', targetPath);
-                }
-                else {
-                    console.error('Temp file does not exist at:', file.path);
                 }
                 avatarUrl = `uploads/images/${filename}`;
             }
             catch (err) {
-                console.error('Error processing avatar during creation:', err);
-                // We'll continue even if file processing fails, but avatarUrl remains null
+                this.logger.error({ err }, 'Error processing avatar during creation');
             }
         }
-        console.log('avatar_url to save:', avatarUrl);
-        // 3. Create the user record with the pre-generated ID and avatar_url
         const user = await this.usersService.create({
             ...createUserDto,
             id: userId,
             avatar_url: avatarUrl,
-            created_at: new Date(), // Explicitly set created_at as requested
+            created_at: new Date(),
         });
         return user;
     }
@@ -141,6 +126,7 @@ let UsersController = class UsersController {
             };
         }
         catch (error) {
+            const err = error;
             this.logger.error({
                 userId: id,
                 fileMetadata: file ? {
@@ -148,7 +134,7 @@ let UsersController = class UsersController {
                     mimetype: file.mimetype,
                     size: file.size,
                 } : null,
-                errorMessage: error.message,
+                errorMessage: err.message,
             }, 'Failed to upload avatar');
             throw error;
         }
@@ -156,14 +142,13 @@ let UsersController = class UsersController {
 };
 exports.UsersController = UsersController;
 __decorate([
-    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     (0, common_1.Get)(),
+    (0, permissions_decorator_1.RequiresPermissions)('users.read'),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "findAll", null);
 __decorate([
-    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     (0, common_1.Get)('profile'),
     __param(0, (0, common_1.Request)()),
     __metadata("design:type", Function),
@@ -171,8 +156,8 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "getProfile", null);
 __decorate([
-    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     (0, common_1.Patch)('profile'),
+    (0, permissions_decorator_1.RequiresPermissions)('settings.update'),
     __param(0, (0, common_1.Request)()),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
@@ -180,8 +165,8 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "updateProfile", null);
 __decorate([
-    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     (0, common_1.Patch)('change-password'),
+    (0, permissions_decorator_1.RequiresPermissions)('settings.update'),
     __param(0, (0, common_1.Request)()),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
@@ -189,8 +174,8 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "changePassword", null);
 __decorate([
-    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     (0, common_1.Patch)(':id'),
+    (0, permissions_decorator_1.RequiresPermissions)('users.manage'),
     __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
@@ -198,8 +183,8 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "update", null);
 __decorate([
-    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     (0, common_1.Post)(),
+    (0, permissions_decorator_1.RequiresPermissions)('users.manage'),
     (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)('avatar', {
         storage: (0, multer_1.diskStorage)({
             destination: (req, file, cb) => {
@@ -222,16 +207,16 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "create", null);
 __decorate([
-    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     (0, common_1.Delete)(':id'),
+    (0, permissions_decorator_1.RequiresPermissions)('users.manage'),
     __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "remove", null);
 __decorate([
-    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     (0, common_1.Post)(':id/upload-avatar'),
+    (0, permissions_decorator_1.RequiresPermissions)('settings.update'),
     (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)('file', {
         storage: (0, multer_1.diskStorage)({
             destination: (req, file, cb) => {
@@ -244,7 +229,6 @@ __decorate([
             filename: (req, file, cb) => {
                 const userId = req.params.id;
                 const fileExtName = (0, path_1.extname)(file.originalname);
-                // Renaming by UUID as requested: [userId][ext]
                 cb(null, `${userId}${fileExtName}`);
             },
         }),

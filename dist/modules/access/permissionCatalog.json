@@ -1,0 +1,19 @@
+[
+    { "slug": "dashboard.read", "name": "View dashboard", "category": "Dashboard", "description": "Access the main dashboard" },
+    { "slug": "members.read", "name": "View members", "category": "Members", "description": "List and view members" },
+    { "slug": "members.create", "name": "Create members", "category": "Members", "description": "Add new members" },
+    { "slug": "members.update", "name": "Update members", "category": "Members", "description": "Edit member records" },
+    { "slug": "members.delete", "name": "Delete members", "category": "Members", "description": "Remove members" },
+    { "slug": "ministries.read", "name": "View ministries", "category": "Ministries", "description": "List and view ministries" },
+    { "slug": "ministries.create", "name": "Create ministries", "category": "Ministries", "description": "Add new ministries" },
+    { "slug": "ministries.update", "name": "Update ministries", "category": "Ministries", "description": "Edit ministry records" },
+    { "slug": "ministries.delete", "name": "Delete ministries", "category": "Ministries", "description": "Remove ministries" },
+    { "slug": "users.read", "name": "View users", "category": "Users", "description": "List user accounts" },
+    { "slug": "users.manage", "name": "Manage users", "category": "Users", "description": "Create, edit, and deactivate users" },
+    { "slug": "settings.read", "name": "View settings", "category": "Settings", "description": "Access account settings" },
+    { "slug": "settings.update", "name": "Update settings", "category": "Settings", "description": "Change profile and password" },
+    { "slug": "roles.read", "name": "View roles", "category": "Roles", "description": "View roles and permissions" },
+    { "slug": "roles.manage", "name": "Manage roles", "category": "Roles", "description": "Create and edit custom roles" },
+    { "slug": "notifications.read", "name": "View notifications", "category": "Notifications", "description": "Read in-app notifications" },
+    { "slug": "notifications.update", "name": "Update notification settings", "category": "Notifications", "description": "Manage notification preferences" }
+]

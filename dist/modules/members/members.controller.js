@@ -17,9 +17,9 @@ const common_1 = require("@nestjs/common");
 const members_service_1 = require("./members.service");
 const create_member_dto_1 = require("./dto/create-member.dto");
 const update_member_dto_1 = require("./dto/update-member.dto");
-const jwt_auth_guard_1 = require("../auth/guards/jwt-auth.guard");
 const ministries_service_1 = require("../ministries/ministries.service");
 const pagination_query_dto_1 = require("../../common/dto/pagination-query.dto");
+const permissions_decorator_1 = require("../../common/decorators/permissions.decorator");
 let MembersController = class MembersController {
     constructor(membersService, ministriesService) {
         this.membersService = membersService;
@@ -47,6 +47,7 @@ let MembersController = class MembersController {
 exports.MembersController = MembersController;
 __decorate([
     (0, common_1.Post)(),
+    (0, permissions_decorator_1.RequiresPermissions)('members.create'),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [create_member_dto_1.CreateMemberDto]),
@@ -54,6 +55,7 @@ __decorate([
 ], MembersController.prototype, "create", null);
 __decorate([
     (0, common_1.Get)(),
+    (0, permissions_decorator_1.RequiresPermissions)('members.read'),
     __param(0, (0, common_1.Query)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [pagination_query_dto_1.PaginationQueryDto]),
@@ -61,6 +63,7 @@ __decorate([
 ], MembersController.prototype, "findAll", null);
 __decorate([
     (0, common_1.Get)(':id'),
+    (0, permissions_decorator_1.RequiresPermissions)('members.read'),
     __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
@@ -68,6 +71,7 @@ __decorate([
 ], MembersController.prototype, "findOne", null);
 __decorate([
     (0, common_1.Patch)(':id'),
+    (0, permissions_decorator_1.RequiresPermissions)('members.update'),
     __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
@@ -76,6 +80,7 @@ __decorate([
 ], MembersController.prototype, "update", null);
 __decorate([
     (0, common_1.Delete)(':id'),
+    (0, permissions_decorator_1.RequiresPermissions)('members.delete'),
     __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
@@ -83,6 +88,7 @@ __decorate([
 ], MembersController.prototype, "remove", null);
 __decorate([
     (0, common_1.Get)(':id/ministries'),
+    (0, permissions_decorator_1.RequiresPermissions)('members.read'),
     __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
@@ -90,7 +96,6 @@ __decorate([
 ], MembersController.prototype, "getMemberMinistries", null);
 exports.MembersController = MembersController = __decorate([
     (0, common_1.Controller)('members'),
-    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     __metadata("design:paramtypes", [members_service_1.MembersService,
         ministries_service_1.MinistriesService])
 ], MembersController);

@@ -1,0 +1,32 @@
+[
+    {
+        "key": "admin",
+        "name": "Administrator",
+        "description": "Full system access",
+        "permissionSlugs": "*"
+    },
+    {
+        "key": "minister",
+        "name": "Minister",
+        "description": "Manage members and ministries",
+        "permissionSlugs": [
+            "dashboard.read",
+            "members.read", "members.create", "members.update",
+            "ministries.read", "ministries.create", "ministries.update",
+            "settings.read", "settings.update",
+            "notifications.read", "notifications.update"
+        ]
+    },
+    {
+        "key": "staff",
+        "name": "Staff",
+        "description": "View members and ministries",
+        "permissionSlugs": [
+            "dashboard.read",
+            "members.read",
+            "ministries.read",
+            "settings.read", "settings.update",
+            "notifications.read", "notifications.update"
+        ]
+    }
+]

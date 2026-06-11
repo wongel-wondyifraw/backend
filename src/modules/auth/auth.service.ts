@@ -1,15 +1,18 @@
-import { Injectable, UnauthorizedException, ConflictException } from '@nestjs/common';
+import { Injectable, UnauthorizedException, ConflictException, ForbiddenException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
 import { UsersService } from '../users/users.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
+import { toUserResponse } from '../users/user.mapper';
 
 @Injectable()
 export class AuthService {
     constructor(
         private readonly usersService: UsersService,
         private readonly jwtService: JwtService,
+        private readonly config: ConfigService,
     ) { }
 
     private parseFullName(fullName: string) {
@@ -28,6 +31,11 @@ export class AuthService {
     }
 
     async register(registerDto: RegisterDto) {
+        const allowPublicRegister = this.config.get<string>('ALLOW_PUBLIC_REGISTER') === 'true';
+        if (!allowPublicRegister) {
+            throw new ForbiddenException('Registration is disabled');
+        }
+
         const email = registerDto.email.trim().toLowerCase();
         const existingUser = await this.usersService.findOneByEmail(email);
         if (existingUser) {
@@ -41,8 +49,6 @@ export class AuthService {
             role: 'staff',
             is_active: true,
         });
-
-        delete (newUser as any).password_hash;
 
         return {
             message: 'User registered successfully',
@@ -72,15 +78,7 @@ export class AuthService {
 
         return {
             access_token: await this.jwtService.signAsync(payload),
-            user: {
-                id: user.id,
-                email: user.email,
-                first_name: user.first_name,
-                middle_name: user.middle_name,
-                last_name: user.last_name,
-                role: user.role,
-                avatar_url: user.avatar_url,
-            }
+            user: toUserResponse(user, true),
         };
     }
 }

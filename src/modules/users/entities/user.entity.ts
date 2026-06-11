@@ -1,40 +1,57 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
+  ManyToOne,
+  JoinColumn,
+} from 'typeorm';
+import { Role } from '../../access/entities/role.entity';
 
 @Entity('users')
 export class User {
-    @PrimaryGeneratedColumn('uuid')
-    id: string;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
-    @Column()
-    first_name: string;
+  @Column()
+  first_name: string;
 
-    @Column()
-    middle_name: string;
+  @Column()
+  middle_name: string;
 
-    @Column()
-    last_name: string;
+  @Column()
+  last_name: string;
 
-    @Column({ nullable: true })
-    avatar_url: string;
+  @Column({ nullable: true })
+  avatar_url: string;
 
-    @Column({ nullable: true })
-    title: string;
+  @Column({ nullable: true })
+  title: string;
 
-    @Column({ default: 'staff' })
-    role: string;
+  /** @deprecated Use roleEntity.key — kept for migration backfill */
+  @Column({ nullable: true })
+  role: string;
 
-    @Column({ unique: true })
-    email: string;
+  @Column({ nullable: true })
+  role_id: string;
 
-    @Column({ select: false }) // Password should not be selected by default
-    password_hash: string;
+  @ManyToOne(() => Role, (role) => role.users, { eager: false })
+  @JoinColumn({ name: 'role_id' })
+  roleEntity: Role;
 
-    @Column({ default: true })
-    is_active: boolean;
+  @Column({ unique: true })
+  email: string;
 
-    @CreateDateColumn()
-    created_at: Date;
+  @Column({ select: false })
+  password_hash: string;
 
-    @UpdateDateColumn()
-    updated_at: Date;
+  @Column({ default: true })
+  is_active: boolean;
+
+  @CreateDateColumn()
+  created_at: Date;
+
+  @UpdateDateColumn()
+  updated_at: Date;
 }

@@ -16,14 +16,29 @@ exports.MembersService = void 0;
 const common_1 = require("@nestjs/common");
 const typeorm_1 = require("@nestjs/typeorm");
 const typeorm_2 = require("typeorm");
+const event_emitter_1 = require("@nestjs/event-emitter");
 const member_entity_1 = require("./entities/member.entity");
+const notification_events_1 = require("../notifications/notification-events");
 let MembersService = class MembersService {
-    constructor(membersRepository) {
+    constructor(membersRepository, events) {
         this.membersRepository = membersRepository;
+        this.events = events;
     }
     async create(createMemberDto) {
         const member = this.membersRepository.create(createMemberDto);
-        return this.membersRepository.save(member);
+        const saved = await this.membersRepository.save(member);
+        const name = `${saved.first_name} ${saved.last_name}`.trim();
+        this.events.emit(notification_events_1.NOTIFICATION_EVENT, {
+            eventName: 'member.created',
+            kind: 'member',
+            severity: 'success',
+            title: 'New member added',
+            message: `${name} was added to the directory.`,
+            href: `/members/${saved.id}`,
+            dedupeKey: `member.created:${saved.id}`,
+            targetRoles: ['admin', 'minister'],
+        });
+        return saved;
     }
     async findAllPaginated(page = 1, limit = 20, search) {
         const qb = this.membersRepository.createQueryBuilder('member');
@@ -56,12 +71,37 @@ let MembersService = class MembersService {
     }
     async update(id, updateMemberDto) {
         await this.membersRepository.update(id, updateMemberDto);
-        return this.findOne(id);
+        const member = await this.findOne(id);
+        const name = `${member.first_name} ${member.last_name}`.trim();
+        this.events.emit(notification_events_1.NOTIFICATION_EVENT, {
+            eventName: 'member.updated',
+            kind: 'member',
+            severity: 'info',
+            title: 'Member updated',
+            message: `${name}'s profile was updated.`,
+            href: `/members/${id}`,
+            dedupeKey: `member.updated:${id}:${Date.now()}`,
+            targetRoles: ['admin', 'minister'],
+        });
+        return member;
     }
     async remove(id) {
+        const member = await this.membersRepository.findOne({ where: { id } });
         const result = await this.membersRepository.delete(id);
         if (result.affected === 0) {
             throw new common_1.NotFoundException(`Member with ID ${id} not found`);
+        }
+        if (member) {
+            const name = `${member.first_name} ${member.last_name}`.trim();
+            this.events.emit(notification_events_1.NOTIFICATION_EVENT, {
+                eventName: 'member.deleted',
+                kind: 'member',
+                severity: 'warning',
+                title: 'Member removed',
+                message: `${name} was removed from the directory.`,
+                dedupeKey: `member.deleted:${id}`,
+                targetRoles: ['admin', 'minister'],
+            });
         }
     }
 };
@@ -69,5 +109,6 @@ exports.MembersService = MembersService;
 exports.MembersService = MembersService = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, typeorm_1.InjectRepository)(member_entity_1.Member)),
-    __metadata("design:paramtypes", [typeorm_2.Repository])
+    __metadata("design:paramtypes", [typeorm_2.Repository,
+        event_emitter_1.EventEmitter2])
 ], MembersService);

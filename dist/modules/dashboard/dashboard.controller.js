@@ -15,7 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.DashboardController = void 0;
 const common_1 = require("@nestjs/common");
 const dashboard_service_1 = require("./dashboard.service");
-const jwt_auth_guard_1 = require("../auth/guards/jwt-auth.guard");
+const permissions_decorator_1 = require("../../common/decorators/permissions.decorator");
 let DashboardController = class DashboardController {
     constructor(dashboardService) {
         this.dashboardService = dashboardService;
@@ -24,20 +24,23 @@ let DashboardController = class DashboardController {
         return this.dashboardService.getStats();
     }
     search(query, req) {
-        var _a;
-        const includeUsers = ((_a = req.user) === null || _a === void 0 ? void 0 : _a.role) === 'admin';
+        var _a, _b, _c;
+        const perms = new Set(((_c = (_b = (_a = req.user) === null || _a === void 0 ? void 0 : _a.roleEntity) === null || _b === void 0 ? void 0 : _b.permissions) !== null && _c !== void 0 ? _c : []).map((p) => p.slug));
+        const includeUsers = perms.has('users.read');
         return this.dashboardService.search(query || '', includeUsers);
     }
 };
 exports.DashboardController = DashboardController;
 __decorate([
     (0, common_1.Get)('stats'),
+    (0, permissions_decorator_1.RequiresPermissions)('dashboard.read'),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", void 0)
 ], DashboardController.prototype, "getStats", null);
 __decorate([
     (0, common_1.Get)('search'),
+    (0, permissions_decorator_1.RequiresPermissions)('dashboard.read'),
     __param(0, (0, common_1.Query)('q')),
     __param(1, (0, common_1.Req)()),
     __metadata("design:type", Function),
@@ -46,6 +49,5 @@ __decorate([
 ], DashboardController.prototype, "search", null);
 exports.DashboardController = DashboardController = __decorate([
     (0, common_1.Controller)('dashboard'),
-    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     __metadata("design:paramtypes", [dashboard_service_1.DashboardService])
 ], DashboardController);

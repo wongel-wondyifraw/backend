@@ -1,16 +1,16 @@
-import { Controller, Get, UseGuards, Request, Post, UseInterceptors, UploadedFile, Param, NotFoundException, Body, Patch, ParseUUIDPipe, Delete } from '@nestjs/common';
+import { Controller, Get, Post, UseInterceptors, UploadedFile, Param, NotFoundException, Body, Patch, ParseUUIDPipe, Delete, Request } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { join, extname } from 'path';
 import { randomUUID } from 'crypto';
 import * as fs from 'fs';
 import { UsersService } from './users.service';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { PinoLogger } from 'nestjs-pino';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { RequiresPermissions } from '../../common/decorators/permissions.decorator';
 
 @Controller('users')
 export class UsersController {
@@ -21,39 +21,37 @@ export class UsersController {
         this.logger.setContext('UsersController');
     }
 
-    @UseGuards(JwtAuthGuard)
     @Get()
+    @RequiresPermissions('users.read')
     async findAll() {
         return this.usersService.findAll();
     }
 
-    @UseGuards(JwtAuthGuard)
     @Get('profile')
-    async getProfile(@Request() req: any) {
-        // req.user is set by the JwtStrategy's validate method
-        return this.usersService.findOne(req.user.id);
+    async getProfile(@Request() req: { user: { id: string } }) {
+        return this.usersService.findOne(req.user.id, true);
     }
 
-    @UseGuards(JwtAuthGuard)
     @Patch('profile')
-    async updateProfile(@Request() req: any, @Body() updateProfileDto: UpdateProfileDto) {
+    @RequiresPermissions('settings.update')
+    async updateProfile(@Request() req: { user: { id: string } }, @Body() updateProfileDto: UpdateProfileDto) {
         return this.usersService.update(req.user.id, updateProfileDto);
     }
 
-    @UseGuards(JwtAuthGuard)
     @Patch('change-password')
-    async changePassword(@Request() req: any, @Body() changePasswordDto: ChangePasswordDto) {
+    @RequiresPermissions('settings.update')
+    async changePassword(@Request() req: { user: { id: string } }, @Body() changePasswordDto: ChangePasswordDto) {
         return this.usersService.changePassword(req.user.id, changePasswordDto);
     }
 
-    @UseGuards(JwtAuthGuard)
     @Patch(':id')
+    @RequiresPermissions('users.manage')
     async update(@Param('id', ParseUUIDPipe) id: string, @Body() updateUserDto: UpdateUserDto) {
         return this.usersService.update(id, updateUserDto);
     }
 
-    @UseGuards(JwtAuthGuard)
     @Post()
+    @RequiresPermissions('users.manage')
     @UseInterceptors(FileInterceptor('avatar', {
         storage: diskStorage({
             destination: (req, file, cb) => {
@@ -69,64 +67,49 @@ export class UsersController {
             },
         }),
     }))
-    async create(@Body() createUserDto: CreateUserDto, @UploadedFile() file: any) {
-        // 1. Generate the UUID for the new user
+    async create(@Body() createUserDto: CreateUserDto, @UploadedFile() file: Express.Multer.File | undefined) {
         const userId = randomUUID();
-        let avatarUrl = null;
+        let avatarUrl: string | null = null;
 
-        console.log('--- CREATE USER ---');
-        console.log('File received:', file ? { originalname: file.originalname, path: file.path, size: file.size } : 'NO FILE');
-        console.log('Body received:', JSON.stringify(createUserDto));
-
-        // 2. If a file was uploaded, move it to the final location immediately
         if (file) {
             const fileExt = extname(file.originalname);
             const filename = `${userId}${fileExt}`;
             const targetPath = join(process.cwd(), 'uploads/images', filename);
 
             try {
-                // Ensure directory exists
                 const uploadDir = join(process.cwd(), 'uploads/images');
                 if (!fs.existsSync(uploadDir)) {
                     fs.mkdirSync(uploadDir, { recursive: true });
                 }
 
-                // Move file - use copy + unlink for cross-partition reliability
                 if (fs.existsSync(file.path)) {
                     fs.copyFileSync(file.path, targetPath);
                     fs.unlinkSync(file.path);
-                    console.log('Avatar file moved to:', targetPath);
-                } else {
-                    console.error('Temp file does not exist at:', file.path);
                 }
                 avatarUrl = `uploads/images/${filename}`;
             } catch (err) {
-                console.error('Error processing avatar during creation:', err);
-                // We'll continue even if file processing fails, but avatarUrl remains null
+                this.logger.error({ err }, 'Error processing avatar during creation');
             }
         }
 
-        console.log('avatar_url to save:', avatarUrl);
-
-        // 3. Create the user record with the pre-generated ID and avatar_url
         const user = await this.usersService.create({
             ...createUserDto,
             id: userId,
             avatar_url: avatarUrl,
-            created_at: new Date(), // Explicitly set created_at as requested
+            created_at: new Date(),
         });
 
         return user;
     }
 
-    @UseGuards(JwtAuthGuard)
     @Delete(':id')
+    @RequiresPermissions('users.manage')
     async remove(@Param('id', ParseUUIDPipe) id: string) {
         return this.usersService.remove(id);
     }
 
-    @UseGuards(JwtAuthGuard)
     @Post(':id/upload-avatar')
+    @RequiresPermissions('settings.update')
     @UseInterceptors(FileInterceptor('file', {
         storage: diskStorage({
             destination: (req, file, cb) => {
@@ -139,7 +122,6 @@ export class UsersController {
             filename: (req, file, cb) => {
                 const userId = req.params.id;
                 const fileExtName = extname(file.originalname);
-                // Renaming by UUID as requested: [userId][ext]
                 cb(null, `${userId}${fileExtName}`);
             },
         }),
@@ -150,7 +132,7 @@ export class UsersController {
             cb(null, true);
         },
     }))
-    async uploadAvatar(@Param('id', ParseUUIDPipe) id: string, @UploadedFile() file: any) {
+    async uploadAvatar(@Param('id', ParseUUIDPipe) id: string, @UploadedFile() file: Express.Multer.File | undefined) {
         try {
             if (!file) {
                 throw new NotFoundException('File not found');
@@ -161,7 +143,8 @@ export class UsersController {
                 message: 'Avatar uploaded successfully',
                 avatar_url: avatarUrl,
             };
-        } catch (error: any) {
+        } catch (error: unknown) {
+            const err = error as Error;
             this.logger.error({
                 userId: id,
                 fileMetadata: file ? {
@@ -169,7 +152,7 @@ export class UsersController {
                     mimetype: file.mimetype,
                     size: file.size,
                 } : null,
-                errorMessage: error.message,
+                errorMessage: err.message,
             }, 'Failed to upload avatar');
             throw error;
         }

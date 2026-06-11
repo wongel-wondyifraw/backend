@@ -5,6 +5,7 @@
     "@nestjs/common": "^11.1.14",
     "@nestjs/config": "^4.0.2",
     "@nestjs/core": "^11.1.14",
+    "@nestjs/event-emitter": "^3.1.0",
     "@nestjs/jwt": "^11.0.2",
     "@nestjs/passport": "^11.0.5",
     "@nestjs/platform-express": "^11.1.13",
@@ -33,7 +34,8 @@
     "start": "nest start",
     "start:dev": "nest start --watch",
     "start:prod": "node dist/main",
-    "format": "prettier --write \"src/**/*.ts\""
+    "format": "prettier --write \"src/**/*.ts\"",
+    "test": "jest"
   },
   "devDependencies": {
     "@nestjs/cli": "^11.0.16",

@@ -45,12 +45,15 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.AuthService = void 0;
 const common_1 = require("@nestjs/common");
 const jwt_1 = require("@nestjs/jwt");
+const config_1 = require("@nestjs/config");
 const bcrypt = __importStar(require("bcrypt"));
 const users_service_1 = require("../users/users.service");
+const user_mapper_1 = require("../users/user.mapper");
 let AuthService = class AuthService {
-    constructor(usersService, jwtService) {
+    constructor(usersService, jwtService, config) {
         this.usersService = usersService;
         this.jwtService = jwtService;
+        this.config = config;
     }
     parseFullName(fullName) {
         const parts = fullName.trim().split(/\s+/).filter(Boolean);
@@ -67,6 +70,10 @@ let AuthService = class AuthService {
         };
     }
     async register(registerDto) {
+        const allowPublicRegister = this.config.get('ALLOW_PUBLIC_REGISTER') === 'true';
+        if (!allowPublicRegister) {
+            throw new common_1.ForbiddenException('Registration is disabled');
+        }
         const email = registerDto.email.trim().toLowerCase();
         const existingUser = await this.usersService.findOneByEmail(email);
         if (existingUser) {
@@ -79,7 +86,6 @@ let AuthService = class AuthService {
             role: 'staff',
             is_active: true,
         });
-        delete newUser.password_hash;
         return {
             message: 'User registered successfully',
             user: newUser,
@@ -101,15 +107,7 @@ let AuthService = class AuthService {
         const payload = { sub: user.id, email: user.email };
         return {
             access_token: await this.jwtService.signAsync(payload),
-            user: {
-                id: user.id,
-                email: user.email,
-                first_name: user.first_name,
-                middle_name: user.middle_name,
-                last_name: user.last_name,
-                role: user.role,
-                avatar_url: user.avatar_url,
-            }
+            user: (0, user_mapper_1.toUserResponse)(user, true),
         };
     }
 };
@@ -117,5 +115,6 @@ exports.AuthService = AuthService;
 exports.AuthService = AuthService = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [users_service_1.UsersService,
-        jwt_1.JwtService])
+        jwt_1.JwtService,
+        config_1.ConfigService])
 ], AuthService);

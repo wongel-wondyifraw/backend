@@ -18,7 +18,10 @@ const users_service_1 = require("../../users/users.service");
 let JwtStrategy = class JwtStrategy extends (0, passport_1.PassportStrategy)(passport_jwt_1.Strategy) {
     constructor(configService, usersService) {
         super({
-            jwtFromRequest: passport_jwt_1.ExtractJwt.fromAuthHeaderAsBearerToken(),
+            jwtFromRequest: passport_jwt_1.ExtractJwt.fromExtractors([
+                passport_jwt_1.ExtractJwt.fromAuthHeaderAsBearerToken(),
+                (req) => { var _a, _b; return (_b = (_a = req.query) === null || _a === void 0 ? void 0 : _a.token) !== null && _b !== void 0 ? _b : null; },
+            ]),
             ignoreExpiration: false,
             secretOrKey: configService.get('JWT_SECRET', 'super-secret-key'),
         });
@@ -26,11 +29,10 @@ let JwtStrategy = class JwtStrategy extends (0, passport_1.PassportStrategy)(pas
         this.usersService = usersService;
     }
     async validate(payload) {
-        const user = await this.usersService.findOne(payload.sub);
+        const user = await this.usersService.findOneEntity(payload.sub);
         if (!user) {
             throw new common_1.UnauthorizedException();
         }
-        // Remove password just to be sure
         delete user.password_hash;
         return user;
     }

@@ -11,19 +11,21 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
         private readonly usersService: UsersService,
     ) {
         super({
-            jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+            jwtFromRequest: ExtractJwt.fromExtractors([
+                ExtractJwt.fromAuthHeaderAsBearerToken(),
+                (req: { query?: { token?: string } }) => req.query?.token ?? null,
+            ]),
             ignoreExpiration: false,
             secretOrKey: configService.get<string>('JWT_SECRET', 'super-secret-key'),
         });
     }
 
-    async validate(payload: any) {
-        const user = await this.usersService.findOne(payload.sub);
+    async validate(payload: { sub: string }) {
+        const user = await this.usersService.findOneEntity(payload.sub);
         if (!user) {
             throw new UnauthorizedException();
         }
-        // Remove password just to be sure
-        delete (user as any).password_hash;
+        delete (user as { password_hash?: string }).password_hash;
         return user;
     }
 }

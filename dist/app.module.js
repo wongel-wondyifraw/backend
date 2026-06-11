@@ -8,16 +8,22 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AppModule = void 0;
 const common_1 = require("@nestjs/common");
+const core_1 = require("@nestjs/core");
 const config_1 = require("@nestjs/config");
 const typeorm_1 = require("@nestjs/typeorm");
 const nestjs_pino_1 = require("nestjs-pino");
 const throttler_1 = require("@nestjs/throttler");
+const event_emitter_1 = require("@nestjs/event-emitter");
 const users_module_1 = require("./modules/users/users.module");
 const auth_module_1 = require("./modules/auth/auth.module");
 const members_module_1 = require("./modules/members/members.module");
 const ministries_module_1 = require("./modules/ministries/ministries.module");
 const dashboard_module_1 = require("./modules/dashboard/dashboard.module");
+const access_module_1 = require("./modules/access/access.module");
+const notifications_module_1 = require("./modules/notifications/notifications.module");
 const admin_seed_service_1 = require("./database/admin-seed.service");
+const jwt_auth_guard_1 = require("./modules/auth/guards/jwt-auth.guard");
+const permissions_guard_1 = require("./common/guards/permissions.guard");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -25,6 +31,7 @@ exports.AppModule = AppModule = __decorate([
     (0, common_1.Module)({
         imports: [
             config_1.ConfigModule.forRoot({ isGlobal: true }),
+            event_emitter_1.EventEmitterModule.forRoot(),
             nestjs_pino_1.LoggerModule.forRootAsync({
                 imports: [config_1.ConfigModule],
                 inject: [config_1.ConfigService],
@@ -70,7 +77,7 @@ exports.AppModule = AppModule = __decorate([
                                     statusCode: res.statusCode,
                                 }),
                             },
-                            customProps: (req, res) => ({
+                            customProps: () => ({
                                 context: 'HTTP',
                             }),
                         },
@@ -97,13 +104,21 @@ exports.AppModule = AppModule = __decorate([
                     synchronize: config.get('DB_SYNCHRONIZE') === 'true',
                 }),
             }),
+            access_module_1.AccessModule,
             users_module_1.UsersModule,
             auth_module_1.AuthModule,
             members_module_1.MembersModule,
             ministries_module_1.MinistriesModule,
             dashboard_module_1.DashboardModule,
+            notifications_module_1.NotificationsModule,
         ],
         controllers: [],
-        providers: [admin_seed_service_1.AdminSeedService],
+        providers: [
+            admin_seed_service_1.AdminSeedService,
+            jwt_auth_guard_1.JwtAuthGuard,
+            permissions_guard_1.PermissionsGuard,
+            { provide: core_1.APP_GUARD, useClass: jwt_auth_guard_1.JwtAuthGuard },
+            { provide: core_1.APP_GUARD, useClass: permissions_guard_1.PermissionsGuard },
+        ],
     })
 ], AppModule);

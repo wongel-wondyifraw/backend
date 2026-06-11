@@ -1,31 +1,34 @@
-import { Controller, Get, Post, Patch, Delete, Body, Param, ParseUUIDPipe, UseGuards, Query } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Delete, Body, Param, ParseUUIDPipe, Query } from '@nestjs/common';
 import { MinistriesService } from './ministries.service';
 import { CreateMinistryDto } from './dto/create-ministry.dto';
 import { UpdateMinistryDto } from './dto/update-ministry.dto';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { PaginationQueryDto } from '../../common/dto/pagination-query.dto';
+import { RequiresPermissions } from '../../common/decorators/permissions.decorator';
 
 @Controller('ministries')
-@UseGuards(JwtAuthGuard)
 export class MinistriesController {
     constructor(private readonly ministriesService: MinistriesService) { }
 
     @Post()
+    @RequiresPermissions('ministries.create')
     async create(@Body() createMinistryDto: CreateMinistryDto) {
         return this.ministriesService.create(createMinistryDto);
     }
 
     @Get()
+    @RequiresPermissions('ministries.read')
     async findAll(@Query() query: PaginationQueryDto) {
         return this.ministriesService.findAllPaginated(query.page, query.limit, query.search);
     }
 
     @Get(':id')
+    @RequiresPermissions('ministries.read')
     async findOne(@Param('id', ParseUUIDPipe) id: string) {
         return this.ministriesService.findOne(id);
     }
 
     @Patch(':id')
+    @RequiresPermissions('ministries.update')
     async update(
         @Param('id', ParseUUIDPipe) id: string,
         @Body() updateMinistryDto: UpdateMinistryDto,
@@ -34,18 +37,19 @@ export class MinistriesController {
     }
 
     @Delete(':id')
+    @RequiresPermissions('ministries.delete')
     async remove(@Param('id', ParseUUIDPipe) id: string) {
         return this.ministriesService.remove(id);
     }
 
-    // ==================== Ministry Members ====================
-
     @Get(':id/members')
+    @RequiresPermissions('ministries.read')
     async getMinistryMembers(@Param('id', ParseUUIDPipe) id: string) {
         return this.ministriesService.getMinistryMembers(id);
     }
 
     @Post(':id/members/:memberId')
+    @RequiresPermissions('ministries.update')
     async addMember(
         @Param('id', ParseUUIDPipe) id: string,
         @Param('memberId', ParseUUIDPipe) memberId: string,
@@ -54,6 +58,7 @@ export class MinistriesController {
     }
 
     @Delete(':id/members/:memberId')
+    @RequiresPermissions('ministries.update')
     async removeMember(
         @Param('id', ParseUUIDPipe) id: string,
         @Param('memberId', ParseUUIDPipe) memberId: string,

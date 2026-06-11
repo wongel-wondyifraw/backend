@@ -1,18 +1,25 @@
 import { Module } from '@nestjs/common';
+import { APP_GUARD } from '@nestjs/core';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { LoggerModule } from 'nestjs-pino';
 import { ThrottlerModule } from '@nestjs/throttler';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 import { UsersModule } from './modules/users/users.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { MembersModule } from './modules/members/members.module';
 import { MinistriesModule } from './modules/ministries/ministries.module';
 import { DashboardModule } from './modules/dashboard/dashboard.module';
+import { AccessModule } from './modules/access/access.module';
+import { NotificationsModule } from './modules/notifications/notifications.module';
 import { AdminSeedService } from './database/admin-seed.service';
+import { JwtAuthGuard } from './modules/auth/guards/jwt-auth.guard';
+import { PermissionsGuard } from './common/guards/permissions.guard';
 
 @Module({
     imports: [
         ConfigModule.forRoot({ isGlobal: true }),
+        EventEmitterModule.forRoot(),
         LoggerModule.forRootAsync({
             imports: [ConfigModule],
             inject: [ConfigService],
@@ -54,7 +61,7 @@ import { AdminSeedService } from './database/admin-seed.service';
                                 statusCode: res.statusCode,
                             }),
                         },
-                        customProps: (req, res) => ({
+                        customProps: () => ({
                             context: 'HTTP',
                         }),
                     },
@@ -81,13 +88,21 @@ import { AdminSeedService } from './database/admin-seed.service';
                 synchronize: config.get<string>('DB_SYNCHRONIZE') === 'true',
             }),
         }),
+        AccessModule,
         UsersModule,
         AuthModule,
         MembersModule,
         MinistriesModule,
         DashboardModule,
+        NotificationsModule,
     ],
     controllers: [],
-    providers: [AdminSeedService],
+    providers: [
+        AdminSeedService,
+        JwtAuthGuard,
+        PermissionsGuard,
+        { provide: APP_GUARD, useClass: JwtAuthGuard },
+        { provide: APP_GUARD, useClass: PermissionsGuard },
+    ],
 })
 export class AppModule { }
