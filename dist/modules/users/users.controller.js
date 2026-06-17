@@ -48,7 +48,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.UsersController = void 0;
 const common_1 = require("@nestjs/common");
 const platform_express_1 = require("@nestjs/platform-express");
-const multer_1 = require("multer");
 const path_1 = require("path");
 const crypto_1 = require("crypto");
 const fs = __importStar(require("fs"));
@@ -59,6 +58,7 @@ const update_profile_dto_1 = require("./dto/update-profile.dto");
 const change_password_dto_1 = require("./dto/change-password.dto");
 const update_user_dto_1 = require("./dto/update-user.dto");
 const permissions_decorator_1 = require("../../common/decorators/permissions.decorator");
+const multer_config_1 = require("../../common/config/multer.config");
 let UsersController = class UsersController {
     constructor(usersService, logger) {
         this.usersService = usersService;
@@ -77,6 +77,9 @@ let UsersController = class UsersController {
     async changePassword(req, changePasswordDto) {
         return this.usersService.changePassword(req.user.id, changePasswordDto);
     }
+    async findOne(id) {
+        return this.usersService.findOne(id, true);
+    }
     async update(id, updateUserDto) {
         return this.usersService.update(id, updateUserDto);
     }
@@ -84,14 +87,9 @@ let UsersController = class UsersController {
         const userId = (0, crypto_1.randomUUID)();
         let avatarUrl = null;
         if (file) {
-            const fileExt = (0, path_1.extname)(file.originalname);
-            const filename = `${userId}${fileExt}`;
-            const targetPath = (0, path_1.join)(process.cwd(), 'uploads/images', filename);
+            const filename = (0, multer_config_1.avatarFilenameForUserId)(userId, file.originalname);
+            const targetPath = (0, path_1.join)((0, multer_config_1.getImagesUploadDir)(), filename);
             try {
-                const uploadDir = (0, path_1.join)(process.cwd(), 'uploads/images');
-                if (!fs.existsSync(uploadDir)) {
-                    fs.mkdirSync(uploadDir, { recursive: true });
-                }
                 if (fs.existsSync(file.path)) {
                     fs.copyFileSync(file.path, targetPath);
                     fs.unlinkSync(file.path);
@@ -174,6 +172,14 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "changePassword", null);
 __decorate([
+    (0, common_1.Get)(':id'),
+    (0, permissions_decorator_1.RequiresPermissions)('users.read'),
+    __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], UsersController.prototype, "findOne", null);
+__decorate([
     (0, common_1.Patch)(':id'),
     (0, permissions_decorator_1.RequiresPermissions)('users.manage'),
     __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
@@ -186,19 +192,12 @@ __decorate([
     (0, common_1.Post)(),
     (0, permissions_decorator_1.RequiresPermissions)('users.manage'),
     (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)('avatar', {
-        storage: (0, multer_1.diskStorage)({
-            destination: (req, file, cb) => {
-                const uploadPath = (0, path_1.join)(process.cwd(), 'uploads/images');
-                if (!fs.existsSync(uploadPath)) {
-                    fs.mkdirSync(uploadPath, { recursive: true });
-                }
-                cb(null, uploadPath);
-            },
-            filename: (req, file, cb) => {
-                const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-                cb(null, `temp-${uniqueSuffix}${(0, path_1.extname)(file.originalname)}`);
-            },
+        storage: (0, multer_config_1.createImageDiskStorage)((_req, file, cb) => {
+            const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+            cb(null, `temp-${uniqueSuffix}${file.originalname.replace(/^.*(\.\w+)$/, '$1')}`);
         }),
+        fileFilter: multer_config_1.imageFileFilter,
+        limits: multer_config_1.imageUploadLimits,
     })),
     __param(0, (0, common_1.Body)()),
     __param(1, (0, common_1.UploadedFile)()),
@@ -216,28 +215,14 @@ __decorate([
 ], UsersController.prototype, "remove", null);
 __decorate([
     (0, common_1.Post)(':id/upload-avatar'),
-    (0, permissions_decorator_1.RequiresPermissions)('settings.update'),
+    (0, permissions_decorator_1.RequiresPermissions)('settings.update', 'users.manage'),
     (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)('file', {
-        storage: (0, multer_1.diskStorage)({
-            destination: (req, file, cb) => {
-                const uploadPath = './uploads/images';
-                if (!fs.existsSync(uploadPath)) {
-                    fs.mkdirSync(uploadPath, { recursive: true });
-                }
-                cb(null, uploadPath);
-            },
-            filename: (req, file, cb) => {
-                const userId = req.params.id;
-                const fileExtName = (0, path_1.extname)(file.originalname);
-                cb(null, `${userId}${fileExtName}`);
-            },
+        storage: (0, multer_config_1.createImageDiskStorage)((req, file, cb) => {
+            const userId = req.params.id;
+            cb(null, (0, multer_config_1.avatarFilenameForUserId)(userId, file.originalname));
         }),
-        fileFilter: (req, file, cb) => {
-            if (!file.originalname.match(/\.(jpg|jpeg|png|gif)$/)) {
-                return cb(new Error('Only image files are allowed!'), false);
-            }
-            cb(null, true);
-        },
+        fileFilter: multer_config_1.imageFileFilter,
+        limits: multer_config_1.imageUploadLimits,
     })),
     __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
     __param(1, (0, common_1.UploadedFile)()),

@@ -26,10 +26,10 @@ export class PermissionsGuard implements CanActivate {
     const granted = new Set(
       (user.roleEntity?.permissions ?? []).map((p) => p.slug),
     );
-    const missing = required.filter((slug) => !granted.has(slug));
-    if (missing.length > 0) {
+    const allowed = required.some((slug) => granted.has(slug));
+    if (!allowed) {
       throw new ForbiddenException(
-        `Missing permission(s): ${missing.join(', ')}`,
+        `Missing permission(s): ${required.join(' or ')}`,
       );
     }
     return true;

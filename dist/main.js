@@ -10,6 +10,7 @@ const nestjs_pino_1 = require("nestjs-pino");
 const path_1 = require("path");
 const helmet_1 = __importDefault(require("helmet"));
 const config_1 = require("@nestjs/config");
+const swagger_1 = require("@nestjs/swagger");
 const app_module_1 = require("./app.module");
 const http_exception_filter_1 = require("./common/filters/http-exception.filter");
 async function bootstrap() {
@@ -30,7 +31,19 @@ async function bootstrap() {
         crossOriginEmbedderPolicy: false,
     }));
     app.enableCors({
-        origin: frontendUrl,
+        origin: (origin, callback) => {
+            if (!origin) {
+                callback(null, true);
+                return;
+            }
+            const isDevLocalhost = process.env.NODE_ENV !== 'production'
+                && /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin);
+            if (isDevLocalhost || origin === frontendUrl) {
+                callback(null, true);
+                return;
+            }
+            callback(null, false);
+        },
         credentials: true,
     });
     // 3. Static Assets: Serve from project root (use process.cwd() for reliable pathing)
@@ -48,16 +61,22 @@ async function bootstrap() {
         defaultVersion: '1',
     });
     // 5. Validation: Global sanitization of inputs
-    // backend/src/main.ts - Update section 5
-    // 5. Validation: Global sanitization of inputs
     app.useGlobalPipes(new common_1.ValidationPipe({
         whitelist: true,
-        transform: true, // This allows @Transform to run
+        transform: true,
         forbidNonWhitelisted: true,
         transformOptions: {
-            enableImplicitConversion: true, // Automatically converts primitives (numbers, booleans)
+            enableImplicitConversion: true,
         },
     }));
+    const swaggerConfig = new swagger_1.DocumentBuilder()
+        .setTitle('CMS API')
+        .setDescription('Church Management System REST API')
+        .setVersion('1.0')
+        .addBearerAuth()
+        .build();
+    const document = swagger_1.SwaggerModule.createDocument(app, swaggerConfig);
+    swagger_1.SwaggerModule.setup('api/docs', app, document);
     await app.listen(port);
     logger.log(`Backend running on http://localhost:${port}`);
 }

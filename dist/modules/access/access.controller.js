@@ -47,7 +47,7 @@ let AccessController = class AccessController {
 exports.AccessController = AccessController;
 __decorate([
     (0, common_1.Get)('roles'),
-    (0, permissions_decorator_1.RequiresPermissions)('roles.read'),
+    (0, permissions_decorator_1.RequiresPermissions)('roles.read', 'users.manage'),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", void 0)

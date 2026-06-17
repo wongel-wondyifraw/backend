@@ -1,14 +1,15 @@
 # CMS Backend API
 
-A professional Nest.js application with Users and Members management, JWT authentication, and comprehensive CRUD operations.
+A Nest.js application with Users, Members, Ministries, JWT authentication, and role-based access control.
 
 ## Features
 
 - **Authentication**: JWT-based authentication with email/password login
-- **User Management**: CRUD operations for users with role-based access control
-- **Member Management**: CRUD operations for members
-- **HTTP Logging**: Request/response logging middleware
-- **API Documentation**: Swagger/OpenAPI documentation
+- **User Management**: CRUD operations with role-based access control
+- **Member & Ministry Management**: CRUD with pagination and search
+- **Notifications**: In-app notifications with SSE streaming
+- **HTTP Logging**: Structured logging with Pino
+- **API Documentation**: Swagger/OpenAPI at `/api/docs`
 - **Database**: PostgreSQL with TypeORM
 - **Validation**: Input validation with class-validator
 
@@ -28,20 +29,28 @@ DB_PORT=5432
 DB_USERNAME=postgres
 DB_PASSWORD=your_password
 DB_NAME=your_database_name
+DB_SYNCHRONIZE=true
 
 JWT_SECRET=your-super-secret-key
-JWT_EXPIRES_IN=24h
+JWT_EXPIRES_IN=1d
 
 PORT=3001
 FRONTEND_URL=http://localhost:3000
 NODE_ENV=development
+
+# Optional
+ALLOW_PUBLIC_REGISTER=false
+ADMIN_EMAIL=admin@example.com
+ADMIN_PASSWORD=change-me
 ```
+
+**Production:** `JWT_SECRET` is required when `NODE_ENV=production`. The app will fail to start without it.
 
 ## Database Setup
 
 1. Create a PostgreSQL database
 2. Update the `.env` file with your database credentials
-3. The application will automatically create tables on startup (in development mode)
+3. Set `DB_SYNCHRONIZE=true` in development to auto-create tables on startup
 
 ## Running the Application
 
@@ -56,85 +65,66 @@ npm run start:prod
 
 ## API Documentation
 
-Once the application is running, visit `http://localhost:3001/api` to view the Swagger documentation.
+Once the application is running, visit `http://localhost:3001/api/docs` for Swagger UI. Authenticated routes require a Bearer token.
 
 ## API Endpoints
 
+All routes are prefixed with `/api/v1`.
+
 ### Authentication
 
-- `POST /auth/register` - Register a new user
-- `POST /auth/login` - Login user
-- `GET /auth/profile` - Get current user profile (JWT required)
+- `POST /auth/register` - Register a new user (disabled unless `ALLOW_PUBLIC_REGISTER=true`)
+- `POST /auth/login` - Login and receive JWT access token
 
 ### Users
 
-- `GET /users` - Get all users (Admin/Manager only)
+- `GET /users` - List all users (`users.read`)
 - `GET /users/profile` - Get current user profile (JWT required)
-- `GET /users/:id` - Get user by ID (Admin/Manager only)
-- `POST /users` - Create user (Admin/Manager only)
-- `PATCH /users/:id` - Update user (Admin/Manager or own profile)
-- `DELETE /users/:id` - Delete user (Admin only)
+- `PATCH /users/profile` - Update own profile (`settings.update`)
+- `PATCH /users/change-password` - Change own password (`settings.update`)
+- `POST /users` - Create user (`users.manage`)
+- `PATCH /users/:id` - Update user (`users.manage`)
+- `DELETE /users/:id` - Delete user (`users.manage`)
+- `POST /users/:id/upload-avatar` - Upload avatar (`settings.update`)
 
 ### Members
 
-- `GET /members` - Get all members (JWT required)
-- `GET /members/:id` - Get member by ID (JWT required)
-- `POST /members` - Create member (Admin/Manager only)
-- `PATCH /members/:id` - Update member (Admin/Manager only)
-- `DELETE /members/:id` - Delete member (Admin only)
+- `GET /members` - List members with pagination (`members.read`)
+- `GET /members/:id` - Get member by ID (`members.read`)
+- `POST /members` - Create member (`members.create`)
+- `PATCH /members/:id` - Update member (`members.update`)
+- `DELETE /members/:id` - Delete member (`members.delete`)
+
+### Access (Roles & Permissions)
+
+- `GET /access/roles` - List roles (`roles.read`)
+- `POST /access/roles` - Create role (`roles.manage`)
+- `GET /access/permissions` - List permissions (`roles.read`)
 
 ## User Roles
 
-- `admin` - Full access to all resources
-- `manager` - Can manage users and members, but cannot delete users
-- `user` - Can only view and update their own profile
+System roles are seeded on startup:
 
-## Data Models
-
-### User
-
-```typescript
-{
-  id: string;
-  firstName: string;
-  middleName?: string;
-  lastName: string;
-  email: string;
-  password: string; // Hashed
-  role: 'admin' | 'user' | 'manager';
-  imageUrl?: string;
-  createdAt: Date;
-  updatedAt: Date;
-}
-```
-
-### Member
-
-```typescript
-{
-  id: string;
-  firstName: string;
-  middleName?: string;
-  lastName: string;
-  email: string;
-  imageUrl?: string;
-  phoneNumber?: string;
-  address?: string;
-  maritalStatus?: 'single' | 'married' | 'divorced' | 'widowed';
-  createdAt: Date;
-  updatedAt: Date;
-}
-```
+- `admin` - Full access to all permissions
+- `minister` - Manage members and ministries
+- `staff` - Read-only access to members and ministries
 
 ## Security Features
 
 - Password hashing with bcrypt
-- JWT token authentication
-- Role-based access control
+- JWT Bearer authentication (header only; query-string tokens are not supported)
+- Permission-based access control
+- Helmet security headers
 - Input validation and sanitization
-- CORS configuration
-- HTTP request logging
+- CORS restricted to configured frontend URL
+- Avatar uploads limited to JPEG/PNG/GIF/WebP (max 5 MB)
+
+## Testing
+
+```bash
+npm test
+```
 
 ## Development
 
-The application includes comprehensive error handling, validation, and logging. All endpoints are documented with Swagger annotations for easy API exploration.
+The application includes global exception handling, structured logging, and Swagger documentation for API exploration.

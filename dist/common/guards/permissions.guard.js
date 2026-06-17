@@ -27,9 +27,9 @@ let PermissionsGuard = class PermissionsGuard {
         if (!user)
             throw new common_1.ForbiddenException('Not authenticated');
         const granted = new Set(((_b = (_a = user.roleEntity) === null || _a === void 0 ? void 0 : _a.permissions) !== null && _b !== void 0 ? _b : []).map((p) => p.slug));
-        const missing = required.filter((slug) => !granted.has(slug));
-        if (missing.length > 0) {
-            throw new common_1.ForbiddenException(`Missing permission(s): ${missing.join(', ')}`);
+        const allowed = required.some((slug) => granted.has(slug));
+        if (!allowed) {
+            throw new common_1.ForbiddenException(`Missing permission(s): ${required.join(' or ')}`);
         }
         return true;
     }

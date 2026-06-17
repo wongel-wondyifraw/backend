@@ -1,7 +1,6 @@
 import { Controller, Get, Post, UseInterceptors, UploadedFile, Param, NotFoundException, Body, Patch, ParseUUIDPipe, Delete, Request } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { diskStorage } from 'multer';
-import { join, extname } from 'path';
+import { join } from 'path';
 import { randomUUID } from 'crypto';
 import * as fs from 'fs';
 import { UsersService } from './users.service';
@@ -11,6 +10,13 @@ import { UpdateProfileDto } from './dto/update-profile.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { RequiresPermissions } from '../../common/decorators/permissions.decorator';
+import {
+    avatarFilenameForUserId,
+    createImageDiskStorage,
+    getImagesUploadDir,
+    imageFileFilter,
+    imageUploadLimits,
+} from '../../common/config/multer.config';
 
 @Controller('users')
 export class UsersController {
@@ -44,6 +50,12 @@ export class UsersController {
         return this.usersService.changePassword(req.user.id, changePasswordDto);
     }
 
+    @Get(':id')
+    @RequiresPermissions('users.read')
+    async findOne(@Param('id', ParseUUIDPipe) id: string) {
+        return this.usersService.findOne(id, true);
+    }
+
     @Patch(':id')
     @RequiresPermissions('users.manage')
     async update(@Param('id', ParseUUIDPipe) id: string, @Body() updateUserDto: UpdateUserDto) {
@@ -53,35 +65,22 @@ export class UsersController {
     @Post()
     @RequiresPermissions('users.manage')
     @UseInterceptors(FileInterceptor('avatar', {
-        storage: diskStorage({
-            destination: (req, file, cb) => {
-                const uploadPath = join(process.cwd(), 'uploads/images');
-                if (!fs.existsSync(uploadPath)) {
-                    fs.mkdirSync(uploadPath, { recursive: true });
-                }
-                cb(null, uploadPath);
-            },
-            filename: (req, file, cb) => {
-                const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-                cb(null, `temp-${uniqueSuffix}${extname(file.originalname)}`);
-            },
+        storage: createImageDiskStorage((_req, file, cb) => {
+            const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+            cb(null, `temp-${uniqueSuffix}${file.originalname.replace(/^.*(\.\w+)$/, '$1')}`);
         }),
+        fileFilter: imageFileFilter,
+        limits: imageUploadLimits,
     }))
     async create(@Body() createUserDto: CreateUserDto, @UploadedFile() file: Express.Multer.File | undefined) {
         const userId = randomUUID();
         let avatarUrl: string | null = null;
 
         if (file) {
-            const fileExt = extname(file.originalname);
-            const filename = `${userId}${fileExt}`;
-            const targetPath = join(process.cwd(), 'uploads/images', filename);
+            const filename = avatarFilenameForUserId(userId, file.originalname);
+            const targetPath = join(getImagesUploadDir(), filename);
 
             try {
-                const uploadDir = join(process.cwd(), 'uploads/images');
-                if (!fs.existsSync(uploadDir)) {
-                    fs.mkdirSync(uploadDir, { recursive: true });
-                }
-
                 if (fs.existsSync(file.path)) {
                     fs.copyFileSync(file.path, targetPath);
                     fs.unlinkSync(file.path);
@@ -109,28 +108,14 @@ export class UsersController {
     }
 
     @Post(':id/upload-avatar')
-    @RequiresPermissions('settings.update')
+    @RequiresPermissions('settings.update', 'users.manage')
     @UseInterceptors(FileInterceptor('file', {
-        storage: diskStorage({
-            destination: (req, file, cb) => {
-                const uploadPath = './uploads/images';
-                if (!fs.existsSync(uploadPath)) {
-                    fs.mkdirSync(uploadPath, { recursive: true });
-                }
-                cb(null, uploadPath);
-            },
-            filename: (req, file, cb) => {
-                const userId = req.params.id;
-                const fileExtName = extname(file.originalname);
-                cb(null, `${userId}${fileExtName}`);
-            },
+        storage: createImageDiskStorage((req, file, cb) => {
+            const userId = (req as Express.Request & { params: { id: string } }).params.id;
+            cb(null, avatarFilenameForUserId(userId, file.originalname));
         }),
-        fileFilter: (req, file, cb) => {
-            if (!file.originalname.match(/\.(jpg|jpeg|png|gif)$/)) {
-                return cb(new Error('Only image files are allowed!'), false);
-            }
-            cb(null, true);
-        },
+        fileFilter: imageFileFilter,
+        limits: imageUploadLimits,
     }))
     async uploadAvatar(@Param('id', ParseUUIDPipe) id: string, @UploadedFile() file: Express.Multer.File | undefined) {
         try {

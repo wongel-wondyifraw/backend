@@ -3,7 +3,6 @@ import { APP_GUARD } from '@nestjs/core';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { LoggerModule } from 'nestjs-pino';
-import { ThrottlerModule } from '@nestjs/throttler';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { UsersModule } from './modules/users/users.module';
 import { AuthModule } from './modules/auth/auth.module';
@@ -12,6 +11,7 @@ import { MinistriesModule } from './modules/ministries/ministries.module';
 import { DashboardModule } from './modules/dashboard/dashboard.module';
 import { AccessModule } from './modules/access/access.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
+import { UploadsModule } from './modules/uploads/uploads.module';
 import { AdminSeedService } from './database/admin-seed.service';
 import { JwtAuthGuard } from './modules/auth/guards/jwt-auth.guard';
 import { PermissionsGuard } from './common/guards/permissions.guard';
@@ -68,12 +68,6 @@ import { PermissionsGuard } from './common/guards/permissions.guard';
                 };
             },
         }),
-        ThrottlerModule.forRoot([
-            {
-                ttl: 60000,
-                limit: 10,
-            },
-        ]),
         TypeOrmModule.forRootAsync({
             imports: [ConfigModule],
             inject: [ConfigService],
@@ -95,6 +89,7 @@ import { PermissionsGuard } from './common/guards/permissions.guard';
         MinistriesModule,
         DashboardModule,
         NotificationsModule,
+        UploadsModule,
     ],
     controllers: [],
     providers: [

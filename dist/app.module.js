@@ -12,7 +12,6 @@ const core_1 = require("@nestjs/core");
 const config_1 = require("@nestjs/config");
 const typeorm_1 = require("@nestjs/typeorm");
 const nestjs_pino_1 = require("nestjs-pino");
-const throttler_1 = require("@nestjs/throttler");
 const event_emitter_1 = require("@nestjs/event-emitter");
 const users_module_1 = require("./modules/users/users.module");
 const auth_module_1 = require("./modules/auth/auth.module");
@@ -21,6 +20,7 @@ const ministries_module_1 = require("./modules/ministries/ministries.module");
 const dashboard_module_1 = require("./modules/dashboard/dashboard.module");
 const access_module_1 = require("./modules/access/access.module");
 const notifications_module_1 = require("./modules/notifications/notifications.module");
+const uploads_module_1 = require("./modules/uploads/uploads.module");
 const admin_seed_service_1 = require("./database/admin-seed.service");
 const jwt_auth_guard_1 = require("./modules/auth/guards/jwt-auth.guard");
 const permissions_guard_1 = require("./common/guards/permissions.guard");
@@ -84,12 +84,6 @@ exports.AppModule = AppModule = __decorate([
                     };
                 },
             }),
-            throttler_1.ThrottlerModule.forRoot([
-                {
-                    ttl: 60000,
-                    limit: 10,
-                },
-            ]),
             typeorm_1.TypeOrmModule.forRootAsync({
                 imports: [config_1.ConfigModule],
                 inject: [config_1.ConfigService],
@@ -111,6 +105,7 @@ exports.AppModule = AppModule = __decorate([
             ministries_module_1.MinistriesModule,
             dashboard_module_1.DashboardModule,
             notifications_module_1.NotificationsModule,
+            uploads_module_1.UploadsModule,
         ],
         controllers: [],
         providers: [

@@ -27,8 +27,12 @@ export interface CreateNotificationInput {
   dedupeKey?: string;
 }
 
+type NotificationStreamEvent =
+  | Record<string, unknown>
+  | { type: 'heartbeat' };
+
 interface UserStreamState {
-  subject: Subject<Record<string, unknown>>;
+  subject: Subject<NotificationStreamEvent>;
   refs: number;
 }
 
@@ -152,13 +156,15 @@ export class NotificationsService {
 
   streamForUser(userId: string): Observable<MessageEvent> {
     const state = this.acquireStream(userId);
-    const heartbeat = interval(30000).pipe(map(() => ({ type: 'heartbeat' })));
+    const heartbeat = interval(30000).pipe(
+      map((): { type: 'heartbeat' } => ({ type: 'heartbeat' })),
+    );
 
     return new Observable<MessageEvent>((subscriber) => {
-      const sub = state.subject.subscribe((event) => {
+      const sub = state.subject.subscribe((event: NotificationStreamEvent) => {
         subscriber.next({ data: event });
       });
-      const hb = heartbeat.subscribe((event) => {
+      const hb = heartbeat.subscribe((event: { type: 'heartbeat' }) => {
         subscriber.next({ data: event });
       });
 
@@ -173,7 +179,7 @@ export class NotificationsService {
   private acquireStream(userId: string): UserStreamState {
     let state = this.streams.get(userId);
     if (!state) {
-      state = { subject: new Subject(), refs: 0 };
+      state = { subject: new Subject<NotificationStreamEvent>(), refs: 0 };
       this.streams.set(userId, state);
     }
     state.refs += 1;

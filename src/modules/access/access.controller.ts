@@ -20,7 +20,7 @@ export class AccessController {
   constructor(private readonly accessService: AccessService) {}
 
   @Get('roles')
-  @RequiresPermissions('roles.read')
+  @RequiresPermissions('roles.read', 'users.manage')
   listRoles() {
     return this.accessService.listRoles();
   }

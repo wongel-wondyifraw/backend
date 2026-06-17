@@ -40,6 +40,9 @@ export class Member {
     @Column({ default: false })
     baptized: boolean;
 
+    @Column({ type: 'date', nullable: true })
+    joined_date: Date;
+
     @CreateDateColumn()
     created_at: Date;
 
