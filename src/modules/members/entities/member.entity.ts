@@ -33,6 +33,9 @@ export class Member {
     @Column({ nullable: true })
     marital_status: string;
 
+    @Column({ type: 'varchar', nullable: true })
+    gender: string | null;
+
     @Column({ default: 'active' })
     status: string;
 

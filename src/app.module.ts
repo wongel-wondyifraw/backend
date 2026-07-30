@@ -12,6 +12,7 @@ import { MinistriesModule } from './modules/ministries/ministries.module';
 import { HomeGroupsModule } from './modules/home-groups/home-groups.module';
 import { BibleStudiesModule } from './modules/bible-studies/bible-studies.module';
 import { TasksModule } from './modules/tasks/tasks.module';
+import { FamiliesModule } from './modules/families/families.module';
 import { DashboardModule } from './modules/dashboard/dashboard.module';
 import { AccessModule } from './modules/access/access.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
@@ -75,16 +76,28 @@ import { PermissionsGuard } from './common/guards/permissions.guard';
         TypeOrmModule.forRootAsync({
             imports: [ConfigModule],
             inject: [ConfigService],
-            useFactory: (config: ConfigService) => ({
-                type: 'postgres',
-                host: config.get<string>('DB_HOST'),
-                port: config.get<number>('DB_PORT'),
-                username: config.get<string>('DB_USERNAME'),
-                password: config.get<string>('DB_PASSWORD'),
-                database: config.get<string>('DB_NAME'),
-                autoLoadEntities: true,
-                synchronize: config.get<string>('DB_SYNCHRONIZE') === 'true',
-            }),
+            useFactory: (config: ConfigService) => {
+                const databaseUrl = config.get<string>('DATABASE_URL');
+                const sslEnabled = config.get<string>('DB_SSL') === 'true';
+
+                return {
+                    type: 'postgres',
+                    ...(databaseUrl
+                        ? {
+                            url: databaseUrl,
+                          }
+                        : {
+                            host: config.get<string>('DB_HOST'),
+                            port: Number(config.get<string>('DB_PORT') || 5432),
+                            username: config.get<string>('DB_USERNAME'),
+                            password: config.get<string>('DB_PASSWORD'),
+                            database: config.get<string>('DB_NAME'),
+                          }),
+                    ssl: sslEnabled ? { rejectUnauthorized: false } : false,
+                    autoLoadEntities: true,
+                    synchronize: config.get<string>('DB_SYNCHRONIZE') === 'true',
+                };
+            },
         }),
         AccessModule,
         UsersModule,
@@ -95,6 +108,7 @@ import { PermissionsGuard } from './common/guards/permissions.guard';
         HomeGroupsModule,
         BibleStudiesModule,
         TasksModule,
+        FamiliesModule,
         DashboardModule,
         NotificationsModule,
         UploadsModule,

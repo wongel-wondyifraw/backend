@@ -56,6 +56,10 @@ __decorate([
     __metadata("design:type", String)
 ], Member.prototype, "marital_status", void 0);
 __decorate([
+    (0, typeorm_1.Column)({ type: 'varchar', nullable: true }),
+    __metadata("design:type", Object)
+], Member.prototype, "gender", void 0);
+__decorate([
     (0, typeorm_1.Column)({ default: 'active' }),
     __metadata("design:type", String)
 ], Member.prototype, "status", void 0);

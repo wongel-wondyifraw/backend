@@ -13,13 +13,14 @@ const dashboard_controller_1 = require("./dashboard.controller");
 const dashboard_service_1 = require("./dashboard.service");
 const member_entity_1 = require("../members/entities/member.entity");
 const ministry_entity_1 = require("../ministries/entities/ministry.entity");
+const minister_entity_1 = require("../ministers/entities/minister.entity");
 const user_entity_1 = require("../users/entities/user.entity");
 let DashboardModule = class DashboardModule {
 };
 exports.DashboardModule = DashboardModule;
 exports.DashboardModule = DashboardModule = __decorate([
     (0, common_1.Module)({
-        imports: [typeorm_1.TypeOrmModule.forFeature([member_entity_1.Member, ministry_entity_1.Ministry, user_entity_1.User])],
+        imports: [typeorm_1.TypeOrmModule.forFeature([member_entity_1.Member, ministry_entity_1.Ministry, minister_entity_1.Minister, user_entity_1.User])],
         controllers: [dashboard_controller_1.DashboardController],
         providers: [dashboard_service_1.DashboardService],
         exports: [dashboard_service_1.DashboardService],

@@ -21,6 +21,7 @@ const ministries_module_1 = require("./modules/ministries/ministries.module");
 const home_groups_module_1 = require("./modules/home-groups/home-groups.module");
 const bible_studies_module_1 = require("./modules/bible-studies/bible-studies.module");
 const tasks_module_1 = require("./modules/tasks/tasks.module");
+const families_module_1 = require("./modules/families/families.module");
 const dashboard_module_1 = require("./modules/dashboard/dashboard.module");
 const access_module_1 = require("./modules/access/access.module");
 const notifications_module_1 = require("./modules/notifications/notifications.module");
@@ -91,16 +92,27 @@ exports.AppModule = AppModule = __decorate([
             typeorm_1.TypeOrmModule.forRootAsync({
                 imports: [config_1.ConfigModule],
                 inject: [config_1.ConfigService],
-                useFactory: (config) => ({
-                    type: 'postgres',
-                    host: config.get('DB_HOST'),
-                    port: config.get('DB_PORT'),
-                    username: config.get('DB_USERNAME'),
-                    password: config.get('DB_PASSWORD'),
-                    database: config.get('DB_NAME'),
-                    autoLoadEntities: true,
-                    synchronize: config.get('DB_SYNCHRONIZE') === 'true',
-                }),
+                useFactory: (config) => {
+                    const databaseUrl = config.get('DATABASE_URL');
+                    const sslEnabled = config.get('DB_SSL') === 'true';
+                    return {
+                        type: 'postgres',
+                        ...(databaseUrl
+                            ? {
+                                url: databaseUrl,
+                            }
+                            : {
+                                host: config.get('DB_HOST'),
+                                port: Number(config.get('DB_PORT') || 5432),
+                                username: config.get('DB_USERNAME'),
+                                password: config.get('DB_PASSWORD'),
+                                database: config.get('DB_NAME'),
+                            }),
+                        ssl: sslEnabled ? { rejectUnauthorized: false } : false,
+                        autoLoadEntities: true,
+                        synchronize: config.get('DB_SYNCHRONIZE') === 'true',
+                    };
+                },
             }),
             access_module_1.AccessModule,
             users_module_1.UsersModule,
@@ -111,6 +123,7 @@ exports.AppModule = AppModule = __decorate([
             home_groups_module_1.HomeGroupsModule,
             bible_studies_module_1.BibleStudiesModule,
             tasks_module_1.TasksModule,
+            families_module_1.FamiliesModule,
             dashboard_module_1.DashboardModule,
             notifications_module_1.NotificationsModule,
             uploads_module_1.UploadsModule,

@@ -18,25 +18,58 @@ const typeorm_1 = require("@nestjs/typeorm");
 const typeorm_2 = require("typeorm");
 const member_entity_1 = require("../members/entities/member.entity");
 const ministry_entity_1 = require("../ministries/entities/ministry.entity");
+const minister_entity_1 = require("../ministers/entities/minister.entity");
 const user_entity_1 = require("../users/entities/user.entity");
 let DashboardService = class DashboardService {
-    constructor(membersRepository, ministriesRepository, usersRepository) {
+    constructor(membersRepository, ministriesRepository, ministersRepository, usersRepository) {
         this.membersRepository = membersRepository;
         this.ministriesRepository = ministriesRepository;
+        this.ministersRepository = ministersRepository;
         this.usersRepository = usersRepository;
     }
+    startOfMonthUtc() {
+        const now = new Date();
+        return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1));
+    }
     async getStats() {
-        const memberCount = await this.membersRepository.count();
-        const activeMembers = await this.membersRepository
-            .createQueryBuilder('member')
-            .where("LOWER(member.status) = 'active'")
-            .getCount();
-        const ministryCount = await this.ministriesRepository.count();
+        const monthStart = this.startOfMonthUtc();
+        const [memberCount, activeMembers, membersThisMonth, ministerCount, activeMinisters, ministersThisMonth, ministryCount, ministriesWithLeader,] = await Promise.all([
+            this.membersRepository.count(),
+            this.membersRepository
+                .createQueryBuilder('member')
+                .where("LOWER(COALESCE(member.status, 'active')) = 'active'")
+                .getCount(),
+            this.membersRepository
+                .createQueryBuilder('member')
+                .where('member.created_at >= :monthStart', { monthStart })
+                .getCount(),
+            this.ministersRepository.count(),
+            this.ministersRepository
+                .createQueryBuilder('minister')
+                .where("LOWER(COALESCE(minister.status, 'active')) = 'active'")
+                .getCount(),
+            this.ministersRepository
+                .createQueryBuilder('minister')
+                .where('minister.created_at >= :monthStart', { monthStart })
+                .getCount(),
+            this.ministriesRepository.count(),
+            this.ministriesRepository
+                .createQueryBuilder('ministry')
+                .where('ministry.leader_id IS NOT NULL')
+                .getCount(),
+        ]);
         return {
             memberCount,
             activeMembers,
-            inactiveMembers: memberCount - activeMembers,
+            inactiveMembers: Math.max(0, memberCount - activeMembers),
+            membersThisMonth,
+            ministerCount,
+            activeMinisters,
+            inactiveMinisters: Math.max(0, ministerCount - activeMinisters),
+            ministersThisMonth,
             ministryCount,
+            ministriesWithLeader,
+            ministriesWithoutLeader: Math.max(0, ministryCount - ministriesWithLeader),
         };
     }
     async search(query, includeUsers) {
@@ -64,19 +97,15 @@ let DashboardService = class DashboardService {
         }
         const ministries = await this.ministriesRepository
             .createQueryBuilder('ministry')
-            .leftJoinAndSelect('ministry.leader', 'leader')
             .where('LOWER(ministry.name) LIKE :pattern', { pattern })
             .orderBy('ministry.created_at', 'DESC')
             .take(8)
             .getMany();
         for (const ministry of ministries) {
-            const leaderName = ministry.leader
-                ? `${ministry.leader.first_name} ${ministry.leader.last_name}`.trim()
-                : '';
             results.push({
                 id: ministry.id,
                 label: ministry.name,
-                sublabel: leaderName ? `Leader: ${leaderName}` : 'Ministry',
+                sublabel: 'Ministry',
                 category: 'Ministries',
                 path: `/ministries/details/${ministry.id}`,
             });
@@ -107,8 +136,10 @@ exports.DashboardService = DashboardService = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, typeorm_1.InjectRepository)(member_entity_1.Member)),
     __param(1, (0, typeorm_1.InjectRepository)(ministry_entity_1.Ministry)),
-    __param(2, (0, typeorm_1.InjectRepository)(user_entity_1.User)),
+    __param(2, (0, typeorm_1.InjectRepository)(minister_entity_1.Minister)),
+    __param(3, (0, typeorm_1.InjectRepository)(user_entity_1.User)),
     __metadata("design:paramtypes", [typeorm_2.Repository,
+        typeorm_2.Repository,
         typeorm_2.Repository,
         typeorm_2.Repository])
 ], DashboardService);

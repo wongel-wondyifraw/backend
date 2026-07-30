@@ -48,6 +48,9 @@ export class Minister {
   @Column({ nullable: true })
   marital_status: string;
 
+  @Column({ type: 'varchar', nullable: true })
+  gender: string | null;
+
   @Column({ nullable: true })
   title: string;
 

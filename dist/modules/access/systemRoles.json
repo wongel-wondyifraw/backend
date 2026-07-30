@@ -17,6 +17,7 @@
             "home_groups.read", "home_groups.create", "home_groups.update",
             "bible_studies.read", "bible_studies.create", "bible_studies.update",
             "tasks.read", "tasks.create", "tasks.update",
+            "families.read", "families.create", "families.update",
             "settings.read", "settings.update",
             "notifications.read", "notifications.update"
         ]
@@ -33,6 +34,7 @@
             "home_groups.read",
             "bible_studies.read",
             "tasks.read",
+            "families.read",
             "settings.read", "settings.update",
             "notifications.read", "notifications.update"
         ]

@@ -49,6 +49,10 @@ export class CreateMemberDto {
 
     @IsString()
     @IsOptional()
+    gender?: string;
+
+    @IsString()
+    @IsOptional()
     status?: string;
 
     /**

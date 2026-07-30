@@ -3,13 +3,21 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Member } from '../members/entities/member.entity';
 import { Ministry } from '../ministries/entities/ministry.entity';
+import { Minister } from '../ministers/entities/minister.entity';
 import { User } from '../users/entities/user.entity';
 
 export interface DashboardStats {
     memberCount: number;
     activeMembers: number;
     inactiveMembers: number;
+    membersThisMonth: number;
+    ministerCount: number;
+    activeMinisters: number;
+    inactiveMinisters: number;
+    ministersThisMonth: number;
     ministryCount: number;
+    ministriesWithLeader: number;
+    ministriesWithoutLeader: number;
 }
 
 export interface SearchResultItem {
@@ -27,23 +35,67 @@ export class DashboardService {
         private readonly membersRepository: Repository<Member>,
         @InjectRepository(Ministry)
         private readonly ministriesRepository: Repository<Ministry>,
+        @InjectRepository(Minister)
+        private readonly ministersRepository: Repository<Minister>,
         @InjectRepository(User)
         private readonly usersRepository: Repository<User>,
     ) {}
 
+    private startOfMonthUtc(): Date {
+        const now = new Date();
+        return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1));
+    }
+
     async getStats(): Promise<DashboardStats> {
-        const memberCount = await this.membersRepository.count();
-        const activeMembers = await this.membersRepository
-            .createQueryBuilder('member')
-            .where("LOWER(member.status) = 'active'")
-            .getCount();
-        const ministryCount = await this.ministriesRepository.count();
+        const monthStart = this.startOfMonthUtc();
+
+        const [
+            memberCount,
+            activeMembers,
+            membersThisMonth,
+            ministerCount,
+            activeMinisters,
+            ministersThisMonth,
+            ministryCount,
+            ministriesWithLeader,
+        ] = await Promise.all([
+            this.membersRepository.count(),
+            this.membersRepository
+                .createQueryBuilder('member')
+                .where("LOWER(COALESCE(member.status, 'active')) = 'active'")
+                .getCount(),
+            this.membersRepository
+                .createQueryBuilder('member')
+                .where('member.created_at >= :monthStart', { monthStart })
+                .getCount(),
+            this.ministersRepository.count(),
+            this.ministersRepository
+                .createQueryBuilder('minister')
+                .where("LOWER(COALESCE(minister.status, 'active')) = 'active'")
+                .getCount(),
+            this.ministersRepository
+                .createQueryBuilder('minister')
+                .where('minister.created_at >= :monthStart', { monthStart })
+                .getCount(),
+            this.ministriesRepository.count(),
+            this.ministriesRepository
+                .createQueryBuilder('ministry')
+                .where('ministry.leader_id IS NOT NULL')
+                .getCount(),
+        ]);
 
         return {
             memberCount,
             activeMembers,
-            inactiveMembers: memberCount - activeMembers,
+            inactiveMembers: Math.max(0, memberCount - activeMembers),
+            membersThisMonth,
+            ministerCount,
+            activeMinisters,
+            inactiveMinisters: Math.max(0, ministerCount - activeMinisters),
+            ministersThisMonth,
             ministryCount,
+            ministriesWithLeader,
+            ministriesWithoutLeader: Math.max(0, ministryCount - ministriesWithLeader),
         };
     }
 
@@ -79,20 +131,16 @@ export class DashboardService {
 
         const ministries = await this.ministriesRepository
             .createQueryBuilder('ministry')
-            .leftJoinAndSelect('ministry.leader', 'leader')
             .where('LOWER(ministry.name) LIKE :pattern', { pattern })
             .orderBy('ministry.created_at', 'DESC')
             .take(8)
             .getMany();
 
         for (const ministry of ministries) {
-            const leaderName = ministry.leader
-                ? `${ministry.leader.first_name} ${ministry.leader.last_name}`.trim()
-                : '';
             results.push({
                 id: ministry.id,
                 label: ministry.name,
-                sublabel: leaderName ? `Leader: ${leaderName}` : 'Ministry',
+                sublabel: 'Ministry',
                 category: 'Ministries',
                 path: `/ministries/details/${ministry.id}`,
             });

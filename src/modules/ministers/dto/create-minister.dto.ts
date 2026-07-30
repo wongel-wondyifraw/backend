@@ -45,6 +45,10 @@ export class CreateMinisterDto {
 
   @IsString()
   @IsOptional()
+  gender?: string;
+
+  @IsString()
+  @IsOptional()
   title?: string;
 
   @IsString()
