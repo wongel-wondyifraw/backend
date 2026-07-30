@@ -28,6 +28,7 @@ export class NotificationDomainListener {
     const kindMap: Record<string, NotificationKind> = {
       member: NotificationKind.MEMBER,
       ministry: NotificationKind.MINISTRY,
+      home_group: NotificationKind.HOME_GROUP,
       system: NotificationKind.SYSTEM,
       user: NotificationKind.USER,
     };

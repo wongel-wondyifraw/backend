@@ -1,6 +1,6 @@
 export const NOTIFICATION_EVENT = 'notification.domain';
 
-export type NotificationDomainKind = 'member' | 'ministry' | 'system' | 'user';
+export type NotificationDomainKind = 'member' | 'ministry' | 'home_group' | 'system' | 'user';
 
 export interface NotificationDomainEvent {
   eventName: string;

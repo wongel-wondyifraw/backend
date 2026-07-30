@@ -1,5 +1,4 @@
 import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, OneToMany } from 'typeorm';
-import { Ministry } from '../../ministries/entities/ministry.entity';
 import { MinistryMember } from '../../ministries/entities/ministry-member.entity';
 
 @Entity('members')
@@ -49,9 +48,7 @@ export class Member {
     @UpdateDateColumn()
     updated_at: Date;
 
-    @OneToMany(() => Ministry, (ministry) => ministry.leader)
-    led_ministries: Ministry[];
-
     @OneToMany(() => MinistryMember, (ministryMember) => ministryMember.member)
     ministry_members: MinistryMember[];
 }
+

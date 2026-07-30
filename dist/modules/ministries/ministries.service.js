@@ -20,14 +20,32 @@ const event_emitter_1 = require("@nestjs/event-emitter");
 const ministry_entity_1 = require("./entities/ministry.entity");
 const ministry_member_entity_1 = require("./entities/ministry-member.entity");
 const notification_events_1 = require("../notifications/notification-events");
+const leader_resolver_service_1 = require("../../common/leadership/leader-resolver.service");
 let MinistriesService = class MinistriesService {
-    constructor(ministriesRepository, ministryMembersRepository, events) {
+    constructor(ministriesRepository, ministryMembersRepository, events, leaders) {
         this.ministriesRepository = ministriesRepository;
         this.ministryMembersRepository = ministryMembersRepository;
         this.events = events;
+        this.leaders = leaders;
+    }
+    normalizeLeader(dto) {
+        if (!dto.leader_id) {
+            return { leader_id: null, leader_type: null };
+        }
+        return {
+            leader_id: dto.leader_id,
+            leader_type: dto.leader_type || 'member',
+        };
     }
     async create(createMinistryDto) {
-        const ministry = this.ministriesRepository.create(createMinistryDto);
+        var _a, _b;
+        const leader = this.normalizeLeader(createMinistryDto);
+        const ministry = this.ministriesRepository.create({
+            name: createMinistryDto.name,
+            about: (_a = createMinistryDto.about) !== null && _a !== void 0 ? _a : null,
+            schedule: (_b = createMinistryDto.schedule) !== null && _b !== void 0 ? _b : null,
+            ...leader,
+        });
         const saved = await this.ministriesRepository.save(ministry);
         this.events.emit(notification_events_1.NOTIFICATION_EVENT, {
             eventName: 'ministry.created',
@@ -35,22 +53,22 @@ let MinistriesService = class MinistriesService {
             severity: 'success',
             title: 'New ministry created',
             message: `${saved.name} was added.`,
-            href: `/ministries/${saved.id}`,
+            href: `/ministries/details/${saved.id}`,
             dedupeKey: `ministry.created:${saved.id}`,
             targetRoles: ['admin', 'minister'],
         });
-        return saved;
+        return this.findOne(saved.id);
     }
     async findAllPaginated(page = 1, limit = 20, search) {
-        const qb = this.ministriesRepository.createQueryBuilder('ministry')
-            .leftJoinAndSelect('ministry.leader', 'leader');
+        const qb = this.ministriesRepository.createQueryBuilder('ministry');
         if (search === null || search === void 0 ? void 0 : search.trim()) {
             const pattern = `%${search.trim().toLowerCase()}%`;
             qb.where('LOWER(ministry.name) LIKE :pattern', { pattern });
         }
         qb.orderBy('ministry.created_at', 'DESC');
         qb.skip((page - 1) * limit).take(limit);
-        const [data, total] = await qb.getManyAndCount();
+        const [rows, total] = await qb.getManyAndCount();
+        const data = await this.leaders.attachLeaders(rows);
         return {
             data,
             total,
@@ -60,23 +78,23 @@ let MinistriesService = class MinistriesService {
         };
     }
     async findAll() {
-        return this.ministriesRepository.find({
-            relations: ['leader'],
-            order: { created_at: 'DESC' },
-        });
+        const rows = await this.ministriesRepository.find({ order: { created_at: 'DESC' } });
+        return this.leaders.attachLeaders(rows);
     }
     async findOne(id) {
-        const ministry = await this.ministriesRepository.findOne({
-            where: { id },
-            relations: ['leader'],
-        });
+        const ministry = await this.ministriesRepository.findOne({ where: { id } });
         if (!ministry) {
             throw new common_1.NotFoundException(`Ministry with ID ${id} not found`);
         }
-        return ministry;
+        const [withLeader] = await this.leaders.attachLeaders([ministry]);
+        return withLeader;
     }
     async update(id, updateMinistryDto) {
-        await this.ministriesRepository.update(id, updateMinistryDto);
+        const patch = { ...updateMinistryDto };
+        if ('leader_id' in updateMinistryDto || 'leader_type' in updateMinistryDto) {
+            Object.assign(patch, this.normalizeLeader(updateMinistryDto));
+        }
+        await this.ministriesRepository.update(id, patch);
         const ministry = await this.findOne(id);
         this.events.emit(notification_events_1.NOTIFICATION_EVENT, {
             eventName: 'ministry.updated',
@@ -84,7 +102,7 @@ let MinistriesService = class MinistriesService {
             severity: 'info',
             title: 'Ministry updated',
             message: `${ministry.name} was updated.`,
-            href: `/ministries/${id}`,
+            href: `/ministries/details/${id}`,
             dedupeKey: `ministry.updated:${id}:${Date.now()}`,
             targetRoles: ['admin', 'minister'],
         });
@@ -127,7 +145,7 @@ let MinistriesService = class MinistriesService {
             severity: 'info',
             title: 'Ministry membership updated',
             message: `A member was added to ${ministry.name}.`,
-            href: `/ministries/${ministryId}`,
+            href: `/ministries/details/${ministryId}`,
             dedupeKey: `ministry.member.added:${ministryId}:${memberId}`,
             targetRoles: ['admin', 'minister'],
         });
@@ -148,7 +166,7 @@ let MinistriesService = class MinistriesService {
             severity: 'info',
             title: 'Ministry membership updated',
             message: `A member was removed from ${ministry.name}.`,
-            href: `/ministries/${ministryId}`,
+            href: `/ministries/details/${ministryId}`,
             dedupeKey: `ministry.member.removed:${ministryId}:${memberId}`,
             targetRoles: ['admin', 'minister'],
         });
@@ -174,5 +192,6 @@ exports.MinistriesService = MinistriesService = __decorate([
     __param(1, (0, typeorm_1.InjectRepository)(ministry_member_entity_1.MinistryMember)),
     __metadata("design:paramtypes", [typeorm_2.Repository,
         typeorm_2.Repository,
-        event_emitter_1.EventEmitter2])
+        event_emitter_1.EventEmitter2,
+        leader_resolver_service_1.LeaderResolverService])
 ], MinistriesService);

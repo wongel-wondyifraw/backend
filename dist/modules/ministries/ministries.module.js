@@ -13,13 +13,13 @@ const ministries_service_1 = require("./ministries.service");
 const ministries_controller_1 = require("./ministries.controller");
 const ministry_entity_1 = require("./entities/ministry.entity");
 const ministry_member_entity_1 = require("./entities/ministry-member.entity");
-const member_entity_1 = require("../members/entities/member.entity");
+const leadership_module_1 = require("../../common/leadership/leadership.module");
 let MinistriesModule = class MinistriesModule {
 };
 exports.MinistriesModule = MinistriesModule;
 exports.MinistriesModule = MinistriesModule = __decorate([
     (0, common_1.Module)({
-        imports: [typeorm_1.TypeOrmModule.forFeature([ministry_entity_1.Ministry, ministry_member_entity_1.MinistryMember, member_entity_1.Member])],
+        imports: [typeorm_1.TypeOrmModule.forFeature([ministry_entity_1.Ministry, ministry_member_entity_1.MinistryMember]), leadership_module_1.LeadershipModule],
         controllers: [ministries_controller_1.MinistriesController],
         providers: [ministries_service_1.MinistriesService],
         exports: [ministries_service_1.MinistriesService],

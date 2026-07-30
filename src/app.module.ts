@@ -7,7 +7,11 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
 import { UsersModule } from './modules/users/users.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { MembersModule } from './modules/members/members.module';
+import { MinistersModule } from './modules/ministers/ministers.module';
 import { MinistriesModule } from './modules/ministries/ministries.module';
+import { HomeGroupsModule } from './modules/home-groups/home-groups.module';
+import { BibleStudiesModule } from './modules/bible-studies/bible-studies.module';
+import { TasksModule } from './modules/tasks/tasks.module';
 import { DashboardModule } from './modules/dashboard/dashboard.module';
 import { AccessModule } from './modules/access/access.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
@@ -86,7 +90,11 @@ import { PermissionsGuard } from './common/guards/permissions.guard';
         UsersModule,
         AuthModule,
         MembersModule,
+        MinistersModule,
         MinistriesModule,
+        HomeGroupsModule,
+        BibleStudiesModule,
+        TasksModule,
         DashboardModule,
         NotificationsModule,
         UploadsModule,

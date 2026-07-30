@@ -16,7 +16,11 @@ const event_emitter_1 = require("@nestjs/event-emitter");
 const users_module_1 = require("./modules/users/users.module");
 const auth_module_1 = require("./modules/auth/auth.module");
 const members_module_1 = require("./modules/members/members.module");
+const ministers_module_1 = require("./modules/ministers/ministers.module");
 const ministries_module_1 = require("./modules/ministries/ministries.module");
+const home_groups_module_1 = require("./modules/home-groups/home-groups.module");
+const bible_studies_module_1 = require("./modules/bible-studies/bible-studies.module");
+const tasks_module_1 = require("./modules/tasks/tasks.module");
 const dashboard_module_1 = require("./modules/dashboard/dashboard.module");
 const access_module_1 = require("./modules/access/access.module");
 const notifications_module_1 = require("./modules/notifications/notifications.module");
@@ -102,7 +106,11 @@ exports.AppModule = AppModule = __decorate([
             users_module_1.UsersModule,
             auth_module_1.AuthModule,
             members_module_1.MembersModule,
+            ministers_module_1.MinistersModule,
             ministries_module_1.MinistriesModule,
+            home_groups_module_1.HomeGroupsModule,
+            bible_studies_module_1.BibleStudiesModule,
+            tasks_module_1.TasksModule,
             dashboard_module_1.DashboardModule,
             notifications_module_1.NotificationsModule,
             uploads_module_1.UploadsModule,

@@ -32,6 +32,7 @@ let NotificationDomainListener = NotificationDomainListener_1 = class Notificati
         const kindMap = {
             member: notification_entity_1.NotificationKind.MEMBER,
             ministry: notification_entity_1.NotificationKind.MINISTRY,
+            home_group: notification_entity_1.NotificationKind.HOME_GROUP,
             system: notification_entity_1.NotificationKind.SYSTEM,
             user: notification_entity_1.NotificationKind.USER,
         };

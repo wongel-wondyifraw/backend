@@ -7,9 +7,13 @@ import {
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import {
+    createDocumentDiskStorage,
     createImageDiskStorage,
+    documentFileFilter,
+    documentUploadLimits,
     imageFileFilter,
     imageUploadLimits,
+    uploadDocumentFilename,
     uploadImageFilename,
 } from '../../common/config/multer.config';
 
@@ -31,6 +35,26 @@ export class UploadsController {
         return {
             message: 'File uploaded successfully',
             url: `uploads/images/${file.filename}`,
+        };
+    }
+
+    @Post('document')
+    @UseInterceptors(FileInterceptor('file', {
+        storage: createDocumentDiskStorage((_req, file, cb) => {
+            cb(null, uploadDocumentFilename(file.originalname));
+        }),
+        fileFilter: documentFileFilter,
+        limits: documentUploadLimits,
+    }))
+    uploadDocument(@UploadedFile() file: Express.Multer.File | undefined) {
+        if (!file) {
+            throw new BadRequestException('File not found');
+        }
+
+        return {
+            message: 'Document uploaded successfully',
+            url: `uploads/documents/${file.filename}`,
+            original_name: file.originalname,
         };
     }
 }

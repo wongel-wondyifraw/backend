@@ -15,6 +15,7 @@ var NotificationKind;
 (function (NotificationKind) {
     NotificationKind["MEMBER"] = "member";
     NotificationKind["MINISTRY"] = "ministry";
+    NotificationKind["HOME_GROUP"] = "home_group";
     NotificationKind["SYSTEM"] = "system";
     NotificationKind["USER"] = "user";
 })(NotificationKind || (exports.NotificationKind = NotificationKind = {}));

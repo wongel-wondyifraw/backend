@@ -1,34 +1,36 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, ManyToOne, OneToMany, JoinColumn } from 'typeorm';
-import { Member } from '../../members/entities/member.entity';
+import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, OneToMany } from 'typeorm';
 import { MinistryMember } from './ministry-member.entity';
+import type { LeaderSummary, LeaderType } from '../../../common/leadership/leader.types';
 
 @Entity('ministries')
 export class Ministry {
-    @PrimaryGeneratedColumn('uuid')
-    id: string;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
-    @Column()
-    name: string;
+  @Column()
+  name: string;
 
-    @Column({ type: 'text', nullable: true })
-    about: string;
+  @Column({ type: 'text', nullable: true })
+  about: string | null;
 
-    @Column({ nullable: true })
-    schedule: string;
+  @Column({ type: 'varchar', nullable: true })
+  schedule: string | null;
 
-    @Column({ type: 'uuid', nullable: true })
-    leader_id: string;
+  @Column({ type: 'uuid', nullable: true })
+  leader_id: string | null;
 
-    @ManyToOne(() => Member, (member) => member.led_ministries, { nullable: true, onDelete: 'SET NULL' })
-    @JoinColumn({ name: 'leader_id' })
-    leader: Member;
+  @Column({ type: 'varchar', length: 16, nullable: true })
+  leader_type: LeaderType | null;
 
-    @CreateDateColumn()
-    created_at: Date;
+  /** Populated by service — not a DB column */
+  leader?: LeaderSummary | null;
 
-    @UpdateDateColumn()
-    updated_at: Date;
+  @CreateDateColumn()
+  created_at: Date;
 
-    @OneToMany(() => MinistryMember, (ministryMember) => ministryMember.ministry)
-    ministry_members: MinistryMember[];
+  @UpdateDateColumn()
+  updated_at: Date;
+
+  @OneToMany(() => MinistryMember, (ministryMember) => ministryMember.ministry)
+  ministry_members: MinistryMember[];
 }

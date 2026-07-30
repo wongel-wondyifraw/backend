@@ -12,7 +12,11 @@
     "permissionSlugs": [
       "dashboard.read",
       "members.read", "members.create", "members.update",
+      "ministers.read", "ministers.create", "ministers.update",
       "ministries.read", "ministries.create", "ministries.update",
+      "home_groups.read", "home_groups.create", "home_groups.update",
+      "bible_studies.read", "bible_studies.create", "bible_studies.update",
+      "tasks.read", "tasks.create", "tasks.update",
       "settings.read", "settings.update",
       "notifications.read", "notifications.update"
     ]
@@ -25,6 +29,10 @@
       "dashboard.read",
       "members.read",
       "ministries.read",
+      "ministers.read",
+      "home_groups.read",
+      "bible_studies.read",
+      "tasks.read",
       "settings.read", "settings.update",
       "notifications.read", "notifications.update"
     ]

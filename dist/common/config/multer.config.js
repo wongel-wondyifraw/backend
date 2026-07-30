@@ -33,12 +33,16 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.imageUploadLimits = exports.IMAGE_UPLOAD_MAX_BYTES = void 0;
+exports.documentUploadLimits = exports.DOCUMENT_UPLOAD_MAX_BYTES = exports.imageUploadLimits = exports.IMAGE_UPLOAD_MAX_BYTES = void 0;
 exports.getImagesUploadDir = getImagesUploadDir;
 exports.imageFileFilter = imageFileFilter;
 exports.createImageDiskStorage = createImageDiskStorage;
 exports.avatarFilenameForUserId = avatarFilenameForUserId;
 exports.uploadImageFilename = uploadImageFilename;
+exports.getDocumentsUploadDir = getDocumentsUploadDir;
+exports.documentFileFilter = documentFileFilter;
+exports.createDocumentDiskStorage = createDocumentDiskStorage;
+exports.uploadDocumentFilename = uploadDocumentFilename;
 const path_1 = require("path");
 const fs = __importStar(require("fs"));
 const crypto_1 = require("crypto");
@@ -83,4 +87,44 @@ function avatarFilenameForUserId(userId, originalname) {
 }
 function uploadImageFilename(originalname) {
     return `upload-${(0, crypto_1.randomUUID)()}${(0, path_1.extname)(originalname)}`;
+}
+exports.DOCUMENT_UPLOAD_MAX_BYTES = 15 * 1024 * 1024;
+const ALLOWED_DOCUMENT_MIME_TYPES = new Set([
+    'application/pdf',
+    'application/msword',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    'text/plain',
+    'image/jpeg',
+    'image/png',
+]);
+const ALLOWED_DOCUMENT_EXTENSION = /\.(pdf|docx?|txt|jpe?g|png)$/i;
+function getDocumentsUploadDir() {
+    const dir = (0, path_1.join)(process.cwd(), 'uploads', 'documents');
+    if (!fs.existsSync(dir)) {
+        fs.mkdirSync(dir, { recursive: true });
+    }
+    return dir;
+}
+function documentFileFilter(_req, file, cb) {
+    const mimeOk = ALLOWED_DOCUMENT_MIME_TYPES.has(file.mimetype);
+    const extOk = ALLOWED_DOCUMENT_EXTENSION.test(file.originalname);
+    if (!mimeOk || !extOk) {
+        cb(new Error('Only PDF, DOC, DOCX, TXT, JPEG, or PNG files are allowed'), false);
+        return;
+    }
+    cb(null, true);
+}
+exports.documentUploadLimits = {
+    fileSize: exports.DOCUMENT_UPLOAD_MAX_BYTES,
+};
+function createDocumentDiskStorage(filename) {
+    return (0, multer_1.diskStorage)({
+        destination: (_req, _file, cb) => {
+            cb(null, getDocumentsUploadDir());
+        },
+        filename,
+    });
+}
+function uploadDocumentFilename(originalname) {
+    return `doc-${(0, crypto_1.randomUUID)()}${(0, path_1.extname)(originalname)}`;
 }

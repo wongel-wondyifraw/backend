@@ -60,3 +60,59 @@ export function avatarFilenameForUserId(userId: string, originalname: string): s
 export function uploadImageFilename(originalname: string): string {
     return `upload-${randomUUID()}${extname(originalname)}`;
 }
+
+export const DOCUMENT_UPLOAD_MAX_BYTES = 15 * 1024 * 1024;
+
+const ALLOWED_DOCUMENT_MIME_TYPES = new Set([
+    'application/pdf',
+    'application/msword',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    'text/plain',
+    'image/jpeg',
+    'image/png',
+]);
+
+const ALLOWED_DOCUMENT_EXTENSION = /\.(pdf|docx?|txt|jpe?g|png)$/i;
+
+export function getDocumentsUploadDir(): string {
+    const dir = join(process.cwd(), 'uploads', 'documents');
+    if (!fs.existsSync(dir)) {
+        fs.mkdirSync(dir, { recursive: true });
+    }
+    return dir;
+}
+
+export function documentFileFilter(
+    _req: Express.Request,
+    file: Express.Multer.File,
+    cb: (error: Error | null, acceptFile: boolean) => void,
+): void {
+    const mimeOk = ALLOWED_DOCUMENT_MIME_TYPES.has(file.mimetype);
+    const extOk = ALLOWED_DOCUMENT_EXTENSION.test(file.originalname);
+
+    if (!mimeOk || !extOk) {
+        cb(new Error('Only PDF, DOC, DOCX, TXT, JPEG, or PNG files are allowed'), false);
+        return;
+    }
+
+    cb(null, true);
+}
+
+export const documentUploadLimits = {
+    fileSize: DOCUMENT_UPLOAD_MAX_BYTES,
+};
+
+export function createDocumentDiskStorage(
+    filename: (req: Express.Request, file: Express.Multer.File, cb: (error: Error | null, filename: string) => void) => void,
+) {
+    return diskStorage({
+        destination: (_req, _file, cb) => {
+            cb(null, getDocumentsUploadDir());
+        },
+        filename,
+    });
+}
+
+export function uploadDocumentFilename(originalname: string): string {
+    return `doc-${randomUUID()}${extname(originalname)}`;
+}

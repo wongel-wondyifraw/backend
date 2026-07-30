@@ -9,6 +9,7 @@ import {
 export enum NotificationKind {
   MEMBER = 'member',
   MINISTRY = 'ministry',
+  HOME_GROUP = 'home_group',
   SYSTEM = 'system',
   USER = 'user',
 }

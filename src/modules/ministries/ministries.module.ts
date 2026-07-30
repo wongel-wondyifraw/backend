@@ -4,12 +4,12 @@ import { MinistriesService } from './ministries.service';
 import { MinistriesController } from './ministries.controller';
 import { Ministry } from './entities/ministry.entity';
 import { MinistryMember } from './entities/ministry-member.entity';
-import { Member } from '../members/entities/member.entity';
+import { LeadershipModule } from '../../common/leadership/leadership.module';
 
 @Module({
-    imports: [TypeOrmModule.forFeature([Ministry, MinistryMember, Member])],
-    controllers: [MinistriesController],
-    providers: [MinistriesService],
-    exports: [MinistriesService],
+  imports: [TypeOrmModule.forFeature([Ministry, MinistryMember]), LeadershipModule],
+  controllers: [MinistriesController],
+  providers: [MinistriesService],
+  exports: [MinistriesService],
 })
-export class MinistriesModule { }
+export class MinistriesModule {}

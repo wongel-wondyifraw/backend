@@ -109,6 +109,7 @@ let NotificationsService = NotificationsService_1 = class NotificationsService {
                 kinds: {
                     member: true,
                     ministry: true,
+                    home_group: true,
                     system: true,
                     user: true,
                 },

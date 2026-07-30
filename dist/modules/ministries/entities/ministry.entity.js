@@ -11,7 +11,6 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Ministry = void 0;
 const typeorm_1 = require("typeorm");
-const member_entity_1 = require("../../members/entities/member.entity");
 const ministry_member_entity_1 = require("./ministry-member.entity");
 let Ministry = class Ministry {
 };
@@ -26,21 +25,20 @@ __decorate([
 ], Ministry.prototype, "name", void 0);
 __decorate([
     (0, typeorm_1.Column)({ type: 'text', nullable: true }),
-    __metadata("design:type", String)
+    __metadata("design:type", Object)
 ], Ministry.prototype, "about", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ nullable: true }),
-    __metadata("design:type", String)
+    (0, typeorm_1.Column)({ type: 'varchar', nullable: true }),
+    __metadata("design:type", Object)
 ], Ministry.prototype, "schedule", void 0);
 __decorate([
     (0, typeorm_1.Column)({ type: 'uuid', nullable: true }),
-    __metadata("design:type", String)
+    __metadata("design:type", Object)
 ], Ministry.prototype, "leader_id", void 0);
 __decorate([
-    (0, typeorm_1.ManyToOne)(() => member_entity_1.Member, (member) => member.led_ministries, { nullable: true, onDelete: 'SET NULL' }),
-    (0, typeorm_1.JoinColumn)({ name: 'leader_id' }),
-    __metadata("design:type", member_entity_1.Member)
-], Ministry.prototype, "leader", void 0);
+    (0, typeorm_1.Column)({ type: 'varchar', length: 16, nullable: true }),
+    __metadata("design:type", Object)
+], Ministry.prototype, "leader_type", void 0);
 __decorate([
     (0, typeorm_1.CreateDateColumn)(),
     __metadata("design:type", Date)

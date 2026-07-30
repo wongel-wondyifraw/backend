@@ -25,7 +25,6 @@ describe('MembersService', () => {
         baptized: false,
         created_at: new Date(),
         updated_at: new Date(),
-        led_ministries: [],
         ministry_members: [],
     } as unknown as Member;
 

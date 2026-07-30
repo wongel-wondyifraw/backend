@@ -26,6 +26,16 @@ let UploadsController = class UploadsController {
             url: `uploads/images/${file.filename}`,
         };
     }
+    uploadDocument(file) {
+        if (!file) {
+            throw new common_1.BadRequestException('File not found');
+        }
+        return {
+            message: 'Document uploaded successfully',
+            url: `uploads/documents/${file.filename}`,
+            original_name: file.originalname,
+        };
+    }
 };
 exports.UploadsController = UploadsController;
 __decorate([
@@ -42,6 +52,20 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", void 0)
 ], UploadsController.prototype, "uploadImage", null);
+__decorate([
+    (0, common_1.Post)('document'),
+    (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)('file', {
+        storage: (0, multer_config_1.createDocumentDiskStorage)((_req, file, cb) => {
+            cb(null, (0, multer_config_1.uploadDocumentFilename)(file.originalname));
+        }),
+        fileFilter: multer_config_1.documentFileFilter,
+        limits: multer_config_1.documentUploadLimits,
+    })),
+    __param(0, (0, common_1.UploadedFile)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", void 0)
+], UploadsController.prototype, "uploadDocument", null);
 exports.UploadsController = UploadsController = __decorate([
     (0, common_1.Controller)('uploads')
 ], UploadsController);
