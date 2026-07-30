@@ -20,6 +20,11 @@ async function bootstrap() {
     const config = app.get(config_1.ConfigService);
     const port = config.get('PORT', 3001);
     const frontendUrl = config.get('FRONTEND_URL', 'http://localhost:3000');
+    const frontendUrls = (config.get('FRONTEND_URLS') || '')
+        .split(',')
+        .map((value) => value.trim())
+        .filter(Boolean);
+    const allowedOrigins = new Set([frontendUrl, ...frontendUrls]);
     // 1. Logging: Use Pino instead of default console
     const logger = app.get(nestjs_pino_1.Logger);
     app.useLogger(logger);
@@ -38,7 +43,14 @@ async function bootstrap() {
             }
             const isDevLocalhost = process.env.NODE_ENV !== 'production'
                 && /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin);
-            if (isDevLocalhost || origin === frontendUrl) {
+            let isVercelPreview = false;
+            try {
+                isVercelPreview = /\.vercel\.app$/.test(new URL(origin).hostname);
+            }
+            catch (_a) {
+                isVercelPreview = false;
+            }
+            if (isDevLocalhost || isVercelPreview || allowedOrigins.has(origin)) {
                 callback(null, true);
                 return;
             }

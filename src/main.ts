@@ -18,6 +18,11 @@ async function bootstrap() {
     const config = app.get(ConfigService);
     const port = config.get<number>('PORT', 3001);
     const frontendUrl = config.get<string>('FRONTEND_URL', 'http://localhost:3000');
+    const frontendUrls = (config.get<string>('FRONTEND_URLS') || '')
+        .split(',')
+        .map((value) => value.trim())
+        .filter(Boolean);
+    const allowedOrigins = new Set([frontendUrl, ...frontendUrls]);
 
     // 1. Logging: Use Pino instead of default console
     const logger = app.get(Logger);
@@ -41,8 +46,14 @@ async function bootstrap() {
 
             const isDevLocalhost = process.env.NODE_ENV !== 'production'
                 && /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin);
+            let isVercelPreview = false;
+            try {
+                isVercelPreview = /\.vercel\.app$/.test(new URL(origin).hostname);
+            } catch {
+                isVercelPreview = false;
+            }
 
-            if (isDevLocalhost || origin === frontendUrl) {
+            if (isDevLocalhost || isVercelPreview || allowedOrigins.has(origin)) {
                 callback(null, true);
                 return;
             }
