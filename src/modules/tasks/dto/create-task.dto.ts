@@ -21,4 +21,8 @@ export class CreateTaskDto {
   @IsString()
   @IsOptional()
   notes?: string;
+
+  @IsString({ each: true })
+  @IsOptional()
+  visitation_methods?: string[];
 }

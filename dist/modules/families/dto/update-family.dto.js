@@ -35,6 +35,26 @@ __decorate([
     __metadata("design:type", String)
 ], UpdateFamilyDto.prototype, "wife_type", void 0);
 __decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsIn)(['registered', 'pending', 'external', 'none']),
+    __metadata("design:type", String)
+], UpdateFamilyDto.prototype, "spouse_status", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], UpdateFamilyDto.prototype, "external_spouse_name", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], UpdateFamilyDto.prototype, "external_spouse_phone", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], UpdateFamilyDto.prototype, "external_spouse_church", void 0);
+__decorate([
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)

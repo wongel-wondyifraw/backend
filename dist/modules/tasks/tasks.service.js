@@ -18,15 +18,17 @@ const typeorm_1 = require("@nestjs/typeorm");
 const typeorm_2 = require("typeorm");
 const task_definition_entity_1 = require("./entities/task-definition.entity");
 const task_entity_1 = require("./entities/task.entity");
+const member_entity_1 = require("../members/entities/member.entity");
 const minister_entity_1 = require("../ministers/entities/minister.entity");
 const notifications_service_1 = require("../notifications/notifications.service");
 const notification_entity_1 = require("../notifications/entities/notification.entity");
 exports.HOME_VISIT_CODE = 'HOME_VISIT';
 let TasksService = class TasksService {
-    constructor(definitions, tasks, ministers, notifications) {
+    constructor(definitions, tasks, ministers, members, notifications) {
         this.definitions = definitions;
         this.tasks = tasks;
         this.ministers = ministers;
+        this.members = members;
         this.notifications = notifications;
         // --- Tasks ---
         this.taskRelations = {
@@ -125,6 +127,7 @@ let TasksService = class TasksService {
             target_member_id: definition.requires_visit_target ? dto.target_member_id : null,
             notes: ((_a = dto.notes) === null || _a === void 0 ? void 0 : _a.trim()) || null,
             status: 'pending',
+            visitation_methods: dto.visitation_methods || [],
         });
         const saved = await this.tasks.save(task);
         if (minister.user_id) {
@@ -229,6 +232,9 @@ let TasksService = class TasksService {
         task.status = 'completed';
         task.completed_at = new Date();
         await this.tasks.save(task);
+        if (task.target_member_id) {
+            await this.members.increment({ id: task.target_member_id }, 'visit_count', 1);
+        }
         return this.findOne(id);
     }
     async update(id, dto) {
@@ -244,7 +250,12 @@ let TasksService = class TasksService {
             task.notes = ((_a = dto.notes) === null || _a === void 0 ? void 0 : _a.trim()) || null;
         if (dto.target_member_id !== undefined)
             task.target_member_id = dto.target_member_id;
-        if (dto.status !== undefined) {
+        if (dto.visitation_methods !== undefined)
+            task.visitation_methods = dto.visitation_methods;
+        let justCompleted = false;
+        if (dto.status !== undefined && task.status !== dto.status) {
+            if (dto.status === 'completed')
+                justCompleted = true;
             task.status = dto.status;
             task.completed_at = dto.status === 'completed' ? new Date() : null;
         }
@@ -269,7 +280,9 @@ exports.TasksService = TasksService = __decorate([
     __param(0, (0, typeorm_1.InjectRepository)(task_definition_entity_1.TaskDefinition)),
     __param(1, (0, typeorm_1.InjectRepository)(task_entity_1.Task)),
     __param(2, (0, typeorm_1.InjectRepository)(minister_entity_1.Minister)),
+    __param(3, (0, typeorm_1.InjectRepository)(member_entity_1.Member)),
     __metadata("design:paramtypes", [typeorm_2.Repository,
+        typeorm_2.Repository,
         typeorm_2.Repository,
         typeorm_2.Repository,
         notifications_service_1.NotificationsService])

@@ -17,6 +17,22 @@ export class UpdateFamilyDto {
   @IsOptional()
   wife_type?: 'member' | 'minister';
 
+  @IsOptional()
+  @IsIn(['registered', 'pending', 'external', 'none'])
+  spouse_status?: string;
+
+  @IsOptional()
+  @IsString()
+  external_spouse_name?: string;
+
+  @IsOptional()
+  @IsString()
+  external_spouse_phone?: string;
+
+  @IsOptional()
+  @IsString()
+  external_spouse_church?: string;
+
   @IsString()
   @IsOptional()
   name?: string;

@@ -12,6 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.Member = void 0;
 const typeorm_1 = require("typeorm");
 const ministry_member_entity_1 = require("../../ministries/entities/ministry-member.entity");
+const location_entity_1 = require("../../locations/entities/location.entity");
 let Member = class Member {
 };
 exports.Member = Member;
@@ -60,9 +61,21 @@ __decorate([
     __metadata("design:type", Object)
 ], Member.prototype, "gender", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ default: 'active' }),
+    (0, typeorm_1.Column)({ default: 'pending' }),
     __metadata("design:type", String)
 ], Member.prototype, "status", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'text', nullable: true }),
+    __metadata("design:type", Object)
+], Member.prototype, "status_reason", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'uuid', nullable: true }),
+    __metadata("design:type", Object)
+], Member.prototype, "approved_by_user_id", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'timestamptz', nullable: true }),
+    __metadata("design:type", Object)
+], Member.prototype, "approved_at", void 0);
 __decorate([
     (0, typeorm_1.Column)({ default: false }),
     __metadata("design:type", Boolean)
@@ -72,6 +85,47 @@ __decorate([
     __metadata("design:type", Date)
 ], Member.prototype, "joined_date", void 0);
 __decorate([
+    (0, typeorm_1.Column)({ type: 'varchar', nullable: true }),
+    __metadata("design:type", Object)
+], Member.prototype, "telegram_username", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'varchar', default: 'existing' }),
+    __metadata("design:type", String)
+], Member.prototype, "member_type", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'varchar', nullable: true }),
+    __metadata("design:type", Object)
+], Member.prototype, "recommendation_letter_url", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ default: false }),
+    __metadata("design:type", Boolean)
+], Member.prototype, "requires_follow_up", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ default: false }),
+    __metadata("design:type", Boolean)
+], Member.prototype, "holy_spirit_baptized", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'date', nullable: true }),
+    __metadata("design:type", Object)
+], Member.prototype, "salvation_date", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'uuid', nullable: true }),
+    __metadata("design:type", Object)
+], Member.prototype, "location_id", void 0);
+__decorate([
+    (0, typeorm_1.ManyToOne)(() => location_entity_1.Location, { nullable: true, onDelete: 'SET NULL' }),
+    (0, typeorm_1.JoinColumn)({ name: 'location_id' }),
+    __metadata("design:type", Object)
+], Member.prototype, "location", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ default: false }),
+    __metadata("design:type", Boolean)
+], Member.prototype, "is_deacon", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ default: 0 }),
+    __metadata("design:type", Number)
+], Member.prototype, "visit_count", void 0);
+__decorate([
     (0, typeorm_1.CreateDateColumn)(),
     __metadata("design:type", Date)
 ], Member.prototype, "created_at", void 0);
@@ -79,6 +133,10 @@ __decorate([
     (0, typeorm_1.UpdateDateColumn)(),
     __metadata("design:type", Date)
 ], Member.prototype, "updated_at", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'simple-array', nullable: true }),
+    __metadata("design:type", Array)
+], Member.prototype, "interested_ministries", void 0);
 __decorate([
     (0, typeorm_1.OneToMany)(() => ministry_member_entity_1.MinistryMember, (ministryMember) => ministryMember.member),
     __metadata("design:type", Array)

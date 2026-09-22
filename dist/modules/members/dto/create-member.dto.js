@@ -88,3 +88,76 @@ __decorate([
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], CreateMemberDto.prototype, "joined_date", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], CreateMemberDto.prototype, "telegram_username", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], CreateMemberDto.prototype, "member_type", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], CreateMemberDto.prototype, "recommendation_letter_url", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_transformer_1.Transform)(({ value }) => {
+        if (value === 'true' || value === 'yes')
+            return true;
+        if (value === 'false' || value === 'no')
+            return false;
+        return value;
+    }),
+    (0, class_validator_1.IsBoolean)(),
+    __metadata("design:type", Boolean)
+], CreateMemberDto.prototype, "requires_follow_up", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_transformer_1.Transform)(({ value }) => {
+        if (value === 'true' || value === 'yes')
+            return true;
+        if (value === 'false' || value === 'no')
+            return false;
+        return value;
+    }),
+    (0, class_validator_1.IsBoolean)(),
+    __metadata("design:type", Boolean)
+], CreateMemberDto.prototype, "holy_spirit_baptized", void 0);
+__decorate([
+    (0, class_validator_1.IsDateString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], CreateMemberDto.prototype, "salvation_date", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], CreateMemberDto.prototype, "location_id", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_transformer_1.Transform)(({ value }) => {
+        if (value === 'true' || value === 'yes')
+            return true;
+        if (value === 'false' || value === 'no')
+            return false;
+        return value;
+    }),
+    (0, class_validator_1.IsBoolean)(),
+    __metadata("design:type", Boolean)
+], CreateMemberDto.prototype, "is_deacon", void 0);
+__decorate([
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.IsString)({ each: true }),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Array)
+], CreateMemberDto.prototype, "ministry_ids", void 0);
+__decorate([
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.IsString)({ each: true }),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Array)
+], CreateMemberDto.prototype, "interested_ministries", void 0);

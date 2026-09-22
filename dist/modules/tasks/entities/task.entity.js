@@ -75,6 +75,10 @@ __decorate([
     __metadata("design:type", Object)
 ], Task.prototype, "notes", void 0);
 __decorate([
+    (0, typeorm_1.Column)({ type: 'simple-array', nullable: true }),
+    __metadata("design:type", Object)
+], Task.prototype, "visitation_methods", void 0);
+__decorate([
     (0, typeorm_1.Column)({ type: 'timestamptz', nullable: true }),
     __metadata("design:type", Object)
 ], Task.prototype, "completed_at", void 0);

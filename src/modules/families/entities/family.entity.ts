@@ -16,17 +16,29 @@ export class Family {
   @Column({ type: 'varchar', nullable: true })
   name: string | null;
 
-  @Column({ type: 'uuid' })
-  husband_id: string;
+  @Column({ type: 'uuid', nullable: true })
+  husband_id: string | null;
 
   @Column({ type: 'varchar', length: 16, default: 'member' })
   husband_type: 'member' | 'minister';
 
-  @Column({ type: 'uuid' })
-  wife_id: string;
+  @Column({ type: 'uuid', nullable: true })
+  wife_id: string | null;
 
   @Column({ type: 'varchar', length: 16, default: 'member' })
   wife_type: 'member' | 'minister';
+
+  @Column({ type: 'varchar', default: 'registered' })
+  spouse_status: string; // 'registered' | 'pending' | 'external' | 'none'
+
+  @Column({ type: 'varchar', nullable: true })
+  external_spouse_name: string | null;
+
+  @Column({ type: 'varchar', nullable: true })
+  external_spouse_phone: string | null;
+
+  @Column({ type: 'varchar', nullable: true })
+  external_spouse_church: string | null;
 
   @Column({ type: 'text', nullable: true })
   notes: string | null;

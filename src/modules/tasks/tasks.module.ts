@@ -7,9 +7,11 @@ import { Task } from './entities/task.entity';
 import { Minister } from '../ministers/entities/minister.entity';
 import { NotificationsModule } from '../notifications/notifications.module';
 
+import { Member } from '../members/entities/member.entity';
+
 @Module({
   imports: [
-    TypeOrmModule.forFeature([TaskDefinition, Task, Minister]),
+    TypeOrmModule.forFeature([TaskDefinition, Task, Minister, Member]),
     NotificationsModule,
   ],
   controllers: [TasksController],

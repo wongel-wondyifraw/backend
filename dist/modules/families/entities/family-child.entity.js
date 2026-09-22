@@ -33,9 +33,13 @@ __decorate([
     __metadata("design:type", String)
 ], FamilyChild.prototype, "name", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'int' }),
-    __metadata("design:type", Number)
+    (0, typeorm_1.Column)({ type: 'int', nullable: true }),
+    __metadata("design:type", Object)
 ], FamilyChild.prototype, "age", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'date', nullable: true }),
+    __metadata("design:type", Object)
+], FamilyChild.prototype, "date_of_birth", void 0);
 __decorate([
     (0, typeorm_1.CreateDateColumn)(),
     __metadata("design:type", Date)

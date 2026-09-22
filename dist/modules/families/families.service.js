@@ -31,6 +31,8 @@ let FamiliesService = class FamiliesService {
         return (value || '').trim().toLowerCase();
     }
     async resolvePerson(id, type) {
+        if (!id)
+            return null;
         if (type === 'minister') {
             const minister = await this.ministers.findOne({ where: { id } });
             if (!minister)
@@ -69,19 +71,24 @@ let FamiliesService = class FamiliesService {
         ]);
         family.husband = husband;
         family.wife = wife;
-        family.children = (family.children || []).sort((a, b) => a.age - b.age || a.name.localeCompare(b.name));
+        family.children = (family.children || []).sort((a, b) => (a.age || 0) - (b.age || 0) || a.name.localeCompare(b.name));
         return family;
     }
     async ensureSpousesAvailable(husbandId, husbandType, wifeId, wifeType, excludeFamilyId) {
-        if (husbandId === wifeId && husbandType === wifeType) {
+        if (!husbandId && !wifeId)
+            return;
+        if (husbandId && wifeId && husbandId === wifeId && husbandType === wifeType) {
             throw new common_1.BadRequestException('Husband and wife must be different people');
         }
-        const qb = this.families.createQueryBuilder('family').where(`(
-        (family.husband_id = :husbandId AND family.husband_type = :husbandType)
-        OR (family.wife_id = :husbandId AND family.wife_type = :husbandType)
-        OR (family.husband_id = :wifeId AND family.husband_type = :wifeType)
-        OR (family.wife_id = :wifeId AND family.wife_type = :wifeType)
-      )`, { husbandId, husbandType, wifeId, wifeType });
+        const qb = this.families.createQueryBuilder('family').where('1=0'); // Start with false
+        if (husbandId) {
+            qb.orWhere(`(family.husband_id = :husbandId AND family.husband_type = :husbandType)`, { husbandId, husbandType });
+            qb.orWhere(`(family.wife_id = :husbandId AND family.husband_type = :husbandType)`, { husbandId, husbandType });
+        }
+        if (wifeId) {
+            qb.orWhere(`(family.husband_id = :wifeId AND family.husband_type = :wifeType)`, { wifeId, wifeType });
+            qb.orWhere(`(family.wife_id = :wifeId AND family.wife_type = :wifeType)`, { wifeId, wifeType });
+        }
         if (excludeFamilyId) {
             qb.andWhere('family.id != :excludeFamilyId', { excludeFamilyId });
         }
@@ -91,6 +98,8 @@ let FamiliesService = class FamiliesService {
         }
     }
     async markMarriedIfSingle(id, type) {
+        if (!id)
+            return;
         if (type === 'minister') {
             const minister = await this.ministers.findOne({ where: { id } });
             if (!minister)

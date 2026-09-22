@@ -11,6 +11,7 @@ import { TaskDefinition } from './entities/task-definition.entity';
 import { Task } from './entities/task.entity';
 import { CreateTaskDefinitionDto } from './dto/create-task-definition.dto';
 import { UpdateTaskDefinitionDto } from './dto/update-task-definition.dto';
+import { Member } from '../members/entities/member.entity';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
 import { TaskQueryDto } from './dto/task-query.dto';
@@ -30,6 +31,8 @@ export class TasksService implements OnModuleInit {
     private readonly tasks: Repository<Task>,
     @InjectRepository(Minister)
     private readonly ministers: Repository<Minister>,
+    @InjectRepository(Member)
+    private readonly members: Repository<Member>,
     private readonly notifications: NotificationsService,
   ) {}
 
@@ -134,6 +137,7 @@ export class TasksService implements OnModuleInit {
       target_member_id: definition.requires_visit_target ? dto.target_member_id! : null,
       notes: dto.notes?.trim() || null,
       status: 'pending',
+      visitation_methods: dto.visitation_methods || [],
     });
     const saved = await this.tasks.save(task);
 
@@ -248,6 +252,11 @@ export class TasksService implements OnModuleInit {
     task.status = 'completed';
     task.completed_at = new Date();
     await this.tasks.save(task);
+
+    if (task.target_member_id) {
+        await this.members.increment({ id: task.target_member_id }, 'visit_count', 1);
+    }
+
     return this.findOne(id);
   }
 
@@ -258,7 +267,11 @@ export class TasksService implements OnModuleInit {
     if (dto.end_date !== undefined) task.end_date = dto.end_date;
     if (dto.notes !== undefined) task.notes = dto.notes?.trim() || null;
     if (dto.target_member_id !== undefined) task.target_member_id = dto.target_member_id;
-    if (dto.status !== undefined) {
+    if (dto.visitation_methods !== undefined) task.visitation_methods = dto.visitation_methods;
+
+    let justCompleted = false;
+    if (dto.status !== undefined && task.status !== dto.status) {
+      if (dto.status === 'completed') justCompleted = true;
       task.status = dto.status;
       task.completed_at = dto.status === 'completed' ? new Date() : null;
     }

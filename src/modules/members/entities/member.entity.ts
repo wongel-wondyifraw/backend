@@ -1,5 +1,6 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, OneToMany } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, OneToMany, ManyToOne, JoinColumn } from 'typeorm';
 import { MinistryMember } from '../../ministries/entities/ministry-member.entity';
+import { Location } from '../../locations/entities/location.entity';
 
 @Entity('members')
 export class Member {
@@ -36,8 +37,17 @@ export class Member {
     @Column({ type: 'varchar', nullable: true })
     gender: string | null;
 
-    @Column({ default: 'active' })
-    status: string;
+    @Column({ default: 'pending' })
+    status: string; // 'pending' | 'active' | 'inactive' | 'rejected'
+
+    @Column({ type: 'text', nullable: true })
+    status_reason: string | null;
+
+    @Column({ type: 'uuid', nullable: true })
+    approved_by_user_id: string | null;
+
+    @Column({ type: 'timestamptz', nullable: true })
+    approved_at: Date | null;
 
     @Column({ default: false })
     baptized: boolean;
@@ -45,11 +55,45 @@ export class Member {
     @Column({ type: 'date', nullable: true })
     joined_date: Date;
 
+    @Column({ type: 'varchar', nullable: true })
+    telegram_username: string | null;
+
+    @Column({ type: 'varchar', default: 'existing' })
+    member_type: string; // 'existing' | 'baptized' | 'transferred'
+
+    @Column({ type: 'varchar', nullable: true })
+    recommendation_letter_url: string | null;
+
+    @Column({ default: false })
+    requires_follow_up: boolean;
+
+    @Column({ default: false })
+    holy_spirit_baptized: boolean;
+
+    @Column({ type: 'date', nullable: true })
+    salvation_date: Date | null;
+
+    @Column({ type: 'uuid', nullable: true })
+    location_id: string | null;
+
+    @ManyToOne(() => Location, { nullable: true, onDelete: 'SET NULL' })
+    @JoinColumn({ name: 'location_id' })
+    location: Location | null;
+
+    @Column({ default: false })
+    is_deacon: boolean;
+
+    @Column({ default: 0 })
+    visit_count: number;
+
     @CreateDateColumn()
     created_at: Date;
 
     @UpdateDateColumn()
     updated_at: Date;
+
+    @Column({ type: 'simple-array', nullable: true })
+    interested_ministries: string[];
 
     @OneToMany(() => MinistryMember, (ministryMember) => ministryMember.member)
     ministry_members: MinistryMember[];

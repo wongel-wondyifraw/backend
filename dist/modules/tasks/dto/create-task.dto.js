@@ -41,3 +41,8 @@ __decorate([
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], CreateTaskDto.prototype, "notes", void 0);
+__decorate([
+    (0, class_validator_1.IsString)({ each: true }),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Array)
+], CreateTaskDto.prototype, "visitation_methods", void 0);

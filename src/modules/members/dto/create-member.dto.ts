@@ -6,7 +6,8 @@ import {
     IsOptional,
     IsString,
     IsDateString,
-    IsBoolean
+    IsBoolean,
+    IsArray
 } from 'class-validator';
 import { Transform } from 'class-transformer';
 
@@ -71,4 +72,61 @@ export class CreateMemberDto {
     @IsDateString()
     @IsOptional()
     joined_date?: string;
+
+    @IsString()
+    @IsOptional()
+    telegram_username?: string;
+
+    @IsString()
+    @IsOptional()
+    member_type?: string;
+
+    @IsString()
+    @IsOptional()
+    recommendation_letter_url?: string;
+
+    @IsOptional()
+    @Transform(({ value }) => {
+        if (value === 'true' || value === 'yes') return true;
+        if (value === 'false' || value === 'no') return false;
+        return value;
+    })
+    @IsBoolean()
+    requires_follow_up?: boolean;
+
+    @IsOptional()
+    @Transform(({ value }) => {
+        if (value === 'true' || value === 'yes') return true;
+        if (value === 'false' || value === 'no') return false;
+        return value;
+    })
+    @IsBoolean()
+    holy_spirit_baptized?: boolean;
+
+    @IsDateString()
+    @IsOptional()
+    salvation_date?: string;
+
+    @IsString()
+    @IsOptional()
+    location_id?: string;
+
+    @IsOptional()
+    @Transform(({ value }) => {
+        if (value === 'true' || value === 'yes') return true;
+        if (value === 'false' || value === 'no') return false;
+        return value;
+    })
+    @IsBoolean()
+    is_deacon?: boolean;
+
+    @IsArray()
+    @IsString({ each: true })
+    @IsOptional()
+    ministry_ids?: string[];
+
+    @IsArray()
+    @IsString({ each: true })
+    @IsOptional()
+    interested_ministries?: string[];
 }

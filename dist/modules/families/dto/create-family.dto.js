@@ -15,21 +15,45 @@ class CreateFamilyDto {
 }
 exports.CreateFamilyDto = CreateFamilyDto;
 __decorate([
+    (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsUUID)(),
     __metadata("design:type", String)
 ], CreateFamilyDto.prototype, "husband_id", void 0);
 __decorate([
+    (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsIn)(['member', 'minister']),
     __metadata("design:type", String)
 ], CreateFamilyDto.prototype, "husband_type", void 0);
 __decorate([
+    (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsUUID)(),
     __metadata("design:type", String)
 ], CreateFamilyDto.prototype, "wife_id", void 0);
 __decorate([
+    (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsIn)(['member', 'minister']),
     __metadata("design:type", String)
 ], CreateFamilyDto.prototype, "wife_type", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsIn)(['registered', 'pending', 'external', 'none']),
+    __metadata("design:type", String)
+], CreateFamilyDto.prototype, "spouse_status", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateFamilyDto.prototype, "external_spouse_name", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateFamilyDto.prototype, "external_spouse_phone", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateFamilyDto.prototype, "external_spouse_church", void 0);
 __decorate([
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsOptional)(),

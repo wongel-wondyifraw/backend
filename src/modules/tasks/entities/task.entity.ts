@@ -60,6 +60,9 @@ export class Task {
   @Column({ type: 'text', nullable: true })
   notes: string | null;
 
+  @Column({ type: 'simple-array', nullable: true })
+  visitation_methods: string[] | null;
+
   @Column({ type: 'timestamptz', nullable: true })
   completed_at: Date | null;
 

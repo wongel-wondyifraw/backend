@@ -1,4 +1,4 @@
-import { IsDateString, IsIn, IsOptional, IsString, IsUUID } from 'class-validator';
+import { IsDateString, IsIn, IsOptional, IsString, IsUUID, IsArray } from 'class-validator';
 
 export class UpdateTaskDto {
   @IsUUID()
@@ -20,6 +20,11 @@ export class UpdateTaskDto {
   @IsString()
   @IsOptional()
   notes?: string;
+
+  @IsArray()
+  @IsString({ each: true })
+  @IsOptional()
+  visitation_methods?: string[];
 
   @IsIn(['pending', 'completed', 'cancelled'])
   @IsOptional()

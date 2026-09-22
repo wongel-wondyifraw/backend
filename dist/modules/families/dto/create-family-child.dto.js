@@ -21,9 +21,16 @@ __decorate([
     __metadata("design:type", String)
 ], CreateFamilyChildDto.prototype, "name", void 0);
 __decorate([
+    (0, class_validator_1.IsOptional)(),
     (0, class_transformer_1.Type)(() => Number),
     (0, class_validator_1.IsInt)(),
     (0, class_validator_1.Min)(0),
     (0, class_validator_1.Max)(120),
     __metadata("design:type", Number)
 ], CreateFamilyChildDto.prototype, "age", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)() // Can also use @IsDateString() if preferred
+    ,
+    __metadata("design:type", String)
+], CreateFamilyChildDto.prototype, "date_of_birth", void 0);

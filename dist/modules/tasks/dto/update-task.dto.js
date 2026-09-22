@@ -40,6 +40,12 @@ __decorate([
     __metadata("design:type", String)
 ], UpdateTaskDto.prototype, "notes", void 0);
 __decorate([
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.IsString)({ each: true }),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Array)
+], UpdateTaskDto.prototype, "visitation_methods", void 0);
+__decorate([
     (0, class_validator_1.IsIn)(['pending', 'completed', 'cancelled']),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)

@@ -24,8 +24,11 @@ export class FamilyChild {
   @Column()
   name: string;
 
-  @Column({ type: 'int' })
-  age: number;
+  @Column({ type: 'int', nullable: true })
+  age: number | null;
+
+  @Column({ type: 'date', nullable: true })
+  date_of_birth: Date | null;
 
   @CreateDateColumn()
   created_at: Date;

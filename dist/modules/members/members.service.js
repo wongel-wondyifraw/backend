@@ -25,8 +25,18 @@ let MembersService = class MembersService {
         this.events = events;
     }
     async create(createMemberDto) {
-        const member = this.membersRepository.create(createMemberDto);
+        const { ministry_ids, ...memberData } = createMemberDto;
+        const member = this.membersRepository.create(memberData);
         const saved = await this.membersRepository.save(member);
+        if (ministry_ids && ministry_ids.length > 0) {
+            const ministryMembers = ministry_ids.map(ministry_id => ({
+                ministry_id,
+                member_id: saved.id
+            }));
+            await this.membersRepository.manager
+                .getRepository('MinistryMember')
+                .save(ministryMembers);
+        }
         const name = `${saved.first_name} ${saved.last_name}`.trim();
         this.events.emit(notification_events_1.NOTIFICATION_EVENT, {
             eventName: 'member.created',
@@ -73,7 +83,22 @@ let MembersService = class MembersService {
         return member;
     }
     async update(id, updateMemberDto) {
-        await this.membersRepository.update(id, updateMemberDto);
+        const { ministry_ids, ...memberData } = updateMemberDto;
+        await this.membersRepository.update(id, memberData);
+        if (ministry_ids !== undefined) {
+            await this.membersRepository.manager
+                .getRepository('MinistryMember')
+                .delete({ member_id: id });
+            if (ministry_ids.length > 0) {
+                const ministryMembers = ministry_ids.map(ministry_id => ({
+                    ministry_id,
+                    member_id: id
+                }));
+                await this.membersRepository.manager
+                    .getRepository('MinistryMember')
+                    .save(ministryMembers);
+            }
+        }
         const member = await this.findOne(id);
         const name = `${member.first_name} ${member.last_name}`.trim();
         this.events.emit(notification_events_1.NOTIFICATION_EVENT, {

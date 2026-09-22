@@ -17,6 +17,9 @@ import { DashboardModule } from './modules/dashboard/dashboard.module';
 import { AccessModule } from './modules/access/access.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
 import { UploadsModule } from './modules/uploads/uploads.module';
+import { LocationsModule } from './modules/locations/locations.module';
+import { AuditLogsModule } from './modules/audit-logs/audit-logs.module';
+import { WebsiteModule } from './modules/website/website.module';
 import { AdminSeedService } from './database/admin-seed.service';
 import { JwtAuthGuard } from './modules/auth/guards/jwt-auth.guard';
 import { PermissionsGuard } from './common/guards/permissions.guard';
@@ -112,6 +115,9 @@ import { PermissionsGuard } from './common/guards/permissions.guard';
         DashboardModule,
         NotificationsModule,
         UploadsModule,
+        LocationsModule,
+        AuditLogsModule,
+        WebsiteModule,
     ],
     controllers: [],
     providers: [

@@ -15,13 +15,14 @@ const task_definition_entity_1 = require("./entities/task-definition.entity");
 const task_entity_1 = require("./entities/task.entity");
 const minister_entity_1 = require("../ministers/entities/minister.entity");
 const notifications_module_1 = require("../notifications/notifications.module");
+const member_entity_1 = require("../members/entities/member.entity");
 let TasksModule = class TasksModule {
 };
 exports.TasksModule = TasksModule;
 exports.TasksModule = TasksModule = __decorate([
     (0, common_1.Module)({
         imports: [
-            typeorm_1.TypeOrmModule.forFeature([task_definition_entity_1.TaskDefinition, task_entity_1.Task, minister_entity_1.Minister]),
+            typeorm_1.TypeOrmModule.forFeature([task_definition_entity_1.TaskDefinition, task_entity_1.Task, minister_entity_1.Minister, member_entity_1.Member]),
             notifications_module_1.NotificationsModule,
         ],
         controllers: [tasks_controller_1.TasksController],
