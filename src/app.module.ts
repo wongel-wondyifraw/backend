@@ -20,6 +20,7 @@ import { UploadsModule } from './modules/uploads/uploads.module';
 import { LocationsModule } from './modules/locations/locations.module';
 import { AuditLogsModule } from './modules/audit-logs/audit-logs.module';
 import { WebsiteModule } from './modules/website/website.module';
+import { HealthModule } from './modules/health/health.module';
 import { AdminSeedService } from './database/admin-seed.service';
 import { JwtAuthGuard } from './modules/auth/guards/jwt-auth.guard';
 import { PermissionsGuard } from './common/guards/permissions.guard';
@@ -118,6 +119,7 @@ import { PermissionsGuard } from './common/guards/permissions.guard';
         LocationsModule,
         AuditLogsModule,
         WebsiteModule,
+        HealthModule,
     ],
     controllers: [],
     providers: [

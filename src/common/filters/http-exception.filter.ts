@@ -46,11 +46,18 @@ export class HttpExceptionFilter implements ExceptionFilter {
         const is500 = status === HttpStatus.INTERNAL_SERVER_ERROR;
         const isDev = process.env.NODE_ENV !== 'production';
 
+        const requestId = request.id || (request.headers['x-request-id'] as string) || 'unknown';
+        const errorCode = typeof exceptionResponse === 'object' && (exceptionResponse as any).code 
+            ? (exceptionResponse as any).code 
+            : undefined;
+
         const errorDetails: any = {
             method: request.method,
             url: request.url,
             userId,
             statusCode: status,
+            requestId,
+            code: errorCode,
         };
 
         if (is500) {
@@ -71,8 +78,10 @@ export class HttpExceptionFilter implements ExceptionFilter {
         response.status(status).json({
             statusCode: status,
             message: is500 ? 'An unexpected error occurred' : message,
+            code: errorCode,
             timestamp: new Date().toISOString(),
             path: request.url,
+            requestId,
         });
     }
 }

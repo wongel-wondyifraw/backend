@@ -86,6 +86,21 @@ export class Member {
     @Column({ default: 0 })
     visit_count: number;
 
+    @Column({ type: 'varchar', nullable: true })
+    employment_status: string | null;
+
+    @Column({ type: 'varchar', nullable: true })
+    profession: string | null;
+
+    @Column({ type: 'varchar', nullable: true })
+    employer: string | null;
+
+    @Column({ type: 'varchar', nullable: true })
+    education_level: string | null;
+
+    @Column({ type: 'varchar', nullable: true })
+    education_field: string | null;
+
     @CreateDateColumn()
     created_at: Date;
 

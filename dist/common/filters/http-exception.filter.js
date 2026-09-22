@@ -43,11 +43,17 @@ let HttpExceptionFilter = class HttpExceptionFilter {
         }
         const is500 = status === common_1.HttpStatus.INTERNAL_SERVER_ERROR;
         const isDev = process.env.NODE_ENV !== 'production';
+        const requestId = request.id || request.headers['x-request-id'] || 'unknown';
+        const errorCode = typeof exceptionResponse === 'object' && exceptionResponse.code
+            ? exceptionResponse.code
+            : undefined;
         const errorDetails = {
             method: request.method,
             url: request.url,
             userId,
             statusCode: status,
+            requestId,
+            code: errorCode,
         };
         if (is500) {
             if (sanitizedBody) {
@@ -62,8 +68,10 @@ let HttpExceptionFilter = class HttpExceptionFilter {
         response.status(status).json({
             statusCode: status,
             message: is500 ? 'An unexpected error occurred' : message,
+            code: errorCode,
             timestamp: new Date().toISOString(),
             path: request.url,
+            requestId,
         });
     }
 };

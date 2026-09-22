@@ -29,6 +29,7 @@ const uploads_module_1 = require("./modules/uploads/uploads.module");
 const locations_module_1 = require("./modules/locations/locations.module");
 const audit_logs_module_1 = require("./modules/audit-logs/audit-logs.module");
 const website_module_1 = require("./modules/website/website.module");
+const health_module_1 = require("./modules/health/health.module");
 const admin_seed_service_1 = require("./database/admin-seed.service");
 const jwt_auth_guard_1 = require("./modules/auth/guards/jwt-auth.guard");
 const permissions_guard_1 = require("./common/guards/permissions.guard");
@@ -133,6 +134,7 @@ exports.AppModule = AppModule = __decorate([
             locations_module_1.LocationsModule,
             audit_logs_module_1.AuditLogsModule,
             website_module_1.WebsiteModule,
+            health_module_1.HealthModule,
         ],
         controllers: [],
         providers: [

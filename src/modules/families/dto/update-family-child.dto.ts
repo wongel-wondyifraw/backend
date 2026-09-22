@@ -1,5 +1,5 @@
 import { Type } from 'class-transformer';
-import { IsInt, IsOptional, IsString, Max, Min } from 'class-validator';
+import { IsDateString, IsInt, IsOptional, IsString, Max, Min } from 'class-validator';
 
 export class UpdateFamilyChildDto {
   @IsString()
@@ -12,4 +12,8 @@ export class UpdateFamilyChildDto {
   @Max(120)
   @IsOptional()
   age?: number;
+
+  @IsOptional()
+  @IsDateString()
+  date_of_birth?: string;
 }

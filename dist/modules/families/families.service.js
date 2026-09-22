@@ -21,11 +21,12 @@ const family_child_entity_1 = require("./entities/family-child.entity");
 const member_entity_1 = require("../members/entities/member.entity");
 const minister_entity_1 = require("../ministers/entities/minister.entity");
 let FamiliesService = class FamiliesService {
-    constructor(families, children, members, ministers) {
+    constructor(families, children, members, ministers, dataSource) {
         this.families = families;
         this.children = children;
         this.members = members;
         this.ministers = ministers;
+        this.dataSource = dataSource;
     }
     normalizeGender(value) {
         return (value || '').trim().toLowerCase();
@@ -83,7 +84,7 @@ let FamiliesService = class FamiliesService {
         const qb = this.families.createQueryBuilder('family').where('1=0'); // Start with false
         if (husbandId) {
             qb.orWhere(`(family.husband_id = :husbandId AND family.husband_type = :husbandType)`, { husbandId, husbandType });
-            qb.orWhere(`(family.wife_id = :husbandId AND family.husband_type = :husbandType)`, { husbandId, husbandType });
+            qb.orWhere(`(family.wife_id = :husbandId AND family.wife_type = :husbandType)`, { husbandId, husbandType });
         }
         if (wifeId) {
             qb.orWhere(`(family.husband_id = :wifeId AND family.husband_type = :wifeType)`, { wifeId, wifeType });
@@ -97,27 +98,29 @@ let FamiliesService = class FamiliesService {
             throw new common_1.BadRequestException('One or both selected people already belong to another family');
         }
     }
-    async markMarriedIfSingle(id, type) {
+    async markMarriedIfSingle(id, type, manager) {
         if (!id)
             return;
         if (type === 'minister') {
-            const minister = await this.ministers.findOne({ where: { id } });
+            const ministerRepo = manager ? manager.getRepository(minister_entity_1.Minister) : this.ministers;
+            const minister = await ministerRepo.findOne({ where: { id } });
             if (!minister)
                 return;
             const status = (minister.marital_status || '').trim().toLowerCase();
             if (!status || status === 'single') {
                 minister.marital_status = 'married';
-                await this.ministers.save(minister);
+                await ministerRepo.save(minister);
             }
             return;
         }
-        const member = await this.members.findOne({ where: { id } });
+        const memberRepo = manager ? manager.getRepository(member_entity_1.Member) : this.members;
+        const member = await memberRepo.findOne({ where: { id } });
         if (!member)
             return;
         const status = (member.marital_status || '').trim().toLowerCase();
         if (!status || status === 'single') {
             member.marital_status = 'married';
-            await this.members.save(member);
+            await memberRepo.save(member);
         }
     }
     defaultFamilyName(husband, wife) {
@@ -125,10 +128,10 @@ let FamiliesService = class FamiliesService {
         return `The ${last} Family`;
     }
     async validateSpouseGenders(husband, wife) {
-        if (this.normalizeGender(husband.gender) !== 'male') {
+        if (husband && this.normalizeGender(husband.gender) !== 'male') {
             throw new common_1.BadRequestException('Husband must be a male member or minister');
         }
-        if (this.normalizeGender(wife.gender) !== 'female') {
+        if (wife && this.normalizeGender(wife.gender) !== 'female') {
             throw new common_1.BadRequestException('Wife must be a female member or minister');
         }
     }
@@ -152,30 +155,68 @@ let FamiliesService = class FamiliesService {
         };
     }
     async create(dto) {
-        var _a, _b;
-        await this.ensureSpousesAvailable(dto.husband_id, dto.husband_type, dto.wife_id, dto.wife_type);
-        const [husband, wife] = await Promise.all([
-            this.resolvePerson(dto.husband_id, dto.husband_type),
-            this.resolvePerson(dto.wife_id, dto.wife_type),
-        ]);
-        if (!husband || !wife) {
-            throw new common_1.BadRequestException('Husband and wife must be existing people');
+        var _a, _b, _c, _d, _e, _f;
+        const queryRunner = this.dataSource.createQueryRunner();
+        await queryRunner.connect();
+        await queryRunner.startTransaction();
+        try {
+            const spouseStatus = (dto.spouse_status || 'registered').trim().toLowerCase();
+            const hasHusband = Boolean(dto.husband_id);
+            const hasWife = Boolean(dto.wife_id);
+            if (!hasHusband && !hasWife && spouseStatus !== 'external') {
+                throw new common_1.BadRequestException('At least one parent or spouse must be provided');
+            }
+            if (hasHusband || hasWife) {
+                await this.ensureSpousesAvailable(dto.husband_id, dto.husband_type, dto.wife_id, dto.wife_type);
+            }
+            const [husband, wife] = await Promise.all([
+                this.resolvePerson(dto.husband_id, dto.husband_type),
+                this.resolvePerson(dto.wife_id, dto.wife_type),
+            ]);
+            if (hasHusband && !husband) {
+                throw new common_1.BadRequestException('Husband must be an existing person');
+            }
+            if (hasWife && !wife) {
+                throw new common_1.BadRequestException('Wife must be an existing person');
+            }
+            if (spouseStatus === 'registered' && hasHusband && hasWife) {
+                await this.validateSpouseGenders(husband, wife);
+            }
+            else {
+                await this.validateSpouseGenders(husband, wife);
+            }
+            if (spouseStatus === 'external' && !((_a = dto.external_spouse_name) === null || _a === void 0 ? void 0 : _a.trim()) && !hasHusband && !hasWife) {
+                throw new common_1.BadRequestException('External spouse name is required');
+            }
+            const family = this.families.create({
+                husband_id: dto.husband_id || null,
+                husband_type: dto.husband_type || 'member',
+                wife_id: dto.wife_id || null,
+                wife_type: dto.wife_type || 'member',
+                spouse_status: spouseStatus,
+                external_spouse_name: ((_b = dto.external_spouse_name) === null || _b === void 0 ? void 0 : _b.trim()) || null,
+                external_spouse_phone: ((_c = dto.external_spouse_phone) === null || _c === void 0 ? void 0 : _c.trim()) || null,
+                external_spouse_church: ((_d = dto.external_spouse_church) === null || _d === void 0 ? void 0 : _d.trim()) || null,
+                name: ((_e = dto.name) === null || _e === void 0 ? void 0 : _e.trim()) || this.defaultFamilyName(husband, wife),
+                notes: ((_f = dto.notes) === null || _f === void 0 ? void 0 : _f.trim()) || null,
+            });
+            const saved = await queryRunner.manager.save(family_entity_1.Family, family);
+            if (spouseStatus === 'registered') {
+                await Promise.all([
+                    this.markMarriedIfSingle(dto.husband_id, dto.husband_type, queryRunner.manager),
+                    this.markMarriedIfSingle(dto.wife_id, dto.wife_type, queryRunner.manager),
+                ]);
+            }
+            await queryRunner.commitTransaction();
+            return this.findOne(saved.id);
         }
-        await this.validateSpouseGenders(husband, wife);
-        const family = this.families.create({
-            husband_id: dto.husband_id,
-            husband_type: dto.husband_type,
-            wife_id: dto.wife_id,
-            wife_type: dto.wife_type,
-            name: ((_a = dto.name) === null || _a === void 0 ? void 0 : _a.trim()) || this.defaultFamilyName(husband, wife),
-            notes: ((_b = dto.notes) === null || _b === void 0 ? void 0 : _b.trim()) || null,
-        });
-        const saved = await this.families.save(family);
-        await Promise.all([
-            this.markMarriedIfSingle(dto.husband_id, dto.husband_type),
-            this.markMarriedIfSingle(dto.wife_id, dto.wife_type),
-        ]);
-        return this.findOne(saved.id);
+        catch (err) {
+            await queryRunner.rollbackTransaction();
+            throw err;
+        }
+        finally {
+            await queryRunner.release();
+        }
     }
     async findAllPaginated(page = 1, limit = 20, search) {
         const qb = this.families
@@ -220,41 +261,76 @@ let FamiliesService = class FamiliesService {
         return this.attachSpouses(family);
     }
     async update(id, dto) {
-        var _a, _b, _c, _d, _e, _f;
+        var _a, _b, _c, _d, _e, _f, _g;
         const family = await this.findOne(id);
-        const nextHusbandId = (_a = dto.husband_id) !== null && _a !== void 0 ? _a : family.husband_id;
-        const nextHusbandType = (_b = dto.husband_type) !== null && _b !== void 0 ? _b : family.husband_type;
-        const nextWifeId = (_c = dto.wife_id) !== null && _c !== void 0 ? _c : family.wife_id;
-        const nextWifeType = (_d = dto.wife_type) !== null && _d !== void 0 ? _d : family.wife_type;
+        const nextHusbandId = dto.husband_id !== undefined ? dto.husband_id : family.husband_id;
+        const nextHusbandType = (_a = dto.husband_type) !== null && _a !== void 0 ? _a : family.husband_type;
+        const nextWifeId = dto.wife_id !== undefined ? dto.wife_id : family.wife_id;
+        const nextWifeType = (_b = dto.wife_type) !== null && _b !== void 0 ? _b : family.wife_type;
+        const nextStatus = dto.spouse_status !== undefined
+            ? dto.spouse_status.trim().toLowerCase()
+            : family.spouse_status;
         const spousesChanged = nextHusbandId !== family.husband_id ||
             nextHusbandType !== family.husband_type ||
             nextWifeId !== family.wife_id ||
             nextWifeType !== family.wife_type;
-        if (spousesChanged) {
-            await this.ensureSpousesAvailable(nextHusbandId, nextHusbandType, nextWifeId, nextWifeType, id);
-            const [husband, wife] = await Promise.all([
-                this.resolvePerson(nextHusbandId, nextHusbandType),
-                this.resolvePerson(nextWifeId, nextWifeType),
-            ]);
-            if (!husband || !wife) {
-                throw new common_1.BadRequestException('Husband and wife must be existing people');
+        const queryRunner = this.dataSource.createQueryRunner();
+        await queryRunner.connect();
+        await queryRunner.startTransaction();
+        try {
+            if (!nextHusbandId && !nextWifeId && nextStatus !== 'external') {
+                throw new common_1.BadRequestException('At least one parent or spouse must be provided');
             }
-            await this.validateSpouseGenders(husband, wife);
-            family.husband_id = nextHusbandId;
-            family.husband_type = nextHusbandType;
-            family.wife_id = nextWifeId;
-            family.wife_type = nextWifeType;
-            await Promise.all([
-                this.markMarriedIfSingle(nextHusbandId, nextHusbandType),
-                this.markMarriedIfSingle(nextWifeId, nextWifeType),
-            ]);
+            if (spousesChanged) {
+                await this.ensureSpousesAvailable(nextHusbandId, nextHusbandType, nextWifeId, nextWifeType, id);
+                const [husband, wife] = await Promise.all([
+                    this.resolvePerson(nextHusbandId, nextHusbandType),
+                    this.resolvePerson(nextWifeId, nextWifeType),
+                ]);
+                if (nextHusbandId && !husband) {
+                    throw new common_1.BadRequestException('Husband must be an existing person');
+                }
+                if (nextWifeId && !wife) {
+                    throw new common_1.BadRequestException('Wife must be an existing person');
+                }
+                await this.validateSpouseGenders(husband, wife);
+                family.husband_id = nextHusbandId || null;
+                family.husband_type = nextHusbandType || 'member';
+                family.wife_id = nextWifeId || null;
+                family.wife_type = nextWifeType || 'member';
+                if (nextStatus === 'registered') {
+                    await Promise.all([
+                        this.markMarriedIfSingle(nextHusbandId, nextHusbandType, queryRunner.manager),
+                        this.markMarriedIfSingle(nextWifeId, nextWifeType, queryRunner.manager),
+                    ]);
+                }
+            }
+            if (dto.spouse_status !== undefined)
+                family.spouse_status = nextStatus;
+            if (dto.external_spouse_name !== undefined) {
+                family.external_spouse_name = ((_c = dto.external_spouse_name) === null || _c === void 0 ? void 0 : _c.trim()) || null;
+            }
+            if (dto.external_spouse_phone !== undefined) {
+                family.external_spouse_phone = ((_d = dto.external_spouse_phone) === null || _d === void 0 ? void 0 : _d.trim()) || null;
+            }
+            if (dto.external_spouse_church !== undefined) {
+                family.external_spouse_church = ((_e = dto.external_spouse_church) === null || _e === void 0 ? void 0 : _e.trim()) || null;
+            }
+            if (dto.name !== undefined)
+                family.name = ((_f = dto.name) === null || _f === void 0 ? void 0 : _f.trim()) || null;
+            if (dto.notes !== undefined)
+                family.notes = ((_g = dto.notes) === null || _g === void 0 ? void 0 : _g.trim()) || null;
+            await queryRunner.manager.save(family_entity_1.Family, family);
+            await queryRunner.commitTransaction();
+            return this.findOne(id);
         }
-        if (dto.name !== undefined)
-            family.name = ((_e = dto.name) === null || _e === void 0 ? void 0 : _e.trim()) || null;
-        if (dto.notes !== undefined)
-            family.notes = ((_f = dto.notes) === null || _f === void 0 ? void 0 : _f.trim()) || null;
-        await this.families.save(family);
-        return this.findOne(id);
+        catch (err) {
+            await queryRunner.rollbackTransaction();
+            throw err;
+        }
+        finally {
+            await queryRunner.release();
+        }
     }
     async remove(id) {
         const result = await this.families.delete(id);
@@ -262,11 +338,21 @@ let FamiliesService = class FamiliesService {
             throw new common_1.NotFoundException('Family not found');
     }
     async addChild(familyId, dto) {
+        var _a;
         await this.findOne(familyId);
+        let age = (_a = dto.age) !== null && _a !== void 0 ? _a : null;
+        if (dto.date_of_birth && (age === null || age === undefined)) {
+            const dob = new Date(dto.date_of_birth);
+            if (!Number.isNaN(dob.getTime())) {
+                const now = new Date();
+                age = Math.max(0, now.getFullYear() - dob.getFullYear());
+            }
+        }
         const child = this.children.create({
             family_id: familyId,
             name: dto.name.trim(),
-            age: dto.age,
+            age,
+            date_of_birth: dto.date_of_birth ? new Date(dto.date_of_birth) : null,
         });
         return this.children.save(child);
     }
@@ -280,6 +366,9 @@ let FamiliesService = class FamiliesService {
             child.name = dto.name.trim();
         if (dto.age !== undefined)
             child.age = dto.age;
+        if (dto.date_of_birth !== undefined) {
+            child.date_of_birth = dto.date_of_birth ? new Date(dto.date_of_birth) : null;
+        }
         return this.children.save(child);
     }
     async removeChild(familyId, childId) {
@@ -298,5 +387,6 @@ exports.FamiliesService = FamiliesService = __decorate([
     __metadata("design:paramtypes", [typeorm_2.Repository,
         typeorm_2.Repository,
         typeorm_2.Repository,
-        typeorm_2.Repository])
+        typeorm_2.Repository,
+        typeorm_2.DataSource])
 ], FamiliesService);

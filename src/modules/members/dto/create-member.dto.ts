@@ -129,4 +129,24 @@ export class CreateMemberDto {
     @IsString({ each: true })
     @IsOptional()
     interested_ministries?: string[];
+
+    @IsString()
+    @IsOptional()
+    employment_status?: string;
+
+    @IsString()
+    @IsOptional()
+    profession?: string;
+
+    @IsString()
+    @IsOptional()
+    employer?: string;
+
+    @IsString()
+    @IsOptional()
+    education_level?: string;
+
+    @IsString()
+    @IsOptional()
+    education_field?: string;
 }
