@@ -119,6 +119,14 @@ System roles are seeded on startup:
 - CORS restricted to configured frontend URL
 - Avatar uploads limited to JPEG/PNG/GIF/WebP (max 5 MB)
 
+## Media storage (Cloudinary)
+
+- `CLOUD_STORAGE=false` (default) — files go under `uploads/` and are processed with Sharp.
+- `CLOUD_STORAGE=true` — uploads go to Cloudinary; the `secure_url` is stored in the DB.
+  Also set `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, and `CLOUDINARY_API_SECRET`.
+
+Use Cloudinary on Render / other memory-constrained hosts to avoid Sharp OOM.
+
 ## Testing
 
 ```bash

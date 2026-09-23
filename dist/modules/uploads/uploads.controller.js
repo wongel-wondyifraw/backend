@@ -17,13 +17,16 @@ const common_1 = require("@nestjs/common");
 const platform_express_1 = require("@nestjs/platform-express");
 const permissions_decorator_1 = require("../../common/decorators/permissions.decorator");
 const multer_config_1 = require("../../common/config/multer.config");
-const image_processor_1 = require("./image-processor");
+const cloudinary_service_1 = require("./cloudinary.service");
 let UploadsController = class UploadsController {
+    constructor(cloudinary) {
+        this.cloudinary = cloudinary;
+    }
     async uploadImage(file) {
         if (!file) {
             throw new common_1.BadRequestException('File not found');
         }
-        const processed = await (0, image_processor_1.processUploadedImage)(file.path, file.filename);
+        const processed = await this.cloudinary.uploadImage(file, 'cms/images');
         return {
             message: 'File uploaded successfully',
             url: processed.url,
@@ -32,14 +35,15 @@ let UploadsController = class UploadsController {
             height: processed.height,
         };
     }
-    uploadDocument(file) {
+    async uploadDocument(file) {
         if (!file) {
             throw new common_1.BadRequestException('File not found');
         }
+        const uploaded = await this.cloudinary.uploadDocument(file, 'cms/documents');
         return {
             message: 'Document uploaded successfully',
-            url: `uploads/documents/${file.filename}`,
-            original_name: file.originalname,
+            url: uploaded.url,
+            original_name: uploaded.original_name,
         };
     }
 };
@@ -48,9 +52,7 @@ __decorate([
     (0, common_1.Post)('image'),
     (0, permissions_decorator_1.RequiresPermissions)('uploads.create', 'website.manage', 'members.update', 'members.create'),
     (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)('file', {
-        storage: (0, multer_config_1.createImageDiskStorage)((_req, file, cb) => {
-            cb(null, (0, multer_config_1.uploadImageFilename)(file.originalname));
-        }),
+        storage: (0, multer_config_1.createImageMemoryStorage)(),
         fileFilter: multer_config_1.imageFileFilter,
         limits: multer_config_1.imageUploadLimits,
     })),
@@ -63,17 +65,16 @@ __decorate([
     (0, common_1.Post)('document'),
     (0, permissions_decorator_1.RequiresPermissions)('uploads.create', 'website.manage', 'members.update', 'members.create'),
     (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)('file', {
-        storage: (0, multer_config_1.createDocumentDiskStorage)((_req, file, cb) => {
-            cb(null, (0, multer_config_1.uploadDocumentFilename)(file.originalname));
-        }),
+        storage: (0, multer_config_1.createDocumentMemoryStorage)(),
         fileFilter: multer_config_1.documentFileFilter,
         limits: multer_config_1.documentUploadLimits,
     })),
     __param(0, (0, common_1.UploadedFile)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
-    __metadata("design:returntype", void 0)
+    __metadata("design:returntype", Promise)
 ], UploadsController.prototype, "uploadDocument", null);
 exports.UploadsController = UploadsController = __decorate([
-    (0, common_1.Controller)('uploads')
+    (0, common_1.Controller)('uploads'),
+    __metadata("design:paramtypes", [cloudinary_service_1.CloudinaryService])
 ], UploadsController);

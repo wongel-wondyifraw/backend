@@ -13,6 +13,7 @@ const users_service_1 = require("./users.service");
 const users_controller_1 = require("./users.controller");
 const user_entity_1 = require("./entities/user.entity");
 const access_module_1 = require("../access/access.module");
+const uploads_module_1 = require("../uploads/uploads.module");
 let UsersModule = class UsersModule {
 };
 exports.UsersModule = UsersModule;
@@ -21,6 +22,7 @@ exports.UsersModule = UsersModule = __decorate([
         imports: [
             typeorm_1.TypeOrmModule.forFeature([user_entity_1.User]),
             (0, common_1.forwardRef)(() => access_module_1.AccessModule),
+            uploads_module_1.UploadsModule,
         ],
         controllers: [users_controller_1.UsersController],
         providers: [users_service_1.UsersService],

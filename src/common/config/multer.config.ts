@@ -1,7 +1,7 @@
 import { join, extname } from 'path';
 import * as fs from 'fs';
 import { randomUUID } from 'crypto';
-import { diskStorage } from 'multer';
+import { diskStorage, memoryStorage } from 'multer';
 
 export const IMAGE_UPLOAD_MAX_BYTES = 5 * 1024 * 1024;
 
@@ -51,6 +51,15 @@ export function createImageDiskStorage(
         },
         filename,
     });
+}
+
+/** Prefer memory storage so files can go straight to Cloudinary without disk I/O. */
+export function createImageMemoryStorage() {
+    return memoryStorage();
+}
+
+export function createDocumentMemoryStorage() {
+    return memoryStorage();
 }
 
 export function avatarFilenameForUserId(userId: string, originalname: string): string {

@@ -8,26 +8,24 @@ import {
 import { FileInterceptor } from '@nestjs/platform-express';
 import { RequiresPermissions } from '../../common/decorators/permissions.decorator';
 import {
-  createDocumentDiskStorage,
-  createImageDiskStorage,
+  createDocumentMemoryStorage,
+  createImageMemoryStorage,
   documentFileFilter,
   documentUploadLimits,
   imageFileFilter,
   imageUploadLimits,
-  uploadDocumentFilename,
-  uploadImageFilename,
 } from '../../common/config/multer.config';
-import { processUploadedImage } from './image-processor';
+import { CloudinaryService } from './cloudinary.service';
 
 @Controller('uploads')
 export class UploadsController {
+  constructor(private readonly cloudinary: CloudinaryService) {}
+
   @Post('image')
   @RequiresPermissions('uploads.create', 'website.manage', 'members.update', 'members.create')
   @UseInterceptors(
     FileInterceptor('file', {
-      storage: createImageDiskStorage((_req, file, cb) => {
-        cb(null, uploadImageFilename(file.originalname));
-      }),
+      storage: createImageMemoryStorage(),
       fileFilter: imageFileFilter,
       limits: imageUploadLimits,
     }),
@@ -37,7 +35,7 @@ export class UploadsController {
       throw new BadRequestException('File not found');
     }
 
-    const processed = await processUploadedImage(file.path, file.filename);
+    const processed = await this.cloudinary.uploadImage(file, 'cms/images');
 
     return {
       message: 'File uploaded successfully',
@@ -52,22 +50,22 @@ export class UploadsController {
   @RequiresPermissions('uploads.create', 'website.manage', 'members.update', 'members.create')
   @UseInterceptors(
     FileInterceptor('file', {
-      storage: createDocumentDiskStorage((_req, file, cb) => {
-        cb(null, uploadDocumentFilename(file.originalname));
-      }),
+      storage: createDocumentMemoryStorage(),
       fileFilter: documentFileFilter,
       limits: documentUploadLimits,
     }),
   )
-  uploadDocument(@UploadedFile() file: Express.Multer.File | undefined) {
+  async uploadDocument(@UploadedFile() file: Express.Multer.File | undefined) {
     if (!file) {
       throw new BadRequestException('File not found');
     }
 
+    const uploaded = await this.cloudinary.uploadDocument(file, 'cms/documents');
+
     return {
       message: 'Document uploaded successfully',
-      url: `uploads/documents/${file.filename}`,
-      original_name: file.originalname,
+      url: uploaded.url,
+      original_name: uploaded.original_name,
     };
   }
 }

@@ -37,6 +37,8 @@ exports.documentUploadLimits = exports.DOCUMENT_UPLOAD_MAX_BYTES = exports.image
 exports.getImagesUploadDir = getImagesUploadDir;
 exports.imageFileFilter = imageFileFilter;
 exports.createImageDiskStorage = createImageDiskStorage;
+exports.createImageMemoryStorage = createImageMemoryStorage;
+exports.createDocumentMemoryStorage = createDocumentMemoryStorage;
 exports.avatarFilenameForUserId = avatarFilenameForUserId;
 exports.uploadImageFilename = uploadImageFilename;
 exports.getDocumentsUploadDir = getDocumentsUploadDir;
@@ -81,6 +83,13 @@ function createImageDiskStorage(filename) {
         },
         filename,
     });
+}
+/** Prefer memory storage so files can go straight to Cloudinary without disk I/O. */
+function createImageMemoryStorage() {
+    return (0, multer_1.memoryStorage)();
+}
+function createDocumentMemoryStorage() {
+    return (0, multer_1.memoryStorage)();
 }
 function avatarFilenameForUserId(userId, originalname) {
     return `${userId}${(0, path_1.extname)(originalname)}`;
