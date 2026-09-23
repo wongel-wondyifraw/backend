@@ -44,18 +44,70 @@ export class MembersService {
         return saved;
     }
 
-    async findAllPaginated(page = 1, limit = 20, search?: string): Promise<PaginatedResult<Member>> {
+    async findAllPaginated(
+        page = 1,
+        limit = 20,
+        search?: string,
+        filters?: {
+            status?: string;
+            marital_status?: string;
+            joined_from?: string;
+            joined_to?: string;
+            sort_by?: 'created_at' | 'joined_date' | 'visit_count';
+            sort_order?: string;
+        },
+    ): Promise<PaginatedResult<Member>> {
         const qb = this.membersRepository.createQueryBuilder('member');
 
         if (search?.trim()) {
             const pattern = `%${search.trim().toLowerCase()}%`;
-            qb.where(
-                'LOWER(member.first_name) LIKE :pattern OR LOWER(member.last_name) LIKE :pattern OR LOWER(member.email) LIKE :pattern OR member.phone LIKE :pattern OR LOWER(member.address) LIKE :pattern',
+            qb.andWhere(
+                '(LOWER(member.first_name) LIKE :pattern OR LOWER(member.last_name) LIKE :pattern OR LOWER(COALESCE(member.email, \'\')) LIKE :pattern OR COALESCE(member.phone, \'\') LIKE :pattern OR LOWER(COALESCE(member.address, \'\')) LIKE :pattern)',
                 { pattern },
             );
         }
 
-        qb.orderBy('member.created_at', 'DESC');
+        if (filters?.status?.trim()) {
+            qb.andWhere('LOWER(member.status) = :status', {
+                status: filters.status.trim().toLowerCase(),
+            });
+        }
+
+        if (filters?.marital_status?.trim()) {
+            qb.andWhere('LOWER(member.marital_status) = :marital', {
+                marital: filters.marital_status.trim().toLowerCase(),
+            });
+        }
+
+        if (filters?.joined_from) {
+            qb.andWhere(
+                'COALESCE(member.joined_date, CAST(member.created_at AS date)) >= :joinedFrom',
+                { joinedFrom: filters.joined_from },
+            );
+        }
+
+        if (filters?.joined_to) {
+            qb.andWhere(
+                'COALESCE(member.joined_date, CAST(member.created_at AS date)) <= :joinedTo',
+                { joinedTo: filters.joined_to },
+            );
+        }
+
+        const sortBy = filters?.sort_by || 'created_at';
+        const sortOrder: 'ASC' | 'DESC' =
+            (filters?.sort_order || 'DESC').toUpperCase() === 'ASC' ? 'ASC' : 'DESC';
+
+        if (sortBy === 'visit_count') {
+            qb.orderBy('member.visit_count', sortOrder).addOrderBy('member.created_at', 'DESC');
+        } else if (sortBy === 'joined_date') {
+            qb.orderBy(
+                'COALESCE(member.joined_date, CAST(member.created_at AS date))',
+                sortOrder,
+            );
+        } else {
+            qb.orderBy('member.created_at', sortOrder);
+        }
+
         qb.skip((page - 1) * limit).take(limit);
 
         const [data, total] = await qb.getManyAndCount();
@@ -78,7 +130,7 @@ export class MembersService {
     async findOne(id: string): Promise<Member> {
         const member = await this.membersRepository.findOne({
             where: { id },
-            relations: ['ministry_members', 'ministry_members.ministry'],
+            relations: ['ministry_members', 'ministry_members.ministry', 'location'],
         });
         if (!member) {
             throw new NotFoundException(`Member with ID ${id} not found`);

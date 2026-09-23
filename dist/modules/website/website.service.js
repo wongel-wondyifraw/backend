@@ -18,31 +18,50 @@ const typeorm_1 = require("@nestjs/typeorm");
 const typeorm_2 = require("typeorm");
 const page_content_entity_1 = require("./entities/page-content.entity");
 const community_project_entity_1 = require("./entities/community-project.entity");
+const PAGE_CACHE_TTL_MS = 60000;
 let WebsiteService = class WebsiteService {
     constructor(pageContentRepo, communityProjectRepo) {
         this.pageContentRepo = pageContentRepo;
         this.communityProjectRepo = communityProjectRepo;
+        this.pageCache = new Map();
     }
-    // Page Content Methods
     async getPageContent(slug) {
-        const page = await this.pageContentRepo.findOne({ where: { page_slug: slug } });
-        if (!page) {
-            // Return default empty content if not found
-            return { page_slug: slug, content: {} };
+        const cached = this.pageCache.get(slug);
+        if (cached && cached.expiresAt > Date.now()) {
+            return cached.value;
         }
-        return page;
+        const page = await this.pageContentRepo.findOne({ where: { page_slug: slug } });
+        const value = page
+            ? {
+                page_slug: page.page_slug,
+                content: page.content,
+                created_at: page.created_at,
+                updated_at: page.updated_at,
+            }
+            : { page_slug: slug, content: slug === 'landing' ? {} : '' };
+        this.pageCache.set(slug, { value, expiresAt: Date.now() + PAGE_CACHE_TTL_MS });
+        return value;
     }
-    async updatePageContent(slug, content) {
+    async updatePageContent(slug, body) {
+        let payload = body;
+        if (body &&
+            typeof body === 'object' &&
+            !Array.isArray(body) &&
+            Object.prototype.hasOwnProperty.call(body, 'content') &&
+            Object.keys(body).every((k) => k === 'content')) {
+            payload = body.content;
+        }
         let page = await this.pageContentRepo.findOne({ where: { page_slug: slug } });
         if (!page) {
-            page = this.pageContentRepo.create({ page_slug: slug, content });
+            page = this.pageContentRepo.create({ page_slug: slug, content: payload });
         }
         else {
-            page.content = content;
+            page.content = payload;
         }
-        return this.pageContentRepo.save(page);
+        const saved = await this.pageContentRepo.save(page);
+        this.pageCache.delete(slug);
+        return saved;
     }
-    // Community Project Methods
     async getProjects(status) {
         if (status) {
             return this.communityProjectRepo.find({ where: { status }, order: { created_at: 'DESC' } });

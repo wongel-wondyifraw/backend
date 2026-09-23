@@ -15,14 +15,12 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.WebsiteController = void 0;
 const common_1 = require("@nestjs/common");
 const website_service_1 = require("./website.service");
-const jwt_auth_guard_1 = require("../auth/guards/jwt-auth.guard");
-const permissions_guard_1 = require("../../common/guards/permissions.guard");
+const public_decorator_1 = require("../../common/decorators/public.decorator");
 const permissions_decorator_1 = require("../../common/decorators/permissions.decorator");
 let WebsiteController = class WebsiteController {
     constructor(websiteService) {
         this.websiteService = websiteService;
     }
-    // Public Endpoints
     getPageContent(slug) {
         return this.websiteService.getPageContent(slug);
     }
@@ -32,7 +30,6 @@ let WebsiteController = class WebsiteController {
     getProject(id) {
         return this.websiteService.getProject(id);
     }
-    // Admin Endpoints
     updatePageContent(slug, content) {
         return this.websiteService.updatePageContent(slug, content);
     }
@@ -48,6 +45,7 @@ let WebsiteController = class WebsiteController {
 };
 exports.WebsiteController = WebsiteController;
 __decorate([
+    (0, public_decorator_1.Public)(),
     (0, common_1.Get)('pages/:slug'),
     __param(0, (0, common_1.Param)('slug')),
     __metadata("design:type", Function),
@@ -55,6 +53,7 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], WebsiteController.prototype, "getPageContent", null);
 __decorate([
+    (0, public_decorator_1.Public)(),
     (0, common_1.Get)('projects'),
     __param(0, (0, common_1.Query)('status')),
     __metadata("design:type", Function),
@@ -62,6 +61,7 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], WebsiteController.prototype, "getProjects", null);
 __decorate([
+    (0, public_decorator_1.Public)(),
     (0, common_1.Get)('projects/:id'),
     __param(0, (0, common_1.Param)('id')),
     __metadata("design:type", Function),
@@ -70,7 +70,6 @@ __decorate([
 ], WebsiteController.prototype, "getProject", null);
 __decorate([
     (0, common_1.Patch)('pages/:slug'),
-    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, permissions_guard_1.PermissionsGuard),
     (0, permissions_decorator_1.RequiresPermissions)('website.manage'),
     __param(0, (0, common_1.Param)('slug')),
     __param(1, (0, common_1.Body)()),
@@ -80,7 +79,6 @@ __decorate([
 ], WebsiteController.prototype, "updatePageContent", null);
 __decorate([
     (0, common_1.Post)('projects'),
-    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, permissions_guard_1.PermissionsGuard),
     (0, permissions_decorator_1.RequiresPermissions)('projects.manage'),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
@@ -89,7 +87,6 @@ __decorate([
 ], WebsiteController.prototype, "createProject", null);
 __decorate([
     (0, common_1.Patch)('projects/:id'),
-    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, permissions_guard_1.PermissionsGuard),
     (0, permissions_decorator_1.RequiresPermissions)('projects.manage'),
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, common_1.Body)()),
@@ -99,7 +96,6 @@ __decorate([
 ], WebsiteController.prototype, "updateProject", null);
 __decorate([
     (0, common_1.Delete)('projects/:id'),
-    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, permissions_guard_1.PermissionsGuard),
     (0, permissions_decorator_1.RequiresPermissions)('projects.manage'),
     __param(0, (0, common_1.Param)('id')),
     __metadata("design:type", Function),

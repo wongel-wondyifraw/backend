@@ -96,8 +96,11 @@ const ALLOWED_DOCUMENT_MIME_TYPES = new Set([
     'text/plain',
     'image/jpeg',
     'image/png',
+    'video/mp4',
+    'video/webm',
+    'video/quicktime',
 ]);
-const ALLOWED_DOCUMENT_EXTENSION = /\.(pdf|docx?|txt|jpe?g|png)$/i;
+const ALLOWED_DOCUMENT_EXTENSION = /\.(pdf|docx?|txt|jpe?g|png|mp4|webm|mov)$/i;
 function getDocumentsUploadDir() {
     const dir = (0, path_1.join)(process.cwd(), 'uploads', 'documents');
     if (!fs.existsSync(dir)) {
@@ -109,7 +112,7 @@ function documentFileFilter(_req, file, cb) {
     const mimeOk = ALLOWED_DOCUMENT_MIME_TYPES.has(file.mimetype);
     const extOk = ALLOWED_DOCUMENT_EXTENSION.test(file.originalname);
     if (!mimeOk || !extOk) {
-        cb(new Error('Only PDF, DOC, DOCX, TXT, JPEG, or PNG files are allowed'), false);
+        cb(new Error('Only PDF, DOC, DOCX, TXT, JPEG, PNG, or video (MP4/WebM) files are allowed'), false);
         return;
     }
     cb(null, true);

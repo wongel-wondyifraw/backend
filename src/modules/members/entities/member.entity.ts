@@ -58,6 +58,15 @@ export class Member {
     @Column({ type: 'varchar', nullable: true })
     telegram_username: string | null;
 
+    @Column({ type: 'varchar', nullable: true })
+    facebook_username: string | null;
+
+    @Column({ type: 'varchar', nullable: true })
+    instagram_username: string | null;
+
+    @Column({ type: 'varchar', nullable: true })
+    whatsapp_number: string | null;
+
     @Column({ type: 'varchar', default: 'existing' })
     member_type: string; // 'existing' | 'baptized' | 'transferred'
 

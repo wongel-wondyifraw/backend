@@ -17,8 +17,8 @@ const common_1 = require("@nestjs/common");
 const members_service_1 = require("./members.service");
 const create_member_dto_1 = require("./dto/create-member.dto");
 const update_member_dto_1 = require("./dto/update-member.dto");
+const member_list_query_dto_1 = require("./dto/member-list-query.dto");
 const ministries_service_1 = require("../ministries/ministries.service");
-const pagination_query_dto_1 = require("../../common/dto/pagination-query.dto");
 const permissions_decorator_1 = require("../../common/decorators/permissions.decorator");
 let MembersController = class MembersController {
     constructor(membersService, ministriesService) {
@@ -29,7 +29,14 @@ let MembersController = class MembersController {
         return this.membersService.create(createMemberDto);
     }
     async findAll(query) {
-        return this.membersService.findAllPaginated(query.page, query.limit, query.search);
+        return this.membersService.findAllPaginated(query.page, query.limit, query.search, {
+            status: query.status,
+            marital_status: query.marital_status,
+            joined_from: query.joined_from,
+            joined_to: query.joined_to,
+            sort_by: query.sort_by,
+            sort_order: query.sort_order,
+        });
     }
     async findOne(id) {
         return this.membersService.findOne(id);
@@ -58,7 +65,7 @@ __decorate([
     (0, permissions_decorator_1.RequiresPermissions)('members.read'),
     __param(0, (0, common_1.Query)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [pagination_query_dto_1.PaginationQueryDto]),
+    __metadata("design:paramtypes", [member_list_query_dto_1.MemberListQueryDto]),
     __metadata("design:returntype", Promise)
 ], MembersController.prototype, "findAll", null);
 __decorate([

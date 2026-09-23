@@ -79,6 +79,18 @@ export class CreateMemberDto {
 
     @IsString()
     @IsOptional()
+    facebook_username?: string;
+
+    @IsString()
+    @IsOptional()
+    instagram_username?: string;
+
+    @IsString()
+    @IsOptional()
+    whatsapp_number?: string;
+
+    @IsString()
+    @IsOptional()
     member_type?: string;
 
     @IsString()

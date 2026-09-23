@@ -2,8 +2,8 @@ import { Controller, Get, Post, Patch, Delete, Body, Param, ParseUUIDPipe, Query
 import { MembersService } from './members.service';
 import { CreateMemberDto } from './dto/create-member.dto';
 import { UpdateMemberDto } from './dto/update-member.dto';
+import { MemberListQueryDto } from './dto/member-list-query.dto';
 import { MinistriesService } from '../ministries/ministries.service';
-import { PaginationQueryDto } from '../../common/dto/pagination-query.dto';
 import { RequiresPermissions } from '../../common/decorators/permissions.decorator';
 
 @Controller('members')
@@ -21,8 +21,15 @@ export class MembersController {
 
     @Get()
     @RequiresPermissions('members.read')
-    async findAll(@Query() query: PaginationQueryDto) {
-        return this.membersService.findAllPaginated(query.page, query.limit, query.search);
+    async findAll(@Query() query: MemberListQueryDto) {
+        return this.membersService.findAllPaginated(query.page, query.limit, query.search, {
+            status: query.status,
+            marital_status: query.marital_status,
+            joined_from: query.joined_from,
+            joined_to: query.joined_to,
+            sort_by: query.sort_by,
+            sort_order: query.sort_order,
+        });
     }
 
     @Get(':id')

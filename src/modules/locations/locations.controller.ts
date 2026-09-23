@@ -15,25 +15,22 @@ export class LocationsController {
   constructor(private readonly locationsService: LocationsService) {}
 
   @Get()
+  @RequiresPermissions('locations.read', 'locations.manage', 'members.create', 'members.update')
   @ApiOperation({ summary: 'Get all locations' })
-  // Any authenticated user can read locations for registration form, 
-  // or we can restrict it if needed. Leaving it open to any auth user for now.
   findAll(@Query('status') status?: string) {
     return this.locationsService.findAll(status);
   }
 
   @Get(':id')
+  @RequiresPermissions('locations.read', 'locations.manage', 'members.create', 'members.update')
   @ApiOperation({ summary: 'Get a location by id' })
   findOne(@Param('id') id: string) {
     return this.locationsService.findOne(id);
   }
 
   @Post()
+  @RequiresPermissions('locations.manage', 'members.create')
   @ApiOperation({ summary: 'Create a new location' })
-  // Creating a location on the fly during registration is needed.
-  // We allow members.create or locations.manage users to do this.
-  // Alternatively, just letting auth users do it if they can access the form.
-  // To be safe, we'll allow any auth user, but frontend checks locations.manage for the settings tab.
   create(@Body() dto: CreateLocationDto) {
     return this.locationsService.create(dto);
   }

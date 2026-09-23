@@ -21,6 +21,7 @@ const ministries_module_1 = require("./modules/ministries/ministries.module");
 const home_groups_module_1 = require("./modules/home-groups/home-groups.module");
 const bible_studies_module_1 = require("./modules/bible-studies/bible-studies.module");
 const tasks_module_1 = require("./modules/tasks/tasks.module");
+const plans_module_1 = require("./modules/plans/plans.module");
 const families_module_1 = require("./modules/families/families.module");
 const dashboard_module_1 = require("./modules/dashboard/dashboard.module");
 const access_module_1 = require("./modules/access/access.module");
@@ -127,6 +128,7 @@ exports.AppModule = AppModule = __decorate([
             home_groups_module_1.HomeGroupsModule,
             bible_studies_module_1.BibleStudiesModule,
             tasks_module_1.TasksModule,
+            plans_module_1.PlansModule,
             families_module_1.FamiliesModule,
             dashboard_module_1.DashboardModule,
             notifications_module_1.NotificationsModule,

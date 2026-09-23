@@ -12,6 +12,7 @@ import { MinistriesModule } from './modules/ministries/ministries.module';
 import { HomeGroupsModule } from './modules/home-groups/home-groups.module';
 import { BibleStudiesModule } from './modules/bible-studies/bible-studies.module';
 import { TasksModule } from './modules/tasks/tasks.module';
+import { PlansModule } from './modules/plans/plans.module';
 import { FamiliesModule } from './modules/families/families.module';
 import { DashboardModule } from './modules/dashboard/dashboard.module';
 import { AccessModule } from './modules/access/access.module';
@@ -112,6 +113,7 @@ import { PermissionsGuard } from './common/guards/permissions.guard';
         HomeGroupsModule,
         BibleStudiesModule,
         TasksModule,
+        PlansModule,
         FamiliesModule,
         DashboardModule,
         NotificationsModule,

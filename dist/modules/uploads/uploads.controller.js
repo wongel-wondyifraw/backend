@@ -15,15 +15,21 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.UploadsController = void 0;
 const common_1 = require("@nestjs/common");
 const platform_express_1 = require("@nestjs/platform-express");
+const permissions_decorator_1 = require("../../common/decorators/permissions.decorator");
 const multer_config_1 = require("../../common/config/multer.config");
+const image_processor_1 = require("./image-processor");
 let UploadsController = class UploadsController {
-    uploadImage(file) {
+    async uploadImage(file) {
         if (!file) {
             throw new common_1.BadRequestException('File not found');
         }
+        const processed = await (0, image_processor_1.processUploadedImage)(file.path, file.filename);
         return {
             message: 'File uploaded successfully',
-            url: `uploads/images/${file.filename}`,
+            url: processed.url,
+            variants: processed.variants,
+            width: processed.width,
+            height: processed.height,
         };
     }
     uploadDocument(file) {
@@ -40,6 +46,7 @@ let UploadsController = class UploadsController {
 exports.UploadsController = UploadsController;
 __decorate([
     (0, common_1.Post)('image'),
+    (0, permissions_decorator_1.RequiresPermissions)('uploads.create', 'website.manage', 'members.update', 'members.create'),
     (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)('file', {
         storage: (0, multer_config_1.createImageDiskStorage)((_req, file, cb) => {
             cb(null, (0, multer_config_1.uploadImageFilename)(file.originalname));
@@ -50,10 +57,11 @@ __decorate([
     __param(0, (0, common_1.UploadedFile)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
-    __metadata("design:returntype", void 0)
+    __metadata("design:returntype", Promise)
 ], UploadsController.prototype, "uploadImage", null);
 __decorate([
     (0, common_1.Post)('document'),
+    (0, permissions_decorator_1.RequiresPermissions)('uploads.create', 'website.manage', 'members.update', 'members.create'),
     (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)('file', {
         storage: (0, multer_config_1.createDocumentDiskStorage)((_req, file, cb) => {
             cb(null, (0, multer_config_1.uploadDocumentFilename)(file.originalname));

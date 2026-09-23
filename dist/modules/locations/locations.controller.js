@@ -25,18 +25,12 @@ let LocationsController = class LocationsController {
     constructor(locationsService) {
         this.locationsService = locationsService;
     }
-    // Any authenticated user can read locations for registration form, 
-    // or we can restrict it if needed. Leaving it open to any auth user for now.
     findAll(status) {
         return this.locationsService.findAll(status);
     }
     findOne(id) {
         return this.locationsService.findOne(id);
     }
-    // Creating a location on the fly during registration is needed.
-    // We allow members.create or locations.manage users to do this.
-    // Alternatively, just letting auth users do it if they can access the form.
-    // To be safe, we'll allow any auth user, but frontend checks locations.manage for the settings tab.
     create(dto) {
         return this.locationsService.create(dto);
     }
@@ -47,10 +41,8 @@ let LocationsController = class LocationsController {
 exports.LocationsController = LocationsController;
 __decorate([
     (0, common_1.Get)(),
-    (0, swagger_1.ApiOperation)({ summary: 'Get all locations' })
-    // Any authenticated user can read locations for registration form, 
-    // or we can restrict it if needed. Leaving it open to any auth user for now.
-    ,
+    (0, permissions_decorator_1.RequiresPermissions)('locations.read', 'locations.manage', 'members.create', 'members.update'),
+    (0, swagger_1.ApiOperation)({ summary: 'Get all locations' }),
     __param(0, (0, common_1.Query)('status')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
@@ -58,6 +50,7 @@ __decorate([
 ], LocationsController.prototype, "findAll", null);
 __decorate([
     (0, common_1.Get)(':id'),
+    (0, permissions_decorator_1.RequiresPermissions)('locations.read', 'locations.manage', 'members.create', 'members.update'),
     (0, swagger_1.ApiOperation)({ summary: 'Get a location by id' }),
     __param(0, (0, common_1.Param)('id')),
     __metadata("design:type", Function),
@@ -66,12 +59,8 @@ __decorate([
 ], LocationsController.prototype, "findOne", null);
 __decorate([
     (0, common_1.Post)(),
-    (0, swagger_1.ApiOperation)({ summary: 'Create a new location' })
-    // Creating a location on the fly during registration is needed.
-    // We allow members.create or locations.manage users to do this.
-    // Alternatively, just letting auth users do it if they can access the form.
-    // To be safe, we'll allow any auth user, but frontend checks locations.manage for the settings tab.
-    ,
+    (0, permissions_decorator_1.RequiresPermissions)('locations.manage', 'members.create'),
+    (0, swagger_1.ApiOperation)({ summary: 'Create a new location' }),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [create_location_dto_1.CreateLocationDto]),

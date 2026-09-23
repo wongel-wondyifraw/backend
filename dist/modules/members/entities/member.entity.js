@@ -89,6 +89,18 @@ __decorate([
     __metadata("design:type", Object)
 ], Member.prototype, "telegram_username", void 0);
 __decorate([
+    (0, typeorm_1.Column)({ type: 'varchar', nullable: true }),
+    __metadata("design:type", Object)
+], Member.prototype, "facebook_username", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'varchar', nullable: true }),
+    __metadata("design:type", Object)
+], Member.prototype, "instagram_username", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'varchar', nullable: true }),
+    __metadata("design:type", Object)
+], Member.prototype, "whatsapp_number", void 0);
+__decorate([
     (0, typeorm_1.Column)({ type: 'varchar', default: 'existing' }),
     __metadata("design:type", String)
 ], Member.prototype, "member_type", void 0);

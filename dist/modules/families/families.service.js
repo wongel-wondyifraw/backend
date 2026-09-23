@@ -75,6 +75,81 @@ let FamiliesService = class FamiliesService {
         family.children = (family.children || []).sort((a, b) => (a.age || 0) - (b.age || 0) || a.name.localeCompare(b.name));
         return family;
     }
+    /** Batch-load spouses for a page of families (avoids N+1). */
+    async attachSpousesBatch(families) {
+        if (families.length === 0)
+            return families;
+        const memberIds = new Set();
+        const ministerIds = new Set();
+        for (const f of families) {
+            if (f.husband_id) {
+                if (f.husband_type === 'minister')
+                    ministerIds.add(f.husband_id);
+                else
+                    memberIds.add(f.husband_id);
+            }
+            if (f.wife_id) {
+                if (f.wife_type === 'minister')
+                    ministerIds.add(f.wife_id);
+                else
+                    memberIds.add(f.wife_id);
+            }
+        }
+        const members = memberIds.size > 0
+            ? await this.members
+                .createQueryBuilder('m')
+                .where('m.id IN (:...ids)', { ids: [...memberIds] })
+                .getMany()
+            : [];
+        const ministers = ministerIds.size > 0
+            ? await this.ministers
+                .createQueryBuilder('m')
+                .where('m.id IN (:...ids)', { ids: [...ministerIds] })
+                .getMany()
+            : [];
+        const memberMap = new Map(members.map((m) => [m.id, m]));
+        const ministerMap = new Map(ministers.map((m) => [m.id, m]));
+        const toSpouse = (id, type) => {
+            if (!id)
+                return null;
+            if (type === 'minister') {
+                const minister = ministerMap.get(id);
+                if (!minister)
+                    return null;
+                return {
+                    id: minister.id,
+                    first_name: minister.first_name,
+                    middle_name: minister.middle_name,
+                    last_name: minister.last_name,
+                    email: minister.email,
+                    phone: minister.phone,
+                    type: 'minister',
+                    gender: minister.gender,
+                    marital_status: minister.marital_status,
+                };
+            }
+            const member = memberMap.get(id);
+            if (!member)
+                return null;
+            return {
+                id: member.id,
+                first_name: member.first_name,
+                middle_name: member.middle_name,
+                last_name: member.last_name,
+                email: member.email,
+                phone: member.phone,
+                type: 'member',
+                gender: member.gender,
+                marital_status: member.marital_status,
+            };
+        };
+        for (const family of families) {
+            family.husband = toSpouse(family.husband_id, family.husband_type);
+            family.wife = toSpouse(family.wife_id, family.wife_type);
+            family.children = (family.children || []).sort((a, b) => (a.age || 0) - (b.age || 0) || a.name.localeCompare(b.name));
+        }
+        return families;
+    }
     async ensureSpousesAvailable(husbandId, husbandType, wifeId, wifeType, excludeFamilyId) {
         if (!husbandId && !wifeId)
             return;
@@ -230,7 +305,7 @@ let FamiliesService = class FamiliesService {
             .skip((page - 1) * limit)
             .take(limit);
         const [data, total] = await qb.getManyAndCount();
-        const withSpouses = await Promise.all(data.map((f) => this.attachSpouses(f)));
+        const withSpouses = await this.attachSpousesBatch(data);
         return {
             data: withSpouses,
             total,
