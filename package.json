@@ -25,14 +25,13 @@
     "pino-http": "^11.0.0",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.2",
-    "sharp": "^0.35.4",
     "typeorm": "^0.3.28"
   },
   "scripts": {
     "build": "nest build",
     "start": "nest start",
     "start:dev": "nest start --watch",
-    "start:prod": "node dist/main",
+    "start:prod": "node --max-old-space-size=384 dist/main",
     "format": "prettier --write \"src/**/*.ts\"",
     "test": "jest"
   },
@@ -53,5 +52,8 @@
   "overrides": {
     "multer": "^2.2.0",
     "js-yaml": "^5.1.0"
+  },
+  "optionalDependencies": {
+    "sharp": "^0.35.4"
   }
 }

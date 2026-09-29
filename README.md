@@ -125,7 +125,9 @@ System roles are seeded on startup:
 - `CLOUD_STORAGE=true` — uploads go to Cloudinary; the `secure_url` is stored in the DB.
   Also set `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, and `CLOUDINARY_API_SECRET`.
 
-Use Cloudinary on Render / other memory-constrained hosts to avoid Sharp OOM.
+**Render / 512MB hosts:** set `CLOUD_STORAGE=true` and all three `CLOUDINARY_*` vars.
+Sharp is optional and only loaded for local storage — leaving `CLOUD_STORAGE=false` on
+Render will OOM. Also set `DB_SYNCHRONIZE=false` in production.
 
 ## Testing
 

@@ -1,4 +1,8 @@
-import { Injectable, Logger } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  ServiceUnavailableException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { v2 as cloudinary, UploadApiResponse } from 'cloudinary';
 import { writeFileSync, unlinkSync, existsSync, readFileSync } from 'fs';
@@ -9,10 +13,7 @@ import {
   uploadDocumentFilename,
   uploadImageFilename,
 } from '../../common/config/multer.config';
-import {
-  processUploadedImage,
-  ProcessedImage,
-} from './image-processor';
+import type { ProcessedImage } from './image-types';
 
 export type UploadedDocument = {
   url: string;
@@ -24,19 +25,21 @@ export type UploadedDocument = {
 export class CloudinaryService {
   private readonly logger = new Logger(CloudinaryService.name);
   private readonly enabled: boolean;
+  /** User asked for cloud but credentials are incomplete. */
+  private readonly cloudRequested: boolean;
 
   constructor(private readonly config: ConfigService) {
-    const cloudStorage = this.config.get<string>('CLOUD_STORAGE') === 'true';
+    this.cloudRequested = this.config.get<string>('CLOUD_STORAGE') === 'true';
     const cloudName = this.config.get<string>('CLOUDINARY_CLOUD_NAME');
     const apiKey = this.config.get<string>('CLOUDINARY_API_KEY');
     const apiSecret = this.config.get<string>('CLOUDINARY_API_SECRET');
     const hasCredentials = Boolean(cloudName && apiKey && apiSecret);
 
-    this.enabled = cloudStorage && hasCredentials;
+    this.enabled = this.cloudRequested && hasCredentials;
 
-    if (cloudStorage && !hasCredentials) {
+    if (this.cloudRequested && !hasCredentials) {
       this.logger.error(
-        'CLOUD_STORAGE=true but CLOUDINARY_CLOUD_NAME / API_KEY / API_SECRET are missing — using local storage',
+        'CLOUD_STORAGE=true but CLOUDINARY_* credentials are missing',
       );
     }
 
@@ -48,8 +51,8 @@ export class CloudinaryService {
         secure: true,
       });
       this.logger.log('Cloud storage enabled (Cloudinary)');
-    } else {
-      this.logger.log('Cloud storage disabled — using local uploads/ + Sharp');
+    } else if (!this.cloudRequested) {
+      this.logger.log('Cloud storage disabled — using local uploads/');
     }
   }
 
@@ -61,6 +64,7 @@ export class CloudinaryService {
     file: Express.Multer.File,
     folder = 'cms/images',
   ): Promise<ProcessedImage> {
+    this.assertCloudReady();
     if (this.enabled) {
       return this.uploadImageToCloudinary(file, folder);
     }
@@ -71,26 +75,56 @@ export class CloudinaryService {
     file: Express.Multer.File,
     folder = 'cms/documents',
   ): Promise<UploadedDocument> {
+    this.assertCloudReady();
     if (this.enabled) {
       return this.uploadDocumentToCloudinary(file, folder);
     }
     return this.uploadDocumentLocally(file);
   }
 
+  private assertCloudReady(): void {
+    if (this.cloudRequested && !this.enabled) {
+      throw new ServiceUnavailableException(
+        'CLOUD_STORAGE=true but Cloudinary credentials are not configured',
+      );
+    }
+  }
+
   private async uploadImageToCloudinary(
     file: Express.Multer.File,
     folder: string,
   ): Promise<ProcessedImage> {
+    // No local transform — Cloudinary handles resize/webp via eager transforms.
     const result = await this.uploadBuffer(file, {
       folder,
       resource_type: 'image',
       eager: [
-        { width: 800, height: 800, crop: 'limit', quality: 78, fetch_format: 'webp' },
-        { width: 320, height: 320, crop: 'fill', gravity: 'auto', quality: 72, fetch_format: 'webp' },
+        {
+          width: 800,
+          height: 800,
+          crop: 'limit',
+          quality: 78,
+          fetch_format: 'webp',
+        },
+        {
+          width: 320,
+          height: 320,
+          crop: 'fill',
+          gravity: 'auto',
+          quality: 72,
+          fetch_format: 'webp',
+        },
       ],
-      eager_async: false,
+      // Async eager avoids holding the upload connection while variants build
+      eager_async: true,
       transformation: [
-        { width: 1920, height: 1920, crop: 'limit', quality: 82, fetch_format: 'webp' },
+        {
+          width: 1920,
+          height: 1920,
+          crop: 'limit',
+          quality: 82,
+          fetch_format: 'webp',
+        },
       ],
     });
 
@@ -157,6 +191,9 @@ export class CloudinaryService {
     const filename = uploadImageFilename(file.originalname);
     const dest = join(getImagesUploadDir(), filename);
     writeFileSync(dest, this.getBuffer(file));
+
+    // Dynamic import — Sharp never loads when CLOUD_STORAGE=true
+    const { processUploadedImage } = await import('./image-processor');
     return processUploadedImage(dest, filename);
   }
 

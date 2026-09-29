@@ -32,48 +32,44 @@ var __importStar = (this && this.__importStar) || (function () {
         return result;
     };
 })();
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.processUploadedImage = processUploadedImage;
 const path_1 = require("path");
 const fs = __importStar(require("fs"));
-const sharp_1 = __importDefault(require("sharp"));
 const multer_config_1 = require("../../common/config/multer.config");
 /**
- * Optimize uploaded images: convert to WebP where useful, create card + thumb variants.
- * Falls back to the original file if processing fails.
+ * Local-only image optimize (Sharp). Loaded dynamically so Cloudinary
+ * deployments never pull Sharp into memory at boot.
  */
 async function processUploadedImage(filePath, filename) {
     const dir = (0, multer_config_1.getImagesUploadDir)();
     const base = filename.replace(/\.[^.]+$/, '');
     const variants = {};
     try {
-        const image = (0, sharp_1.default)(filePath);
+        const sharp = (await Promise.resolve().then(() => __importStar(require('sharp')))).default;
+        const image = sharp(filePath);
         const meta = await image.metadata();
         const mainName = `${base}.webp`;
         const mainPath = (0, path_1.join)(dir, mainName);
-        await (0, sharp_1.default)(filePath)
+        await sharp(filePath)
             .rotate()
             .resize({ width: 1920, height: 1920, fit: 'inside', withoutEnlargement: true })
             .webp({ quality: 82 })
             .toFile(mainPath);
         const cardName = `${base}-card.webp`;
-        await (0, sharp_1.default)(filePath)
+        await sharp(filePath)
             .rotate()
             .resize({ width: 800, height: 800, fit: 'inside', withoutEnlargement: true })
             .webp({ quality: 78 })
             .toFile((0, path_1.join)(dir, cardName));
         variants.card = `uploads/images/${cardName}`;
         const thumbName = `${base}-thumb.webp`;
-        await (0, sharp_1.default)(filePath)
+        await sharp(filePath)
             .rotate()
             .resize({ width: 320, height: 320, fit: 'cover' })
             .webp({ quality: 72 })
             .toFile((0, path_1.join)(dir, thumbName));
         variants.thumb = `uploads/images/${thumbName}`;
-        // Remove original if we wrote a different main file
         if (filename !== mainName && fs.existsSync(filePath)) {
             try {
                 fs.unlinkSync(filePath);

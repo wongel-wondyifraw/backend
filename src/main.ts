@@ -95,8 +95,11 @@ async function bootstrap() {
         .setVersion('1.0')
         .addBearerAuth()
         .build();
-    const document = SwaggerModule.createDocument(app, swaggerConfig);
-    SwaggerModule.setup('api/docs', app, document);
+    // Skip Swagger in production — saves heap on small (512MB) hosts
+    if (config.get<string>('NODE_ENV') !== 'production') {
+        const document = SwaggerModule.createDocument(app, swaggerConfig);
+        SwaggerModule.setup('api/docs', app, document);
+    }
 
     await app.listen(port);
     logger.log(`Backend running on http://localhost:${port}`);

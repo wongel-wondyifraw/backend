@@ -1,23 +1,13 @@
 import { join } from 'path';
 import * as fs from 'fs';
-import sharp from 'sharp';
 import { getImagesUploadDir } from '../../common/config/multer.config';
+import type { ImageVariants, ProcessedImage } from './image-types';
 
-export type ImageVariants = {
-  card?: string;
-  thumb?: string;
-};
-
-export type ProcessedImage = {
-  url: string;
-  width?: number;
-  height?: number;
-  variants: ImageVariants;
-};
+export type { ImageVariants, ProcessedImage } from './image-types';
 
 /**
- * Optimize uploaded images: convert to WebP where useful, create card + thumb variants.
- * Falls back to the original file if processing fails.
+ * Local-only image optimize (Sharp). Loaded dynamically so Cloudinary
+ * deployments never pull Sharp into memory at boot.
  */
 export async function processUploadedImage(
   filePath: string,
@@ -28,6 +18,7 @@ export async function processUploadedImage(
   const variants: ImageVariants = {};
 
   try {
+    const sharp = (await import('sharp')).default;
     const image = sharp(filePath);
     const meta = await image.metadata();
 
@@ -55,7 +46,6 @@ export async function processUploadedImage(
       .toFile(join(dir, thumbName));
     variants.thumb = `uploads/images/${thumbName}`;
 
-    // Remove original if we wrote a different main file
     if (filename !== mainName && fs.existsSync(filePath)) {
       try {
         fs.unlinkSync(filePath);
