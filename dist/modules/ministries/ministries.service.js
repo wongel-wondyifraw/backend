@@ -40,6 +40,7 @@ let MinistriesService = class MinistriesService {
     async create(createMinistryDto) {
         var _a, _b;
         const leader = this.normalizeLeader(createMinistryDto);
+        await this.leaders.assertExists(leader.leader_id, leader.leader_type);
         const ministry = this.ministriesRepository.create({
             name: createMinistryDto.name,
             about: (_a = createMinistryDto.about) !== null && _a !== void 0 ? _a : null,
@@ -95,7 +96,9 @@ let MinistriesService = class MinistriesService {
         const patch = { ...updateMinistryDto };
         if ("leader_id" in updateMinistryDto ||
             "leader_type" in updateMinistryDto) {
-            Object.assign(patch, this.normalizeLeader(updateMinistryDto));
+            const leader = this.normalizeLeader(updateMinistryDto);
+            await this.leaders.assertExists(leader.leader_id, leader.leader_type);
+            Object.assign(patch, leader);
         }
         await this.ministriesRepository.update(id, patch);
         const ministry = await this.findOne(id);

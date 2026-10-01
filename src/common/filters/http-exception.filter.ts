@@ -8,6 +8,17 @@ import {
 import { Request, Response } from "express";
 import { Logger } from "nestjs-pino";
 
+type ExceptionBody = {
+  message?: string | string[];
+  code?: string;
+  [key: string]: unknown;
+};
+
+type AuthenticatedRequest = Request & {
+  user?: { id?: string };
+  id?: string;
+};
+
 @Catch()
 export class HttpExceptionFilter implements ExceptionFilter {
   constructor(private readonly logger: Logger) {
@@ -17,29 +28,29 @@ export class HttpExceptionFilter implements ExceptionFilter {
   catch(exception: unknown, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
-    const request = ctx.getRequest<Request>();
+    const request = ctx.getRequest<AuthenticatedRequest>();
 
     const status =
       exception instanceof HttpException
         ? exception.getStatus()
         : HttpStatus.INTERNAL_SERVER_ERROR;
 
-    const exceptionResponse =
+    const exceptionResponse: string | ExceptionBody =
       exception instanceof HttpException
-        ? exception.getResponse()
+        ? (exception.getResponse() as string | ExceptionBody)
         : { message: "An unexpected error occurred" };
 
     const message =
       typeof exceptionResponse === "object"
-        ? (exceptionResponse as any).message || "An unexpected error occurred"
+        ? exceptionResponse.message || "An unexpected error occurred"
         : exceptionResponse;
 
-    const userId = (request as any).user?.id || "anonymous";
+    const userId = request.user?.id || "anonymous";
 
     // Sanitize body for logging
-    let sanitizedBody = undefined;
+    let sanitizedBody: Record<string, unknown> | undefined;
     if (["POST", "PATCH", "PUT"].includes(request.method) && request.body) {
-      sanitizedBody = { ...request.body };
+      sanitizedBody = { ...(request.body as Record<string, unknown>) };
       if (sanitizedBody.password) sanitizedBody.password = "***";
       if (sanitizedBody.token) sanitizedBody.token = "***";
     }
@@ -48,13 +59,14 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const isDev = process.env.NODE_ENV !== "production";
 
     const requestId =
-      request.id || (request.headers["x-request-id"] as string) || "unknown";
+      request.id ||
+      (typeof request.headers["x-request-id"] === "string"
+        ? request.headers["x-request-id"]
+        : "unknown");
     const errorCode =
-      typeof exceptionResponse === "object" && (exceptionResponse as any).code
-        ? (exceptionResponse as any).code
-        : undefined;
+      typeof exceptionResponse === "object" ? exceptionResponse.code : undefined;
 
-    const errorDetails: any = {
+    const errorDetails: Record<string, unknown> = {
       method: request.method,
       url: request.url,
       userId,

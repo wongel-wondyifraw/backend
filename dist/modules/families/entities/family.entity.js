@@ -72,5 +72,7 @@ __decorate([
     __metadata("design:type", Date)
 ], Family.prototype, "updated_at", void 0);
 exports.Family = Family = __decorate([
-    (0, typeorm_1.Entity)("families")
+    (0, typeorm_1.Entity)("families"),
+    (0, typeorm_1.Index)("IDX_families_husband_id", ["husband_id"]),
+    (0, typeorm_1.Index)("IDX_families_wife_id", ["wife_id"])
 ], Family);

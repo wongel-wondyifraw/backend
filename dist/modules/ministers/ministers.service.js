@@ -57,8 +57,8 @@ let MinistersService = class MinistersService {
             email,
             password: temporaryPassword,
             role: "minister",
-            title: (_c = dto.title) !== null && _c !== void 0 ? _c : null,
-            avatar_url: (_d = dto.image_url) !== null && _d !== void 0 ? _d : null,
+            title: (_c = dto.title) !== null && _c !== void 0 ? _c : undefined,
+            avatar_url: (_d = dto.image_url) !== null && _d !== void 0 ? _d : undefined,
             is_active: isActive,
         });
         const minister = this.ministersRepository.create({

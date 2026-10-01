@@ -23,7 +23,7 @@ export class AuditLog {
   user_id: string | null;
 
   @Column({ type: "jsonb", nullable: true })
-  changes: any;
+  changes: Record<string, unknown> | null;
 
   @CreateDateColumn()
   created_at: Date;

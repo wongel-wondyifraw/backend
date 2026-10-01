@@ -15,6 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.UploadsController = void 0;
 const common_1 = require("@nestjs/common");
 const platform_express_1 = require("@nestjs/platform-express");
+const throttler_1 = require("@nestjs/throttler");
 const permissions_decorator_1 = require("../../common/decorators/permissions.decorator");
 const multer_config_1 = require("../../common/config/multer.config");
 const cloudinary_service_1 = require("./cloudinary.service");
@@ -50,6 +51,7 @@ let UploadsController = class UploadsController {
 exports.UploadsController = UploadsController;
 __decorate([
     (0, common_1.Post)("image"),
+    (0, throttler_1.Throttle)({ default: { limit: 10, ttl: 60000 } }),
     (0, permissions_decorator_1.RequiresPermissions)("uploads.create", "website.manage", "members.update", "members.create"),
     (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)("file", {
         storage: (0, multer_config_1.createImageMemoryStorage)(),
@@ -63,6 +65,7 @@ __decorate([
 ], UploadsController.prototype, "uploadImage", null);
 __decorate([
     (0, common_1.Post)("document"),
+    (0, throttler_1.Throttle)({ default: { limit: 10, ttl: 60000 } }),
     (0, permissions_decorator_1.RequiresPermissions)("uploads.create", "website.manage", "members.update", "members.create"),
     (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)("file", {
         storage: (0, multer_config_1.createDocumentMemoryStorage)(),

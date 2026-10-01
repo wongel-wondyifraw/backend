@@ -43,5 +43,5 @@ export class CreateUserDto {
   is_active?: string | boolean;
 
   @Allow()
-  avatar?: any;
+  avatar?: Express.Multer.File | string | null;
 }

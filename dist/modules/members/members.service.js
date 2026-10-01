@@ -24,8 +24,24 @@ let MembersService = class MembersService {
         this.membersRepository = membersRepository;
         this.events = events;
     }
+    async assertEmailAvailable(email, excludeId) {
+        const normalized = email === null || email === void 0 ? void 0 : email.trim().toLowerCase();
+        if (!normalized)
+            return;
+        const qb = this.membersRepository
+            .createQueryBuilder("member")
+            .where("LOWER(member.email) = :email", { email: normalized });
+        if (excludeId) {
+            qb.andWhere("member.id != :excludeId", { excludeId });
+        }
+        const existing = await qb.getOne();
+        if (existing) {
+            throw new common_1.ConflictException("A member with this email already exists");
+        }
+    }
     async create(createMemberDto) {
         const { ministry_ids, ...memberData } = createMemberDto;
+        await this.assertEmailAvailable(memberData.email);
         const member = this.membersRepository.create(memberData);
         const saved = await this.membersRepository.save(member);
         if (ministry_ids && ministry_ids.length > 0) {
@@ -49,6 +65,21 @@ let MembersService = class MembersService {
             targetRoles: ["admin", "minister"],
         });
         return saved;
+    }
+    async createBulk(items) {
+        const errors = [];
+        let created = 0;
+        for (let i = 0; i < items.length; i += 1) {
+            try {
+                await this.create(items[i]);
+                created += 1;
+            }
+            catch (err) {
+                const message = err instanceof Error ? err.message : "Failed to create member";
+                errors.push({ index: i, message });
+            }
+        }
+        return { created, failed: errors.length, errors };
     }
     async findAllPaginated(page = 1, limit = 20, search, filters) {
         var _a, _b;
@@ -111,6 +142,9 @@ let MembersService = class MembersService {
     }
     async update(id, updateMemberDto) {
         const { ministry_ids, ...memberData } = updateMemberDto;
+        if (memberData.email !== undefined) {
+            await this.assertEmailAvailable(memberData.email, id);
+        }
         await this.membersRepository.update(id, memberData);
         if (ministry_ids !== undefined) {
             await this.membersRepository.manager

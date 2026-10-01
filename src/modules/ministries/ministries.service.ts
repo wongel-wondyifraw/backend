@@ -41,6 +41,7 @@ export class MinistriesService {
 
   async create(createMinistryDto: CreateMinistryDto): Promise<Ministry> {
     const leader = this.normalizeLeader(createMinistryDto);
+    await this.leaders.assertExists(leader.leader_id, leader.leader_type);
     const ministry = this.ministriesRepository.create({
       name: createMinistryDto.name,
       about: createMinistryDto.about ?? null,
@@ -113,7 +114,9 @@ export class MinistriesService {
       "leader_id" in updateMinistryDto ||
       "leader_type" in updateMinistryDto
     ) {
-      Object.assign(patch, this.normalizeLeader(updateMinistryDto));
+      const leader = this.normalizeLeader(updateMinistryDto);
+      await this.leaders.assertExists(leader.leader_id, leader.leader_type);
+      Object.assign(patch, leader);
     }
     await this.ministriesRepository.update(id, patch);
     const ministry = await this.findOne(id);

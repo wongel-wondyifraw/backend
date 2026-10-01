@@ -9,6 +9,7 @@ import {
   Query,
   ParseUUIDPipe,
 } from "@nestjs/common";
+import { Throttle } from "@nestjs/throttler";
 import { ContactRequestsService } from "./contact-requests.service";
 import { CreateContactRequestDto } from "./dto/create-contact-request.dto";
 import { UpdateContactRequestDto } from "./dto/update-contact-request.dto";
@@ -25,6 +26,7 @@ export class ContactRequestsController {
    * Public endpoint to submit prayer requests, ministry inquiries, or general messages.
    */
   @Public()
+  @Throttle({ default: { limit: 10, ttl: 60_000 } })
   @Post()
   async submit(@Body() dto: CreateContactRequestDto) {
     const created = await this.contactRequestsService.create(dto);

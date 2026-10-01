@@ -23,6 +23,14 @@ let LeaderResolverService = class LeaderResolverService {
         this.membersRepository = membersRepository;
         this.ministersRepository = ministersRepository;
     }
+    async assertExists(leaderId, leaderType) {
+        if (!leaderId)
+            return;
+        const resolved = await this.resolve(leaderId, leaderType);
+        if (!resolved) {
+            throw new common_1.BadRequestException(`Leader not found for id ${leaderId}${leaderType ? ` (${leaderType})` : ""}`);
+        }
+    }
     async resolve(leaderId, leaderType) {
         if (!leaderId)
             return null;

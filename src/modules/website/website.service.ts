@@ -24,9 +24,7 @@ export class WebsiteService {
     private readonly pageContentRepo: Repository<PageContent>,
   ) {}
 
-  async getPageContent(
-    slug: string,
-  ): Promise<{
+  async getPageContent(slug: string): Promise<{
     page_slug: string;
     content: unknown;
     created_at?: Date;
@@ -63,7 +61,7 @@ export class WebsiteService {
       typeof body === "object" &&
       !Array.isArray(body) &&
       Object.prototype.hasOwnProperty.call(body, "content") &&
-      Object.keys(body as object).every((k) => k === "content")
+      Object.keys(body).every((k) => k === "content")
     ) {
       payload = (body as { content: unknown }).content;
     }
@@ -71,10 +69,16 @@ export class WebsiteService {
     let page = await this.pageContentRepo.findOne({
       where: { page_slug: slug },
     });
+    const content: Record<string, unknown> | string =
+      typeof payload === "string"
+        ? payload
+        : payload && typeof payload === "object" && !Array.isArray(payload)
+          ? (payload as Record<string, unknown>)
+          : {};
     if (!page) {
-      page = this.pageContentRepo.create({ page_slug: slug, content: payload });
+      page = this.pageContentRepo.create({ page_slug: slug, content });
     } else {
-      page.content = payload;
+      page.content = content;
     }
     const saved = await this.pageContentRepo.save(page);
     this.pageCache.delete(slug);

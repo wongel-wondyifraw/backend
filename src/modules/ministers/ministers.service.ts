@@ -63,8 +63,8 @@ export class MinistersService {
       email,
       password: temporaryPassword,
       role: "minister",
-      title: dto.title ?? null,
-      avatar_url: dto.image_url ?? null,
+      title: dto.title ?? undefined,
+      avatar_url: dto.image_url ?? undefined,
       is_active: isActive,
     });
 

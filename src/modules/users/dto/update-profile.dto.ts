@@ -1,5 +1,3 @@
-import { PartialType, PickType } from "@nestjs/swagger";
-import { CreateUserDto } from "./create-user.dto";
 import { IsString, IsOptional } from "class-validator";
 
 export class UpdateProfileDto {

@@ -176,7 +176,13 @@ export class CloudinaryService {
         (error, result) => {
           if (error || !result) {
             reject(
-              error ?? new Error("Cloudinary upload returned empty result"),
+              error instanceof Error
+                ? error
+                : new Error(
+                    typeof error === "string"
+                      ? error
+                      : "Cloudinary upload returned empty result",
+                  ),
             );
             return;
           }

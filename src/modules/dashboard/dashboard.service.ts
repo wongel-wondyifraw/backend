@@ -60,6 +60,10 @@ const MONTH_LABELS = [
 
 @Injectable()
 export class DashboardService {
+  private statsCache: { value: DashboardStats; expiresAt: number } | null =
+    null;
+  private static readonly STATS_TTL_MS = 60_000;
+
   constructor(
     @InjectRepository(Member)
     private readonly membersRepository: Repository<Member>,
@@ -84,6 +88,10 @@ export class DashboardService {
   }
 
   async getStats(): Promise<DashboardStats> {
+    if (this.statsCache && this.statsCache.expiresAt > Date.now()) {
+      return this.statsCache.value;
+    }
+
     const monthStart = this.startOfMonthUtc();
     const weekStart = this.daysAgoUtc(7);
     const twoWeeksStart = this.daysAgoUtc(14);
@@ -192,7 +200,7 @@ export class DashboardService {
       registrationSpark.push(sparkMap.get(key) || 0);
     }
 
-    return {
+    const value: DashboardStats = {
       memberCount,
       activeMembers,
       inactiveMembers: Math.max(0, memberCount - activeMembers),
@@ -216,6 +224,12 @@ export class DashboardService {
       registrationsByMonth: monthBuckets,
       registrationSpark,
     };
+
+    this.statsCache = {
+      value,
+      expiresAt: Date.now() + DashboardService.STATS_TTL_MS,
+    };
+    return value;
   }
 
   async search(

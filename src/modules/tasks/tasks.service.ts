@@ -322,9 +322,7 @@ export class TasksService implements OnModuleInit {
     if (dto.visitation_methods !== undefined)
       task.visitation_methods = dto.visitation_methods;
 
-    let justCompleted = false;
     if (dto.status !== undefined && task.status !== dto.status) {
-      if (dto.status === "completed") justCompleted = true;
       task.status = dto.status;
       task.completed_at = dto.status === "completed" ? new Date() : null;
     }

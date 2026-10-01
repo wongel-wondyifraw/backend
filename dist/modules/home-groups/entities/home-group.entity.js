@@ -56,5 +56,6 @@ __decorate([
     __metadata("design:type", Array)
 ], HomeGroup.prototype, "home_group_members", void 0);
 exports.HomeGroup = HomeGroup = __decorate([
-    (0, typeorm_1.Entity)("home_groups")
+    (0, typeorm_1.Entity)("home_groups"),
+    (0, typeorm_1.Index)("IDX_home_groups_leader_id", ["leader_id"])
 ], HomeGroup);

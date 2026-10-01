@@ -51,6 +51,7 @@ export class BibleStudiesService {
     }
 
     const leader = this.normalizeLeader(dto);
+    await this.leaders.assertExists(leader.leader_id, leader.leader_type);
     const study = this.bibleStudiesRepository.create({
       name: dto.name,
       about: dto.about ?? null,
@@ -139,7 +140,9 @@ export class BibleStudiesService {
     if (dto.schedule !== undefined) patch.schedule = dto.schedule ?? null;
     if (dto.location !== undefined) patch.location = dto.location;
     if ("leader_id" in dto || "leader_type" in dto) {
-      Object.assign(patch, this.normalizeLeader(dto));
+      const leader = this.normalizeLeader(dto);
+      await this.leaders.assertExists(leader.leader_id, leader.leader_type);
+      Object.assign(patch, leader);
     }
 
     if (contentType === "book") {

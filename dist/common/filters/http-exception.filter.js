@@ -33,7 +33,7 @@ let HttpExceptionFilter = class HttpExceptionFilter {
             : exceptionResponse;
         const userId = ((_a = request.user) === null || _a === void 0 ? void 0 : _a.id) || "anonymous";
         // Sanitize body for logging
-        let sanitizedBody = undefined;
+        let sanitizedBody;
         if (["POST", "PATCH", "PUT"].includes(request.method) && request.body) {
             sanitizedBody = { ...request.body };
             if (sanitizedBody.password)
@@ -43,10 +43,11 @@ let HttpExceptionFilter = class HttpExceptionFilter {
         }
         const is500 = status === common_1.HttpStatus.INTERNAL_SERVER_ERROR;
         const isDev = process.env.NODE_ENV !== "production";
-        const requestId = request.id || request.headers["x-request-id"] || "unknown";
-        const errorCode = typeof exceptionResponse === "object" && exceptionResponse.code
-            ? exceptionResponse.code
-            : undefined;
+        const requestId = request.id ||
+            (typeof request.headers["x-request-id"] === "string"
+                ? request.headers["x-request-id"]
+                : "unknown");
+        const errorCode = typeof exceptionResponse === "object" ? exceptionResponse.code : undefined;
         const errorDetails = {
             method: request.method,
             url: request.url,

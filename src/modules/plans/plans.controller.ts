@@ -11,6 +11,7 @@ import {
 } from "@nestjs/common";
 import { PlansService } from "./plans.service";
 import { CreatePlanDto } from "./dto/create-plan.dto";
+import { BulkCreatePlansDto } from "./dto/bulk-create-plans.dto";
 import { UpdatePlanDto } from "./dto/update-plan.dto";
 import { PlanListQueryDto } from "./dto/plan-list-query.dto";
 import { RequiresPermissions } from "../../common/decorators/permissions.decorator";
@@ -18,6 +19,12 @@ import { RequiresPermissions } from "../../common/decorators/permissions.decorat
 @Controller("plans")
 export class PlansController {
   constructor(private readonly plansService: PlansService) {}
+
+  @Post("bulk")
+  @RequiresPermissions("plans.create")
+  createBulk(@Body() dto: BulkCreatePlansDto) {
+    return this.plansService.createBulk(dto.items);
+  }
 
   @Post()
   @RequiresPermissions("plans.create")

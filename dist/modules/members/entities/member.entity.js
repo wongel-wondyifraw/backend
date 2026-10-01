@@ -174,5 +174,8 @@ __decorate([
     __metadata("design:type", Array)
 ], Member.prototype, "ministry_members", void 0);
 exports.Member = Member = __decorate([
-    (0, typeorm_1.Entity)("members")
+    (0, typeorm_1.Entity)("members"),
+    (0, typeorm_1.Index)("IDX_members_status_created_at", ["status", "created_at"]),
+    (0, typeorm_1.Index)("IDX_members_joined_date", ["joined_date"]),
+    (0, typeorm_1.Index)("IDX_members_email", ["email"])
 ], Member);

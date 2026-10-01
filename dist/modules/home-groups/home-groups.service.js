@@ -40,6 +40,7 @@ let HomeGroupsService = class HomeGroupsService {
     async create(dto) {
         var _a, _b;
         const leader = this.normalizeLeader(dto);
+        await this.leaders.assertExists(leader.leader_id, leader.leader_type);
         const homeGroup = this.homeGroupsRepository.create({
             name: dto.name,
             about: (_a = dto.about) !== null && _a !== void 0 ? _a : null,
@@ -91,7 +92,9 @@ let HomeGroupsService = class HomeGroupsService {
     async update(id, dto) {
         const patch = { ...dto };
         if ("leader_id" in dto || "leader_type" in dto) {
-            Object.assign(patch, this.normalizeLeader(dto));
+            const leader = this.normalizeLeader(dto);
+            await this.leaders.assertExists(leader.leader_id, leader.leader_type);
+            Object.assign(patch, leader);
         }
         await this.homeGroupsRepository.update(id, patch);
         const homeGroup = await this.findOne(id);

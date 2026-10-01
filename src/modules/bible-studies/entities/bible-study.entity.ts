@@ -5,6 +5,7 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   OneToMany,
+  Index,
 } from "typeorm";
 import { BibleStudyMember } from "./bible-study-member.entity";
 import type {
@@ -15,6 +16,7 @@ import type {
 export type BibleStudyContentType = "book" | "study_material";
 
 @Entity("bible_studies")
+@Index("IDX_bible_studies_leader_id", ["leader_id"])
 export class BibleStudy {
   @PrimaryGeneratedColumn("uuid")
   id: string;

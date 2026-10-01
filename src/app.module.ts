@@ -2,6 +2,7 @@ import { Module } from "@nestjs/common";
 import { APP_GUARD } from "@nestjs/core";
 import { ConfigModule, ConfigService } from "@nestjs/config";
 import { TypeOrmModule } from "@nestjs/typeorm";
+import { ThrottlerGuard, ThrottlerModule } from "@nestjs/throttler";
 import { LoggerModule } from "nestjs-pino";
 import { EventEmitterModule } from "@nestjs/event-emitter";
 import { UsersModule } from "./modules/users/users.module";
@@ -29,6 +30,13 @@ import { PermissionsGuard } from "./common/guards/permissions.guard";
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
+    ThrottlerModule.forRoot([
+      {
+        name: "default",
+        ttl: 60_000,
+        limit: 100,
+      },
+    ]),
     EventEmitterModule.forRoot(),
     LoggerModule.forRootAsync({
       imports: [ConfigModule],
@@ -133,6 +141,7 @@ import { PermissionsGuard } from "./common/guards/permissions.guard";
     AdminSeedService,
     JwtAuthGuard,
     PermissionsGuard,
+    { provide: APP_GUARD, useClass: ThrottlerGuard },
     { provide: APP_GUARD, useClass: JwtAuthGuard },
     { provide: APP_GUARD, useClass: PermissionsGuard },
   ],

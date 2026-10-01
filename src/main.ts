@@ -56,7 +56,7 @@ async function bootstrap() {
       try {
         isVercelPreview = /\.vercel\.app$/.test(new URL(origin).hostname);
       } catch {
-        isVercelPreview = false;
+        /* keep false */
       }
 
       if (isDevLocalhost || isVercelPreview || allowedOrigins.has(origin)) {
@@ -112,4 +112,4 @@ async function bootstrap() {
   await app.listen(port);
   logger.log(`Backend running on http://localhost:${port}`);
 }
-bootstrap();
+void bootstrap();

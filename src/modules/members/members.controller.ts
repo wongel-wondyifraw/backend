@@ -11,6 +11,7 @@ import {
 } from "@nestjs/common";
 import { MembersService } from "./members.service";
 import { CreateMemberDto } from "./dto/create-member.dto";
+import { BulkCreateMembersDto } from "./dto/bulk-create-members.dto";
 import { UpdateMemberDto } from "./dto/update-member.dto";
 import { MemberListQueryDto } from "./dto/member-list-query.dto";
 import { MinistriesService } from "../ministries/ministries.service";
@@ -22,6 +23,12 @@ export class MembersController {
     private readonly membersService: MembersService,
     private readonly ministriesService: MinistriesService,
   ) {}
+
+  @Post("bulk")
+  @RequiresPermissions("members.create")
+  async createBulk(@Body() dto: BulkCreateMembersDto) {
+    return this.membersService.createBulk(dto.items);
+  }
 
   @Post()
   @RequiresPermissions("members.create")

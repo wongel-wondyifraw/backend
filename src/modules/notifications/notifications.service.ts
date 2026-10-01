@@ -1,5 +1,4 @@
 import {
-  ConflictException,
   Injectable,
   Logger,
   MessageEvent,
@@ -14,7 +13,6 @@ import {
   NotificationSeverity,
 } from "./entities/notification.entity";
 import { NotificationPreference } from "./entities/notification-preference.entity";
-import { User } from "../users/entities/user.entity";
 
 export interface CreateNotificationInput {
   userId: string;

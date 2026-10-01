@@ -1,7 +1,6 @@
 import {
   Injectable,
   NotFoundException,
-  UnauthorizedException,
   ForbiddenException,
 } from "@nestjs/common";
 import * as bcrypt from "bcrypt";
@@ -10,9 +9,27 @@ import { Repository } from "typeorm";
 import { EventEmitter2 } from "@nestjs/event-emitter";
 import { User } from "./entities/user.entity";
 import { ChangePasswordDto } from "./dto/change-password.dto";
+import { CreateUserDto } from "./dto/create-user.dto";
+import { UpdateUserDto } from "./dto/update-user.dto";
 import { AccessSeederService } from "../access/access.seeder.service";
 import { toUserResponse, UserResponseDto } from "./user.mapper";
 import { NOTIFICATION_EVENT } from "../notifications/notification-events";
+
+type CreateUserInput = Omit<CreateUserDto, "password_hash" | "avatar"> & {
+  password_hash?: string;
+  password?: string;
+  avatar?: Express.Multer.File | string | null;
+  avatar_url?: string | null;
+  id?: string;
+  created_at?: Date;
+};
+
+type UpdateUserInput = Omit<UpdateUserDto, "avatar"> & {
+  currentPassword?: string;
+  newPassword?: string;
+  avatar?: Express.Multer.File | string | null;
+  avatar_url?: string | null;
+};
 
 @Injectable()
 export class UsersService {
@@ -25,9 +42,15 @@ export class UsersService {
 
   private userRelations = { roleEntity: { permissions: true } };
 
-  async create(createUserDto: any): Promise<UserResponseDto> {
-    const { password_hash, avatar, avatar_url, password, role, ...rest } =
-      createUserDto;
+  async create(createUserDto: CreateUserInput): Promise<UserResponseDto> {
+    const {
+      password_hash,
+      avatar: _avatar,
+      avatar_url,
+      password,
+      role,
+      ...rest
+    } = createUserDto;
 
     const roleEntity = await this.accessSeeder.findRoleByKey(role ?? "staff");
     if (!roleEntity) {
@@ -37,12 +60,12 @@ export class UsersService {
     const userData: Partial<User> = {
       ...rest,
       email: rest.email?.trim().toLowerCase(),
-      avatar_url: avatar_url,
+      avatar_url: avatar_url ?? undefined,
       role: roleEntity.key,
       role_id: roleEntity.id,
       roleEntity,
       is_active: rest.is_active === "true" || rest.is_active === true,
-      created_at: rest.created_at || new Date(),
+      created_at: createUserDto.created_at || new Date(),
     };
 
     const plainPassword = password_hash ?? password;
@@ -135,9 +158,19 @@ export class UsersService {
     });
   }
 
-  async update(id: string, userData: any): Promise<UserResponseDto> {
-    const { currentPassword, newPassword, role, ...otherData } = userData;
-    const updateObject: Partial<User> = { ...otherData };
+  async update(id: string, userData: UpdateUserInput): Promise<UserResponseDto> {
+    const {
+      currentPassword,
+      newPassword,
+      role,
+      avatar: _avatar,
+      avatar_url,
+      ...otherData
+    } = userData;
+    const updateObject: Partial<User> = {
+      ...otherData,
+      ...(avatar_url !== undefined ? { avatar_url: avatar_url ?? undefined } : {}),
+    };
 
     if (role) {
       const roleEntity = await this.accessSeeder.findRoleByKey(role);

@@ -15,7 +15,7 @@ export class AuditLogsService {
     entity_type: string,
     entity_id: string,
     user_id: string | null,
-    changes?: any,
+    changes?: Record<string, unknown>,
   ): Promise<AuditLog> {
     const log = this.auditLogsRepo.create({
       action,

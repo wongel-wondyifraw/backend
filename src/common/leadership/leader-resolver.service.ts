@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { BadRequestException, Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { In, Repository } from "typeorm";
 import { Member } from "../../modules/members/entities/member.entity";
@@ -18,6 +18,19 @@ export class LeaderResolverService {
     @InjectRepository(Minister)
     private readonly ministersRepository: Repository<Minister>,
   ) {}
+
+  async assertExists(
+    leaderId?: string | null,
+    leaderType?: string | null,
+  ): Promise<void> {
+    if (!leaderId) return;
+    const resolved = await this.resolve(leaderId, leaderType);
+    if (!resolved) {
+      throw new BadRequestException(
+        `Leader not found for id ${leaderId}${leaderType ? ` (${leaderType})` : ""}`,
+      );
+    }
+  }
 
   async resolve(
     leaderId?: string | null,

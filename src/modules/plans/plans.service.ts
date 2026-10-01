@@ -73,6 +73,28 @@ export class PlansService {
     return this.findOne(saved.id);
   }
 
+  async createBulk(items: CreatePlanDto[]): Promise<{
+    created: number;
+    failed: number;
+    errors: { index: number; message: string }[];
+  }> {
+    const errors: { index: number; message: string }[] = [];
+    let created = 0;
+
+    for (let i = 0; i < items.length; i += 1) {
+      try {
+        await this.create(items[i]);
+        created += 1;
+      } catch (err) {
+        const message =
+          err instanceof Error ? err.message : "Failed to create plan";
+        errors.push({ index: i, message });
+      }
+    }
+
+    return { created, failed: errors.length, errors };
+  }
+
   async findAllPaginated(
     page = 1,
     limit = 20,

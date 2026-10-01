@@ -11,6 +11,7 @@ const common_1 = require("@nestjs/common");
 const core_1 = require("@nestjs/core");
 const config_1 = require("@nestjs/config");
 const typeorm_1 = require("@nestjs/typeorm");
+const throttler_1 = require("@nestjs/throttler");
 const nestjs_pino_1 = require("nestjs-pino");
 const event_emitter_1 = require("@nestjs/event-emitter");
 const users_module_1 = require("./modules/users/users.module");
@@ -41,6 +42,13 @@ exports.AppModule = AppModule = __decorate([
     (0, common_1.Module)({
         imports: [
             config_1.ConfigModule.forRoot({ isGlobal: true }),
+            throttler_1.ThrottlerModule.forRoot([
+                {
+                    name: "default",
+                    ttl: 60000,
+                    limit: 100,
+                },
+            ]),
             event_emitter_1.EventEmitterModule.forRoot(),
             nestjs_pino_1.LoggerModule.forRootAsync({
                 imports: [config_1.ConfigModule],
@@ -145,6 +153,7 @@ exports.AppModule = AppModule = __decorate([
             admin_seed_service_1.AdminSeedService,
             jwt_auth_guard_1.JwtAuthGuard,
             permissions_guard_1.PermissionsGuard,
+            { provide: core_1.APP_GUARD, useClass: throttler_1.ThrottlerGuard },
             { provide: core_1.APP_GUARD, useClass: jwt_auth_guard_1.JwtAuthGuard },
             { provide: core_1.APP_GUARD, useClass: permissions_guard_1.PermissionsGuard },
         ],

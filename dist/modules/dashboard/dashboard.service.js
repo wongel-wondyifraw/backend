@@ -11,6 +11,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
+var DashboardService_1;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.DashboardService = void 0;
 const common_1 = require("@nestjs/common");
@@ -34,12 +35,13 @@ const MONTH_LABELS = [
     "Nov",
     "Dec",
 ];
-let DashboardService = class DashboardService {
+let DashboardService = DashboardService_1 = class DashboardService {
     constructor(membersRepository, ministriesRepository, ministersRepository, usersRepository) {
         this.membersRepository = membersRepository;
         this.ministriesRepository = ministriesRepository;
         this.ministersRepository = ministersRepository;
         this.usersRepository = usersRepository;
+        this.statsCache = null;
     }
     startOfMonthUtc() {
         const now = new Date();
@@ -52,6 +54,9 @@ let DashboardService = class DashboardService {
         return d;
     }
     async getStats() {
+        if (this.statsCache && this.statsCache.expiresAt > Date.now()) {
+            return this.statsCache.value;
+        }
         const monthStart = this.startOfMonthUtc();
         const weekStart = this.daysAgoUtc(7);
         const twoWeeksStart = this.daysAgoUtc(14);
@@ -138,7 +143,7 @@ let DashboardService = class DashboardService {
             const key = `${d.getUTCFullYear()}-${d.getUTCMonth()}`;
             registrationSpark.push(sparkMap.get(key) || 0);
         }
-        return {
+        const value = {
             memberCount,
             activeMembers,
             inactiveMembers: Math.max(0, memberCount - activeMembers),
@@ -159,6 +164,11 @@ let DashboardService = class DashboardService {
             registrationsByMonth: monthBuckets,
             registrationSpark,
         };
+        this.statsCache = {
+            value,
+            expiresAt: Date.now() + DashboardService_1.STATS_TTL_MS,
+        };
+        return value;
     }
     async search(query, includeUsers) {
         const trimmed = query.trim();
@@ -224,7 +234,8 @@ let DashboardService = class DashboardService {
     }
 };
 exports.DashboardService = DashboardService;
-exports.DashboardService = DashboardService = __decorate([
+DashboardService.STATS_TTL_MS = 60000;
+exports.DashboardService = DashboardService = DashboardService_1 = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, typeorm_1.InjectRepository)(member_entity_1.Member)),
     __param(1, (0, typeorm_1.InjectRepository)(ministry_entity_1.Ministry)),

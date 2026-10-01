@@ -57,11 +57,16 @@ let WebsiteService = class WebsiteService {
         let page = await this.pageContentRepo.findOne({
             where: { page_slug: slug },
         });
+        const content = typeof payload === "string"
+            ? payload
+            : payload && typeof payload === "object" && !Array.isArray(payload)
+                ? payload
+                : {};
         if (!page) {
-            page = this.pageContentRepo.create({ page_slug: slug, content: payload });
+            page = this.pageContentRepo.create({ page_slug: slug, content });
         }
         else {
-            page.content = payload;
+            page.content = content;
         }
         const saved = await this.pageContentRepo.save(page);
         this.pageCache.delete(slug);

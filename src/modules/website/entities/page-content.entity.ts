@@ -12,7 +12,7 @@ export class PageContent {
   page_slug: string; // e.g., 'about_us', 'contact_us', 'vision'
 
   @Column({ type: "jsonb" })
-  content: any; // structured content blocks
+  content: Record<string, unknown> | string; // structured content blocks or plain text
 
   @CreateDateColumn()
   created_at: Date;

@@ -6,6 +6,7 @@ import {
   UseInterceptors,
 } from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
+import { Throttle } from "@nestjs/throttler";
 import { RequiresPermissions } from "../../common/decorators/permissions.decorator";
 import {
   createDocumentMemoryStorage,
@@ -22,6 +23,7 @@ export class UploadsController {
   constructor(private readonly cloudinary: CloudinaryService) {}
 
   @Post("image")
+  @Throttle({ default: { limit: 10, ttl: 60_000 } })
   @RequiresPermissions(
     "uploads.create",
     "website.manage",
@@ -52,6 +54,7 @@ export class UploadsController {
   }
 
   @Post("document")
+  @Throttle({ default: { limit: 10, ttl: 60_000 } })
   @RequiresPermissions(
     "uploads.create",
     "website.manage",

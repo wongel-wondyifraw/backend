@@ -64,7 +64,7 @@ let UsersService = class UsersService {
     }
     async create(createUserDto) {
         var _a;
-        const { password_hash, avatar, avatar_url, password, role, ...rest } = createUserDto;
+        const { password_hash, avatar: _avatar, avatar_url, password, role, ...rest } = createUserDto;
         const roleEntity = await this.accessSeeder.findRoleByKey(role !== null && role !== void 0 ? role : "staff");
         if (!roleEntity) {
             throw new common_1.NotFoundException(`Role "${role}" not found`);
@@ -72,12 +72,12 @@ let UsersService = class UsersService {
         const userData = {
             ...rest,
             email: (_a = rest.email) === null || _a === void 0 ? void 0 : _a.trim().toLowerCase(),
-            avatar_url: avatar_url,
+            avatar_url: avatar_url !== null && avatar_url !== void 0 ? avatar_url : undefined,
             role: roleEntity.key,
             role_id: roleEntity.id,
             roleEntity,
             is_active: rest.is_active === "true" || rest.is_active === true,
-            created_at: rest.created_at || new Date(),
+            created_at: createUserDto.created_at || new Date(),
         };
         const plainPassword = password_hash !== null && password_hash !== void 0 ? password_hash : password;
         if (plainPassword) {
@@ -154,8 +154,11 @@ let UsersService = class UsersService {
         });
     }
     async update(id, userData) {
-        const { currentPassword, newPassword, role, ...otherData } = userData;
-        const updateObject = { ...otherData };
+        const { currentPassword, newPassword, role, avatar: _avatar, avatar_url, ...otherData } = userData;
+        const updateObject = {
+            ...otherData,
+            ...(avatar_url !== undefined ? { avatar_url: avatar_url !== null && avatar_url !== void 0 ? avatar_url : undefined } : {}),
+        };
         if (role) {
             const roleEntity = await this.accessSeeder.findRoleByKey(role);
             if (!roleEntity) {

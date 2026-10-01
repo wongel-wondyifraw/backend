@@ -16,12 +16,16 @@ exports.PlansController = void 0;
 const common_1 = require("@nestjs/common");
 const plans_service_1 = require("./plans.service");
 const create_plan_dto_1 = require("./dto/create-plan.dto");
+const bulk_create_plans_dto_1 = require("./dto/bulk-create-plans.dto");
 const update_plan_dto_1 = require("./dto/update-plan.dto");
 const plan_list_query_dto_1 = require("./dto/plan-list-query.dto");
 const permissions_decorator_1 = require("../../common/decorators/permissions.decorator");
 let PlansController = class PlansController {
     constructor(plansService) {
         this.plansService = plansService;
+    }
+    createBulk(dto) {
+        return this.plansService.createBulk(dto.items);
     }
     create(dto) {
         return this.plansService.create(dto);
@@ -45,6 +49,14 @@ let PlansController = class PlansController {
     }
 };
 exports.PlansController = PlansController;
+__decorate([
+    (0, common_1.Post)("bulk"),
+    (0, permissions_decorator_1.RequiresPermissions)("plans.create"),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [bulk_create_plans_dto_1.BulkCreatePlansDto]),
+    __metadata("design:returntype", void 0)
+], PlansController.prototype, "createBulk", null);
 __decorate([
     (0, common_1.Post)(),
     (0, permissions_decorator_1.RequiresPermissions)("plans.create"),

@@ -5,10 +5,13 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   OneToMany,
+  Index,
 } from "typeorm";
 import { FamilyChild } from "./family-child.entity";
 
 @Entity("families")
+@Index("IDX_families_husband_id", ["husband_id"])
+@Index("IDX_families_wife_id", ["wife_id"])
 export class Family {
   @PrimaryGeneratedColumn("uuid")
   id: string;

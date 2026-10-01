@@ -5,6 +5,7 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   OneToMany,
+  Index,
 } from "typeorm";
 import { MinistryMember } from "./ministry-member.entity";
 import type {
@@ -13,6 +14,7 @@ import type {
 } from "../../../common/leadership/leader.types";
 
 @Entity("ministries")
+@Index("IDX_ministries_leader_id", ["leader_id"])
 export class Ministry {
   @PrimaryGeneratedColumn("uuid")
   id: string;

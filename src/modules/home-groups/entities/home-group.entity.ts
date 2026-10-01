@@ -5,6 +5,7 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   OneToMany,
+  Index,
 } from "typeorm";
 import { HomeGroupMember } from "./home-group-member.entity";
 import type {
@@ -13,6 +14,7 @@ import type {
 } from "../../../common/leadership/leader.types";
 
 @Entity("home_groups")
+@Index("IDX_home_groups_leader_id", ["leader_id"])
 export class HomeGroup {
   @PrimaryGeneratedColumn("uuid")
   id: string;

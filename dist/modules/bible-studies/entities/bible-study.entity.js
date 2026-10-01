@@ -68,5 +68,6 @@ __decorate([
     __metadata("design:type", Array)
 ], BibleStudy.prototype, "bible_study_members", void 0);
 exports.BibleStudy = BibleStudy = __decorate([
-    (0, typeorm_1.Entity)("bible_studies")
+    (0, typeorm_1.Entity)("bible_studies"),
+    (0, typeorm_1.Index)("IDX_bible_studies_leader_id", ["leader_id"])
 ], BibleStudy);

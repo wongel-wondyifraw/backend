@@ -67,6 +67,21 @@ let PlansService = class PlansService {
         await this.replaceMinisters(saved.id, ministerIds);
         return this.findOne(saved.id);
     }
+    async createBulk(items) {
+        const errors = [];
+        let created = 0;
+        for (let i = 0; i < items.length; i += 1) {
+            try {
+                await this.create(items[i]);
+                created += 1;
+            }
+            catch (err) {
+                const message = err instanceof Error ? err.message : "Failed to create plan";
+                errors.push({ index: i, message });
+            }
+        }
+        return { created, failed: errors.length, errors };
+    }
     async findAllPaginated(page = 1, limit = 20, search, filters) {
         const qb = this.plansRepository
             .createQueryBuilder("plan")

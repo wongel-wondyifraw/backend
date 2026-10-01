@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { EventEmitter2 } from "@nestjs/event-emitter";
@@ -6,6 +10,7 @@ import { Member } from "./entities/member.entity";
 import { CreateMemberDto } from "./dto/create-member.dto";
 import { UpdateMemberDto } from "./dto/update-member.dto";
 import { PaginatedResult } from "../../common/interfaces/paginated-result.interface";
+import { BulkCreateResult } from "../../common/interfaces/bulk-create-result.interface";
 import { NOTIFICATION_EVENT } from "../notifications/notification-events";
 
 @Injectable()
@@ -16,8 +21,27 @@ export class MembersService {
     private readonly events: EventEmitter2,
   ) {}
 
+  private async assertEmailAvailable(
+    email: string | undefined | null,
+    excludeId?: string,
+  ): Promise<void> {
+    const normalized = email?.trim().toLowerCase();
+    if (!normalized) return;
+    const qb = this.membersRepository
+      .createQueryBuilder("member")
+      .where("LOWER(member.email) = :email", { email: normalized });
+    if (excludeId) {
+      qb.andWhere("member.id != :excludeId", { excludeId });
+    }
+    const existing = await qb.getOne();
+    if (existing) {
+      throw new ConflictException("A member with this email already exists");
+    }
+  }
+
   async create(createMemberDto: CreateMemberDto): Promise<Member> {
     const { ministry_ids, ...memberData } = createMemberDto;
+    await this.assertEmailAvailable(memberData.email);
     const member = this.membersRepository.create(memberData);
     const saved = await this.membersRepository.save(member);
 
@@ -42,6 +66,24 @@ export class MembersService {
       targetRoles: ["admin", "minister"],
     });
     return saved;
+  }
+
+  async createBulk(items: CreateMemberDto[]): Promise<BulkCreateResult> {
+    const errors: BulkCreateResult["errors"] = [];
+    let created = 0;
+
+    for (let i = 0; i < items.length; i += 1) {
+      try {
+        await this.create(items[i]);
+        created += 1;
+      } catch (err) {
+        const message =
+          err instanceof Error ? err.message : "Failed to create member";
+        errors.push({ index: i, message });
+      }
+    }
+
+    return { created, failed: errors.length, errors };
   }
 
   async findAllPaginated(
@@ -143,6 +185,9 @@ export class MembersService {
 
   async update(id: string, updateMemberDto: UpdateMemberDto): Promise<Member> {
     const { ministry_ids, ...memberData } = updateMemberDto;
+    if (memberData.email !== undefined) {
+      await this.assertEmailAvailable(memberData.email, id);
+    }
     await this.membersRepository.update(id, memberData);
 
     if (ministry_ids !== undefined) {

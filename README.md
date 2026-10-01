@@ -50,7 +50,31 @@ ADMIN_PASSWORD=change-me
 
 1. Create a PostgreSQL database
 2. Update the `.env` file with your database credentials
-3. Set `DB_SYNCHRONIZE=true` in development to auto-create tables on startup
+3. **Local development:** you may set `DB_SYNCHRONIZE=true` to auto-create/update tables
+4. **Staging / production:** set `DB_SYNCHRONIZE=false` and run migrations:
+
+```bash
+npm run migration:run
+```
+
+Generate a new migration after entity changes (with synchronize off and DB reachable):
+
+```bash
+npm run migration:generate -- src/database/migrations/NameOfChange
+```
+
+Revert the last migration:
+
+```bash
+npm run migration:revert
+```
+
+## Lint & typecheck
+
+```bash
+npm run lint
+npm run typecheck
+```
 
 ## Running the Application
 

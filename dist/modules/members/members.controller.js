@@ -16,6 +16,7 @@ exports.MembersController = void 0;
 const common_1 = require("@nestjs/common");
 const members_service_1 = require("./members.service");
 const create_member_dto_1 = require("./dto/create-member.dto");
+const bulk_create_members_dto_1 = require("./dto/bulk-create-members.dto");
 const update_member_dto_1 = require("./dto/update-member.dto");
 const member_list_query_dto_1 = require("./dto/member-list-query.dto");
 const ministries_service_1 = require("../ministries/ministries.service");
@@ -24,6 +25,9 @@ let MembersController = class MembersController {
     constructor(membersService, ministriesService) {
         this.membersService = membersService;
         this.ministriesService = ministriesService;
+    }
+    async createBulk(dto) {
+        return this.membersService.createBulk(dto.items);
     }
     async create(createMemberDto) {
         return this.membersService.create(createMemberDto);
@@ -52,6 +56,14 @@ let MembersController = class MembersController {
     }
 };
 exports.MembersController = MembersController;
+__decorate([
+    (0, common_1.Post)("bulk"),
+    (0, permissions_decorator_1.RequiresPermissions)("members.create"),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [bulk_create_members_dto_1.BulkCreateMembersDto]),
+    __metadata("design:returntype", Promise)
+], MembersController.prototype, "createBulk", null);
 __decorate([
     (0, common_1.Post)(),
     (0, permissions_decorator_1.RequiresPermissions)("members.create"),

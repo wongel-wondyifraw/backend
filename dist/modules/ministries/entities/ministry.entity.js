@@ -52,5 +52,6 @@ __decorate([
     __metadata("design:type", Array)
 ], Ministry.prototype, "ministry_members", void 0);
 exports.Ministry = Ministry = __decorate([
-    (0, typeorm_1.Entity)("ministries")
+    (0, typeorm_1.Entity)("ministries"),
+    (0, typeorm_1.Index)("IDX_ministries_leader_id", ["leader_id"])
 ], Ministry);

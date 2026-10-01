@@ -166,7 +166,11 @@ let CloudinaryService = CloudinaryService_1 = class CloudinaryService {
         return new Promise((resolve, reject) => {
             const stream = cloudinary_1.v2.uploader.upload_stream(options, (error, result) => {
                 if (error || !result) {
-                    reject(error !== null && error !== void 0 ? error : new Error("Cloudinary upload returned empty result"));
+                    reject(error instanceof Error
+                        ? error
+                        : new Error(typeof error === "string"
+                            ? error
+                            : "Cloudinary upload returned empty result"));
                     return;
                 }
                 resolve(result);
