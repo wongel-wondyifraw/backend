@@ -16,7 +16,7 @@ let HomeGroup = class HomeGroup {
 };
 exports.HomeGroup = HomeGroup;
 __decorate([
-    (0, typeorm_1.PrimaryGeneratedColumn)('uuid'),
+    (0, typeorm_1.PrimaryGeneratedColumn)("uuid"),
     __metadata("design:type", String)
 ], HomeGroup.prototype, "id", void 0);
 __decorate([
@@ -24,11 +24,11 @@ __decorate([
     __metadata("design:type", String)
 ], HomeGroup.prototype, "name", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'text', nullable: true }),
+    (0, typeorm_1.Column)({ type: "text", nullable: true }),
     __metadata("design:type", Object)
 ], HomeGroup.prototype, "about", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'varchar', nullable: true }),
+    (0, typeorm_1.Column)({ type: "varchar", nullable: true }),
     __metadata("design:type", Object)
 ], HomeGroup.prototype, "schedule", void 0);
 __decorate([
@@ -36,11 +36,11 @@ __decorate([
     __metadata("design:type", String)
 ], HomeGroup.prototype, "location", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'uuid', nullable: true }),
+    (0, typeorm_1.Column)({ type: "uuid", nullable: true }),
     __metadata("design:type", Object)
 ], HomeGroup.prototype, "leader_id", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'varchar', length: 16, nullable: true }),
+    (0, typeorm_1.Column)({ type: "varchar", length: 16, nullable: true }),
     __metadata("design:type", Object)
 ], HomeGroup.prototype, "leader_type", void 0);
 __decorate([
@@ -56,5 +56,5 @@ __decorate([
     __metadata("design:type", Array)
 ], HomeGroup.prototype, "home_group_members", void 0);
 exports.HomeGroup = HomeGroup = __decorate([
-    (0, typeorm_1.Entity)('home_groups')
+    (0, typeorm_1.Entity)("home_groups")
 ], HomeGroup);

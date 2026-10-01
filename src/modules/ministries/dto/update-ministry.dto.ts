@@ -1,4 +1,4 @@
-import { PartialType } from '@nestjs/mapped-types';
-import { CreateMinistryDto } from './create-ministry.dto';
+import { PartialType } from "@nestjs/mapped-types";
+import { CreateMinistryDto } from "./create-ministry.dto";
 
-export class UpdateMinistryDto extends PartialType(CreateMinistryDto) { }
+export class UpdateMinistryDto extends PartialType(CreateMinistryDto) {}

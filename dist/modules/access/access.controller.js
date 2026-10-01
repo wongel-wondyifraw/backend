@@ -46,23 +46,23 @@ let AccessController = class AccessController {
 };
 exports.AccessController = AccessController;
 __decorate([
-    (0, common_1.Get)('roles'),
-    (0, permissions_decorator_1.RequiresPermissions)('roles.read', 'users.manage'),
+    (0, common_1.Get)("roles"),
+    (0, permissions_decorator_1.RequiresPermissions)("roles.read", "users.manage"),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", void 0)
 ], AccessController.prototype, "listRoles", null);
 __decorate([
-    (0, common_1.Get)('roles/:id'),
-    (0, permissions_decorator_1.RequiresPermissions)('roles.read'),
-    __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
+    (0, common_1.Get)("roles/:id"),
+    (0, permissions_decorator_1.RequiresPermissions)("roles.read"),
+    __param(0, (0, common_1.Param)("id", common_1.ParseUUIDPipe)),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", void 0)
 ], AccessController.prototype, "getRole", null);
 __decorate([
-    (0, common_1.Post)('roles'),
-    (0, permissions_decorator_1.RequiresPermissions)('roles.manage'),
+    (0, common_1.Post)("roles"),
+    (0, permissions_decorator_1.RequiresPermissions)("roles.manage"),
     (0, common_1.HttpCode)(common_1.HttpStatus.CREATED),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
@@ -70,38 +70,38 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], AccessController.prototype, "createRole", null);
 __decorate([
-    (0, common_1.Patch)('roles/:id'),
-    (0, permissions_decorator_1.RequiresPermissions)('roles.manage'),
-    __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
+    (0, common_1.Patch)("roles/:id"),
+    (0, permissions_decorator_1.RequiresPermissions)("roles.manage"),
+    __param(0, (0, common_1.Param)("id", common_1.ParseUUIDPipe)),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String, update_role_dto_1.UpdateRoleDto]),
     __metadata("design:returntype", void 0)
 ], AccessController.prototype, "updateRole", null);
 __decorate([
-    (0, common_1.Delete)('roles/:id'),
-    (0, permissions_decorator_1.RequiresPermissions)('roles.manage'),
+    (0, common_1.Delete)("roles/:id"),
+    (0, permissions_decorator_1.RequiresPermissions)("roles.manage"),
     (0, common_1.HttpCode)(common_1.HttpStatus.NO_CONTENT),
-    __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
+    __param(0, (0, common_1.Param)("id", common_1.ParseUUIDPipe)),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], AccessController.prototype, "deleteRole", null);
 __decorate([
-    (0, common_1.Get)('permissions'),
-    (0, permissions_decorator_1.RequiresPermissions)('roles.read'),
+    (0, common_1.Get)("permissions"),
+    (0, permissions_decorator_1.RequiresPermissions)("roles.read"),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", void 0)
 ], AccessController.prototype, "listPermissions", null);
 __decorate([
-    (0, common_1.Get)('permissions/grouped'),
-    (0, permissions_decorator_1.RequiresPermissions)('roles.read'),
+    (0, common_1.Get)("permissions/grouped"),
+    (0, permissions_decorator_1.RequiresPermissions)("roles.read"),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", void 0)
 ], AccessController.prototype, "listPermissionsGrouped", null);
 exports.AccessController = AccessController = __decorate([
-    (0, common_1.Controller)('access'),
+    (0, common_1.Controller)("access"),
     __metadata("design:paramtypes", [access_service_1.AccessService])
 ], AccessController);

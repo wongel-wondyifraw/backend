@@ -46,35 +46,37 @@ exports.AppModule = AppModule = __decorate([
                 imports: [config_1.ConfigModule],
                 inject: [config_1.ConfigService],
                 useFactory: (config) => {
-                    const isProduction = config.get('NODE_ENV') === 'production';
+                    const isProduction = config.get("NODE_ENV") === "production";
                     return {
                         pinoHttp: {
                             autoLogging: true,
                             quietReqLogger: true,
-                            level: isProduction ? 'info' : 'debug',
+                            level: isProduction ? "info" : "debug",
                             transport: isProduction
                                 ? undefined
                                 : {
-                                    target: 'pino-pretty',
+                                    target: "pino-pretty",
                                     options: {
                                         colorize: true,
                                         singleLine: false,
-                                        translateTime: 'SYS:HH:MM:ss',
-                                        ignore: 'req.headers,res.headers,req.remoteAddress,req.remotePort',
+                                        translateTime: "SYS:HH:MM:ss",
+                                        ignore: "req.headers,res.headers,req.remoteAddress,req.remotePort",
                                     },
                                 },
                             serializers: {
                                 req: (req) => {
-                                    const sanitizedBody = req.raw.body ? { ...req.raw.body } : undefined;
+                                    const sanitizedBody = req.raw.body
+                                        ? { ...req.raw.body }
+                                        : undefined;
                                     if (sanitizedBody) {
                                         if (sanitizedBody.password)
-                                            sanitizedBody.password = '***';
+                                            sanitizedBody.password = "***";
                                         if (sanitizedBody.token)
-                                            sanitizedBody.token = '***';
+                                            sanitizedBody.token = "***";
                                         if (sanitizedBody.currentPassword)
-                                            sanitizedBody.currentPassword = '[REDACTED]';
+                                            sanitizedBody.currentPassword = "[REDACTED]";
                                         if (sanitizedBody.newPassword)
-                                            sanitizedBody.newPassword = '[REDACTED]';
+                                            sanitizedBody.newPassword = "[REDACTED]";
                                     }
                                     return {
                                         id: req.id,
@@ -88,7 +90,7 @@ exports.AppModule = AppModule = __decorate([
                                 }),
                             },
                             customProps: () => ({
-                                context: 'HTTP',
+                                context: "HTTP",
                             }),
                         },
                     };
@@ -98,24 +100,24 @@ exports.AppModule = AppModule = __decorate([
                 imports: [config_1.ConfigModule],
                 inject: [config_1.ConfigService],
                 useFactory: (config) => {
-                    const databaseUrl = config.get('DATABASE_URL');
-                    const sslEnabled = config.get('DB_SSL') === 'true';
+                    const databaseUrl = config.get("DATABASE_URL");
+                    const sslEnabled = config.get("DB_SSL") === "true";
                     return {
-                        type: 'postgres',
+                        type: "postgres",
                         ...(databaseUrl
                             ? {
                                 url: databaseUrl,
                             }
                             : {
-                                host: config.get('DB_HOST'),
-                                port: Number(config.get('DB_PORT') || 5432),
-                                username: config.get('DB_USERNAME'),
-                                password: config.get('DB_PASSWORD'),
-                                database: config.get('DB_NAME'),
+                                host: config.get("DB_HOST"),
+                                port: Number(config.get("DB_PORT") || 5432),
+                                username: config.get("DB_USERNAME"),
+                                password: config.get("DB_PASSWORD"),
+                                database: config.get("DB_NAME"),
                             }),
                         ssl: sslEnabled ? { rejectUnauthorized: false } : false,
                         autoLoadEntities: true,
-                        synchronize: config.get('DB_SYNCHRONIZE') === 'true',
+                        synchronize: config.get("DB_SYNCHRONIZE") === "true",
                     };
                 },
             }),

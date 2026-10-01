@@ -16,7 +16,7 @@ let TaskDefinition = class TaskDefinition {
 };
 exports.TaskDefinition = TaskDefinition;
 __decorate([
-    (0, typeorm_1.PrimaryGeneratedColumn)('uuid'),
+    (0, typeorm_1.PrimaryGeneratedColumn)("uuid"),
     __metadata("design:type", String)
 ], TaskDefinition.prototype, "id", void 0);
 __decorate([
@@ -24,11 +24,11 @@ __decorate([
     __metadata("design:type", String)
 ], TaskDefinition.prototype, "name", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'text', nullable: true }),
+    (0, typeorm_1.Column)({ type: "text", nullable: true }),
     __metadata("design:type", Object)
 ], TaskDefinition.prototype, "description", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'varchar', length: 64, nullable: true, unique: true }),
+    (0, typeorm_1.Column)({ type: "varchar", length: 64, nullable: true, unique: true }),
     __metadata("design:type", Object)
 ], TaskDefinition.prototype, "code", void 0);
 __decorate([
@@ -56,5 +56,5 @@ __decorate([
     __metadata("design:type", Array)
 ], TaskDefinition.prototype, "tasks", void 0);
 exports.TaskDefinition = TaskDefinition = __decorate([
-    (0, typeorm_1.Entity)('task_definitions')
+    (0, typeorm_1.Entity)("task_definitions")
 ], TaskDefinition);

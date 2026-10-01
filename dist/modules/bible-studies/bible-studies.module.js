@@ -19,7 +19,10 @@ let BibleStudiesModule = class BibleStudiesModule {
 exports.BibleStudiesModule = BibleStudiesModule;
 exports.BibleStudiesModule = BibleStudiesModule = __decorate([
     (0, common_1.Module)({
-        imports: [typeorm_1.TypeOrmModule.forFeature([bible_study_entity_1.BibleStudy, bible_study_member_entity_1.BibleStudyMember]), leadership_module_1.LeadershipModule],
+        imports: [
+            typeorm_1.TypeOrmModule.forFeature([bible_study_entity_1.BibleStudy, bible_study_member_entity_1.BibleStudyMember]),
+            leadership_module_1.LeadershipModule,
+        ],
         controllers: [bible_studies_controller_1.BibleStudiesController],
         providers: [bible_studies_service_1.BibleStudiesService],
         exports: [bible_studies_service_1.BibleStudiesService],

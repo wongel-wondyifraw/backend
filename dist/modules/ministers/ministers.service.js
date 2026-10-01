@@ -28,33 +28,35 @@ let MinistersService = class MinistersService {
         this.events = events;
     }
     generatePassword(length = 12) {
-        const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789!@#$%';
+        const chars = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789!@#$%";
         const bytes = (0, crypto_1.randomBytes)(length);
-        return Array.from(bytes, (b) => chars[b % chars.length]).join('');
+        return Array.from(bytes, (b) => chars[b % chars.length]).join("");
     }
     async create(dto) {
         var _a, _b, _c, _d, _e;
         const email = dto.email.trim().toLowerCase();
         if (!email) {
-            throw new common_1.BadRequestException('Email is required to create a minister login');
+            throw new common_1.BadRequestException("Email is required to create a minister login");
         }
         const existingUser = await this.usersService.findOneByEmail(email);
         if (existingUser) {
-            throw new common_1.ConflictException('A user with this email already exists');
+            throw new common_1.ConflictException("A user with this email already exists");
         }
-        const existingMinister = await this.ministersRepository.findOne({ where: { email } });
+        const existingMinister = await this.ministersRepository.findOne({
+            where: { email },
+        });
         if (existingMinister) {
-            throw new common_1.ConflictException('A minister with this email already exists');
+            throw new common_1.ConflictException("A minister with this email already exists");
         }
         const temporaryPassword = this.generatePassword();
-        const isActive = ((_a = dto.status) !== null && _a !== void 0 ? _a : 'active').toLowerCase() !== 'inactive';
+        const isActive = ((_a = dto.status) !== null && _a !== void 0 ? _a : "active").toLowerCase() !== "inactive";
         const user = await this.usersService.create({
             first_name: dto.first_name,
-            middle_name: (_b = dto.middle_name) !== null && _b !== void 0 ? _b : '',
+            middle_name: (_b = dto.middle_name) !== null && _b !== void 0 ? _b : "",
             last_name: dto.last_name,
             email,
             password: temporaryPassword,
-            role: 'minister',
+            role: "minister",
             title: (_c = dto.title) !== null && _c !== void 0 ? _c : null,
             avatar_url: (_d = dto.image_url) !== null && _d !== void 0 ? _d : null,
             is_active: isActive,
@@ -63,29 +65,29 @@ let MinistersService = class MinistersService {
             ...dto,
             email,
             user_id: user.id,
-            status: (_e = dto.status) !== null && _e !== void 0 ? _e : 'active',
+            status: (_e = dto.status) !== null && _e !== void 0 ? _e : "active",
         });
         const saved = await this.ministersRepository.save(minister);
         const name = `${saved.first_name} ${saved.last_name}`.trim();
         this.events.emit(notification_events_1.NOTIFICATION_EVENT, {
-            eventName: 'minister.created',
-            kind: 'user',
-            severity: 'success',
-            title: 'New minister registered',
+            eventName: "minister.created",
+            kind: "user",
+            severity: "success",
+            title: "New minister registered",
             message: `${name} was registered with a login account.`,
             href: `/ministers/details/${saved.id}`,
             dedupeKey: `minister.created:${saved.id}`,
-            targetRoles: ['admin'],
+            targetRoles: ["admin"],
         });
         return Object.assign(saved, { temporary_password: temporaryPassword });
     }
     async findAllPaginated(page = 1, limit = 20, search) {
-        const qb = this.ministersRepository.createQueryBuilder('minister');
+        const qb = this.ministersRepository.createQueryBuilder("minister");
         if (search === null || search === void 0 ? void 0 : search.trim()) {
             const pattern = `%${search.trim().toLowerCase()}%`;
-            qb.where('LOWER(minister.first_name) LIKE :pattern OR LOWER(minister.last_name) LIKE :pattern OR LOWER(minister.email) LIKE :pattern OR minister.phone LIKE :pattern OR LOWER(minister.title) LIKE :pattern', { pattern });
+            qb.where("LOWER(minister.first_name) LIKE :pattern OR LOWER(minister.last_name) LIKE :pattern OR LOWER(minister.email) LIKE :pattern OR minister.phone LIKE :pattern OR LOWER(minister.title) LIKE :pattern", { pattern });
         }
-        qb.orderBy('minister.created_at', 'DESC');
+        qb.orderBy("minister.created_at", "DESC");
         qb.skip((page - 1) * limit).take(limit);
         const [data, total] = await qb.getManyAndCount();
         return {
@@ -106,7 +108,7 @@ let MinistersService = class MinistersService {
             throw new common_1.NotFoundException(`Minister with ID ${id} not found`);
         }
         if (minister.user) {
-            const roleKey = (_c = (_b = (_a = minister.user.roleEntity) === null || _a === void 0 ? void 0 : _a.key) !== null && _b !== void 0 ? _b : minister.user.role) !== null && _c !== void 0 ? _c : 'minister';
+            const roleKey = (_c = (_b = (_a = minister.user.roleEntity) === null || _a === void 0 ? void 0 : _a.key) !== null && _b !== void 0 ? _b : minister.user.role) !== null && _c !== void 0 ? _c : "minister";
             // Expose a stable role string for the client without nested roleEntity noise
             minister.user.role = roleKey;
         }
@@ -127,7 +129,7 @@ let MinistersService = class MinistersService {
         if (dto.image_url !== undefined)
             userPatch.avatar_url = dto.image_url;
         if (dto.status !== undefined) {
-            userPatch.is_active = dto.status.toLowerCase() !== 'inactive';
+            userPatch.is_active = dto.status.toLowerCase() !== "inactive";
         }
         if (Object.keys(userPatch).length > 0) {
             await this.usersService.update(minister.user_id, userPatch);
@@ -135,14 +137,14 @@ let MinistersService = class MinistersService {
         const updated = await this.findOne(id);
         const name = `${updated.first_name} ${updated.last_name}`.trim();
         this.events.emit(notification_events_1.NOTIFICATION_EVENT, {
-            eventName: 'minister.updated',
-            kind: 'user',
-            severity: 'info',
-            title: 'Minister updated',
+            eventName: "minister.updated",
+            kind: "user",
+            severity: "info",
+            title: "Minister updated",
             message: `${name}'s profile was updated.`,
             href: `/ministers/details/${id}`,
             dedupeKey: `minister.updated:${id}:${Date.now()}`,
-            targetRoles: ['admin'],
+            targetRoles: ["admin"],
         });
         return updated;
     }
@@ -152,14 +154,14 @@ let MinistersService = class MinistersService {
         await this.usersService.setPasswordFromPlain(minister.user_id, temporaryPassword);
         const name = `${minister.first_name} ${minister.last_name}`.trim();
         this.events.emit(notification_events_1.NOTIFICATION_EVENT, {
-            eventName: 'minister.password_reset',
-            kind: 'user',
-            severity: 'warning',
-            title: 'Minister password reset',
+            eventName: "minister.password_reset",
+            kind: "user",
+            severity: "warning",
+            title: "Minister password reset",
             message: `Login password was reset for ${name}.`,
             href: `/ministers/details/${id}`,
             dedupeKey: `minister.password_reset:${id}:${Date.now()}`,
-            targetRoles: ['admin'],
+            targetRoles: ["admin"],
         });
         return { temporary_password: temporaryPassword };
     }
@@ -175,13 +177,13 @@ let MinistersService = class MinistersService {
             // User may already be gone
         }
         this.events.emit(notification_events_1.NOTIFICATION_EVENT, {
-            eventName: 'minister.deleted',
-            kind: 'user',
-            severity: 'warning',
-            title: 'Minister removed',
+            eventName: "minister.deleted",
+            kind: "user",
+            severity: "warning",
+            title: "Minister removed",
             message: `${name} and their login account were removed.`,
             dedupeKey: `minister.deleted:${id}`,
-            targetRoles: ['admin'],
+            targetRoles: ["admin"],
         });
     }
 };

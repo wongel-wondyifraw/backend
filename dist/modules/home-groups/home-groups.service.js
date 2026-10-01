@@ -34,7 +34,7 @@ let HomeGroupsService = class HomeGroupsService {
         }
         return {
             leader_id: dto.leader_id,
-            leader_type: dto.leader_type || 'member',
+            leader_type: dto.leader_type || "member",
         };
     }
     async create(dto) {
@@ -49,24 +49,24 @@ let HomeGroupsService = class HomeGroupsService {
         });
         const saved = await this.homeGroupsRepository.save(homeGroup);
         this.events.emit(notification_events_1.NOTIFICATION_EVENT, {
-            eventName: 'home_group.created',
-            kind: 'home_group',
-            severity: 'success',
-            title: 'New home group created',
+            eventName: "home_group.created",
+            kind: "home_group",
+            severity: "success",
+            title: "New home group created",
             message: `${saved.name} was added.`,
             href: `/members/home-groups/details/${saved.id}`,
             dedupeKey: `home_group.created:${saved.id}`,
-            targetRoles: ['admin', 'minister'],
+            targetRoles: ["admin", "minister"],
         });
         return this.findOne(saved.id);
     }
     async findAllPaginated(page = 1, limit = 20, search) {
-        const qb = this.homeGroupsRepository.createQueryBuilder('home_group');
+        const qb = this.homeGroupsRepository.createQueryBuilder("home_group");
         if (search === null || search === void 0 ? void 0 : search.trim()) {
             const pattern = `%${search.trim().toLowerCase()}%`;
-            qb.where('LOWER(home_group.name) LIKE :pattern OR LOWER(home_group.location) LIKE :pattern', { pattern });
+            qb.where("LOWER(home_group.name) LIKE :pattern OR LOWER(home_group.location) LIKE :pattern", { pattern });
         }
-        qb.orderBy('home_group.created_at', 'DESC');
+        qb.orderBy("home_group.created_at", "DESC");
         qb.skip((page - 1) * limit).take(limit);
         const [rows, total] = await qb.getManyAndCount();
         const data = await this.leaders.attachLeaders(rows);
@@ -79,7 +79,9 @@ let HomeGroupsService = class HomeGroupsService {
         };
     }
     async findOne(id) {
-        const homeGroup = await this.homeGroupsRepository.findOne({ where: { id } });
+        const homeGroup = await this.homeGroupsRepository.findOne({
+            where: { id },
+        });
         if (!homeGroup) {
             throw new common_1.NotFoundException(`Home group with ID ${id} not found`);
         }
@@ -88,38 +90,40 @@ let HomeGroupsService = class HomeGroupsService {
     }
     async update(id, dto) {
         const patch = { ...dto };
-        if ('leader_id' in dto || 'leader_type' in dto) {
+        if ("leader_id" in dto || "leader_type" in dto) {
             Object.assign(patch, this.normalizeLeader(dto));
         }
         await this.homeGroupsRepository.update(id, patch);
         const homeGroup = await this.findOne(id);
         this.events.emit(notification_events_1.NOTIFICATION_EVENT, {
-            eventName: 'home_group.updated',
-            kind: 'home_group',
-            severity: 'info',
-            title: 'Home group updated',
+            eventName: "home_group.updated",
+            kind: "home_group",
+            severity: "info",
+            title: "Home group updated",
             message: `${homeGroup.name} was updated.`,
             href: `/members/home-groups/details/${id}`,
             dedupeKey: `home_group.updated:${id}:${Date.now()}`,
-            targetRoles: ['admin', 'minister'],
+            targetRoles: ["admin", "minister"],
         });
         return homeGroup;
     }
     async remove(id) {
-        const homeGroup = await this.homeGroupsRepository.findOne({ where: { id } });
+        const homeGroup = await this.homeGroupsRepository.findOne({
+            where: { id },
+        });
         const result = await this.homeGroupsRepository.delete(id);
         if (result.affected === 0) {
             throw new common_1.NotFoundException(`Home group with ID ${id} not found`);
         }
         if (homeGroup) {
             this.events.emit(notification_events_1.NOTIFICATION_EVENT, {
-                eventName: 'home_group.deleted',
-                kind: 'home_group',
-                severity: 'warning',
-                title: 'Home group removed',
+                eventName: "home_group.deleted",
+                kind: "home_group",
+                severity: "warning",
+                title: "Home group removed",
                 message: `${homeGroup.name} was removed.`,
                 dedupeKey: `home_group.deleted:${id}`,
-                targetRoles: ['admin', 'minister'],
+                targetRoles: ["admin", "minister"],
             });
         }
     }
@@ -128,7 +132,7 @@ let HomeGroupsService = class HomeGroupsService {
             where: { home_group_id: homeGroupId, member_id: memberId },
         });
         if (existing) {
-            throw new common_1.ConflictException('Member is already in this home group');
+            throw new common_1.ConflictException("Member is already in this home group");
         }
         const record = this.homeGroupMembersRepository.create({
             home_group_id: homeGroupId,
@@ -137,14 +141,14 @@ let HomeGroupsService = class HomeGroupsService {
         const saved = await this.homeGroupMembersRepository.save(record);
         const homeGroup = await this.findOne(homeGroupId);
         this.events.emit(notification_events_1.NOTIFICATION_EVENT, {
-            eventName: 'home_group.member.added',
-            kind: 'home_group',
-            severity: 'info',
-            title: 'Home group membership updated',
+            eventName: "home_group.member.added",
+            kind: "home_group",
+            severity: "info",
+            title: "Home group membership updated",
             message: `A member was added to ${homeGroup.name}.`,
             href: `/members/home-groups/details/${homeGroupId}`,
             dedupeKey: `home_group.member.added:${homeGroupId}:${memberId}`,
-            targetRoles: ['admin', 'minister'],
+            targetRoles: ["admin", "minister"],
         });
         return saved;
     }
@@ -155,24 +159,24 @@ let HomeGroupsService = class HomeGroupsService {
             member_id: memberId,
         });
         if (result.affected === 0) {
-            throw new common_1.NotFoundException('Member not found in this home group');
+            throw new common_1.NotFoundException("Member not found in this home group");
         }
         this.events.emit(notification_events_1.NOTIFICATION_EVENT, {
-            eventName: 'home_group.member.removed',
-            kind: 'home_group',
-            severity: 'info',
-            title: 'Home group membership updated',
+            eventName: "home_group.member.removed",
+            kind: "home_group",
+            severity: "info",
+            title: "Home group membership updated",
             message: `A member was removed from ${homeGroup.name}.`,
             href: `/members/home-groups/details/${homeGroupId}`,
             dedupeKey: `home_group.member.removed:${homeGroupId}:${memberId}`,
-            targetRoles: ['admin', 'minister'],
+            targetRoles: ["admin", "minister"],
         });
     }
     async getHomeGroupMembers(homeGroupId) {
         return this.homeGroupMembersRepository.find({
             where: { home_group_id: homeGroupId },
-            relations: ['member'],
-            order: { joined_at: 'DESC' },
+            relations: ["member"],
+            order: { joined_at: "DESC" },
         });
     }
 };

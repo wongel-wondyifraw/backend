@@ -1,7 +1,7 @@
-import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { AuditLog } from './entities/audit-log.entity';
+import { Injectable } from "@nestjs/common";
+import { InjectRepository } from "@nestjs/typeorm";
+import { Repository } from "typeorm";
+import { AuditLog } from "./entities/audit-log.entity";
 
 @Injectable()
 export class AuditLogsService {
@@ -27,10 +27,13 @@ export class AuditLogsService {
     return this.auditLogsRepo.save(log);
   }
 
-  async findByEntity(entity_type: string, entity_id: string): Promise<AuditLog[]> {
+  async findByEntity(
+    entity_type: string,
+    entity_id: string,
+  ): Promise<AuditLog[]> {
     return this.auditLogsRepo.find({
       where: { entity_type, entity_id },
-      order: { created_at: 'DESC' },
+      order: { created_at: "DESC" },
     });
   }
 }

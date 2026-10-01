@@ -45,7 +45,7 @@ let MinistersController = class MinistersController {
 exports.MinistersController = MinistersController;
 __decorate([
     (0, common_1.Post)(),
-    (0, permissions_decorator_1.RequiresPermissions)('ministers.create'),
+    (0, permissions_decorator_1.RequiresPermissions)("ministers.create"),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [create_minister_dto_1.CreateMinisterDto]),
@@ -53,46 +53,46 @@ __decorate([
 ], MinistersController.prototype, "create", null);
 __decorate([
     (0, common_1.Get)(),
-    (0, permissions_decorator_1.RequiresPermissions)('ministers.read'),
+    (0, permissions_decorator_1.RequiresPermissions)("ministers.read"),
     __param(0, (0, common_1.Query)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [pagination_query_dto_1.PaginationQueryDto]),
     __metadata("design:returntype", void 0)
 ], MinistersController.prototype, "findAll", null);
 __decorate([
-    (0, common_1.Get)(':id'),
-    (0, permissions_decorator_1.RequiresPermissions)('ministers.read'),
-    __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
+    (0, common_1.Get)(":id"),
+    (0, permissions_decorator_1.RequiresPermissions)("ministers.read"),
+    __param(0, (0, common_1.Param)("id", common_1.ParseUUIDPipe)),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", void 0)
 ], MinistersController.prototype, "findOne", null);
 __decorate([
-    (0, common_1.Patch)(':id'),
-    (0, permissions_decorator_1.RequiresPermissions)('ministers.update'),
-    __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
+    (0, common_1.Patch)(":id"),
+    (0, permissions_decorator_1.RequiresPermissions)("ministers.update"),
+    __param(0, (0, common_1.Param)("id", common_1.ParseUUIDPipe)),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String, update_minister_dto_1.UpdateMinisterDto]),
     __metadata("design:returntype", void 0)
 ], MinistersController.prototype, "update", null);
 __decorate([
-    (0, common_1.Post)(':id/reset-password'),
-    (0, permissions_decorator_1.RequiresPermissions)('ministers.update'),
-    __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
+    (0, common_1.Post)(":id/reset-password"),
+    (0, permissions_decorator_1.RequiresPermissions)("ministers.update"),
+    __param(0, (0, common_1.Param)("id", common_1.ParseUUIDPipe)),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", void 0)
 ], MinistersController.prototype, "resetPassword", null);
 __decorate([
-    (0, common_1.Delete)(':id'),
-    (0, permissions_decorator_1.RequiresPermissions)('ministers.delete'),
-    __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
+    (0, common_1.Delete)(":id"),
+    (0, permissions_decorator_1.RequiresPermissions)("ministers.delete"),
+    __param(0, (0, common_1.Param)("id", common_1.ParseUUIDPipe)),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", void 0)
 ], MinistersController.prototype, "remove", null);
 exports.MinistersController = MinistersController = __decorate([
-    (0, common_1.Controller)('ministers'),
+    (0, common_1.Controller)("ministers"),
     __metadata("design:paramtypes", [ministers_service_1.MinistersService])
 ], MinistersController);

@@ -6,19 +6,19 @@ import {
   UpdateDateColumn,
   OneToOne,
   JoinColumn,
-} from 'typeorm';
-import { User } from '../../users/entities/user.entity';
+} from "typeorm";
+import { User } from "../../users/entities/user.entity";
 
-@Entity('ministers')
+@Entity("ministers")
 export class Minister {
-  @PrimaryGeneratedColumn('uuid')
+  @PrimaryGeneratedColumn("uuid")
   id: string;
 
   @Column({ unique: true })
   user_id: string;
 
-  @OneToOne(() => User, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'user_id' })
+  @OneToOne(() => User, { onDelete: "CASCADE" })
+  @JoinColumn({ name: "user_id" })
   user: User;
 
   @Column()
@@ -42,22 +42,22 @@ export class Minister {
   @Column({ nullable: true })
   address: string;
 
-  @Column({ type: 'date', nullable: true })
+  @Column({ type: "date", nullable: true })
   date_of_birth: Date;
 
   @Column({ nullable: true })
   marital_status: string;
 
-  @Column({ type: 'varchar', nullable: true })
+  @Column({ type: "varchar", nullable: true })
   gender: string | null;
 
   @Column({ nullable: true })
   title: string;
 
-  @Column({ default: 'active' })
+  @Column({ default: "active" })
   status: string;
 
-  @Column({ type: 'date', nullable: true })
+  @Column({ type: "date", nullable: true })
   joined_date: Date;
 
   @CreateDateColumn()

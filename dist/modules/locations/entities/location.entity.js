@@ -15,7 +15,7 @@ let Location = class Location {
 };
 exports.Location = Location;
 __decorate([
-    (0, typeorm_1.PrimaryGeneratedColumn)('uuid'),
+    (0, typeorm_1.PrimaryGeneratedColumn)("uuid"),
     __metadata("design:type", String)
 ], Location.prototype, "id", void 0);
 __decorate([
@@ -23,11 +23,11 @@ __decorate([
     __metadata("design:type", String)
 ], Location.prototype, "name", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ default: 'active' }),
+    (0, typeorm_1.Column)({ default: "active" }),
     __metadata("design:type", String)
 ], Location.prototype, "status", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'uuid', nullable: true }),
+    (0, typeorm_1.Column)({ type: "uuid", nullable: true }),
     __metadata("design:type", Object)
 ], Location.prototype, "parent_id", void 0);
 __decorate([
@@ -39,5 +39,5 @@ __decorate([
     __metadata("design:type", Date)
 ], Location.prototype, "updated_at", void 0);
 exports.Location = Location = __decorate([
-    (0, typeorm_1.Entity)('locations')
+    (0, typeorm_1.Entity)("locations")
 ], Location);

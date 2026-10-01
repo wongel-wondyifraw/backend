@@ -1,23 +1,28 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn } from 'typeorm';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  CreateDateColumn,
+} from "typeorm";
 
-@Entity('audit_logs')
+@Entity("audit_logs")
 export class AuditLog {
-  @PrimaryGeneratedColumn('uuid')
+  @PrimaryGeneratedColumn("uuid")
   id: string;
 
   @Column()
   action: string;
 
-  @Column({ type: 'varchar' })
+  @Column({ type: "varchar" })
   entity_type: string;
 
-  @Column({ type: 'uuid' })
+  @Column({ type: "uuid" })
   entity_id: string;
 
-  @Column({ type: 'uuid', nullable: true })
+  @Column({ type: "uuid", nullable: true })
   user_id: string | null;
 
-  @Column({ type: 'jsonb', nullable: true })
+  @Column({ type: "jsonb", nullable: true })
   changes: any;
 
   @CreateDateColumn()

@@ -1,5 +1,5 @@
-import { IsIn, IsOptional, IsString, IsUUID } from 'class-validator';
-import { Type } from 'class-transformer';
+import { IsIn, IsOptional, IsString, IsUUID } from "class-validator";
+import { Type } from "class-transformer";
 
 export class TaskQueryDto {
   @Type(() => Number)
@@ -14,9 +14,9 @@ export class TaskQueryDto {
   @IsOptional()
   search?: string;
 
-  @IsIn(['pending', 'completed', 'cancelled', 'overdue', 'all'])
+  @IsIn(["pending", "completed", "cancelled", "overdue", "all"])
   @IsOptional()
-  status?: 'pending' | 'completed' | 'cancelled' | 'overdue' | 'all' = 'all';
+  status?: "pending" | "completed" | "cancelled" | "overdue" | "all" = "all";
 
   @IsUUID()
   @IsOptional()

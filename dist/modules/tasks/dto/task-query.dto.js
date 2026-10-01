@@ -16,7 +16,7 @@ class TaskQueryDto {
     constructor() {
         this.page = 1;
         this.limit = 20;
-        this.status = 'all';
+        this.status = "all";
     }
 }
 exports.TaskQueryDto = TaskQueryDto;
@@ -36,7 +36,7 @@ __decorate([
     __metadata("design:type", String)
 ], TaskQueryDto.prototype, "search", void 0);
 __decorate([
-    (0, class_validator_1.IsIn)(['pending', 'completed', 'cancelled', 'overdue', 'all']),
+    (0, class_validator_1.IsIn)(["pending", "completed", "cancelled", "overdue", "all"]),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], TaskQueryDto.prototype, "status", void 0);

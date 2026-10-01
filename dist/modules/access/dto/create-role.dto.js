@@ -18,7 +18,7 @@ __decorate([
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.Length)(2, 64),
     (0, class_validator_1.Matches)(/^[a-z][a-z0-9_]*$/, {
-        message: 'key must be lowercase letters, digits, and underscores',
+        message: "key must be lowercase letters, digits, and underscores",
     }),
     __metadata("design:type", String)
 ], CreateRoleDto.prototype, "key", void 0);

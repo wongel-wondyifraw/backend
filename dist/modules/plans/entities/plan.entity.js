@@ -16,7 +16,7 @@ let Plan = class Plan {
 };
 exports.Plan = Plan;
 __decorate([
-    (0, typeorm_1.PrimaryGeneratedColumn)('uuid'),
+    (0, typeorm_1.PrimaryGeneratedColumn)("uuid"),
     __metadata("design:type", String)
 ], Plan.prototype, "id", void 0);
 __decorate([
@@ -24,31 +24,31 @@ __decorate([
     __metadata("design:type", String)
 ], Plan.prototype, "title", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'varchar', length: 32 }),
+    (0, typeorm_1.Column)({ type: "varchar", length: 32 }),
     __metadata("design:type", String)
 ], Plan.prototype, "type", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'date' }),
+    (0, typeorm_1.Column)({ type: "date" }),
     __metadata("design:type", String)
 ], Plan.prototype, "plan_date", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'time', nullable: true }),
+    (0, typeorm_1.Column)({ type: "time", nullable: true }),
     __metadata("design:type", Object)
 ], Plan.prototype, "start_time", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'time', nullable: true }),
+    (0, typeorm_1.Column)({ type: "time", nullable: true }),
     __metadata("design:type", Object)
 ], Plan.prototype, "end_time", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'varchar', nullable: true }),
+    (0, typeorm_1.Column)({ type: "varchar", nullable: true }),
     __metadata("design:type", Object)
 ], Plan.prototype, "location", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'text', nullable: true }),
+    (0, typeorm_1.Column)({ type: "text", nullable: true }),
     __metadata("design:type", Object)
 ], Plan.prototype, "notes", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'varchar', length: 16, default: 'planned' }),
+    (0, typeorm_1.Column)({ type: "varchar", length: 16, default: "planned" }),
     __metadata("design:type", String)
 ], Plan.prototype, "status", void 0);
 __decorate([
@@ -64,5 +64,5 @@ __decorate([
     __metadata("design:type", Array)
 ], Plan.prototype, "plan_ministers", void 0);
 exports.Plan = Plan = __decorate([
-    (0, typeorm_1.Entity)('plans')
+    (0, typeorm_1.Entity)("plans")
 ], Plan);

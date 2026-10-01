@@ -1,9 +1,9 @@
-import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { In, Repository } from 'typeorm';
-import { Member } from '../../modules/members/entities/member.entity';
-import { Minister } from '../../modules/ministers/entities/minister.entity';
-import { LeaderSummary, LeaderType } from './leader.types';
+import { Injectable } from "@nestjs/common";
+import { InjectRepository } from "@nestjs/typeorm";
+import { In, Repository } from "typeorm";
+import { Member } from "../../modules/members/entities/member.entity";
+import { Minister } from "../../modules/ministers/entities/minister.entity";
+import { LeaderSummary, LeaderType } from "./leader.types";
 
 type LeaderRef = {
   leader_id?: string | null;
@@ -19,24 +19,37 @@ export class LeaderResolverService {
     private readonly ministersRepository: Repository<Minister>,
   ) {}
 
-  async resolve(leaderId?: string | null, leaderType?: string | null): Promise<LeaderSummary | null> {
+  async resolve(
+    leaderId?: string | null,
+    leaderType?: string | null,
+  ): Promise<LeaderSummary | null> {
     if (!leaderId) return null;
 
-    if (leaderType === 'minister') {
-      return this.fromMinister(await this.ministersRepository.findOne({ where: { id: leaderId } }));
+    if (leaderType === "minister") {
+      return this.fromMinister(
+        await this.ministersRepository.findOne({ where: { id: leaderId } }),
+      );
     }
 
-    if (leaderType === 'member') {
-      return this.fromMember(await this.membersRepository.findOne({ where: { id: leaderId } }));
+    if (leaderType === "member") {
+      return this.fromMember(
+        await this.membersRepository.findOne({ where: { id: leaderId } }),
+      );
     }
 
     // Legacy rows without leader_type: try member, then minister
-    const member = await this.membersRepository.findOne({ where: { id: leaderId } });
+    const member = await this.membersRepository.findOne({
+      where: { id: leaderId },
+    });
     if (member) return this.fromMember(member);
-    return this.fromMinister(await this.ministersRepository.findOne({ where: { id: leaderId } }));
+    return this.fromMinister(
+      await this.ministersRepository.findOne({ where: { id: leaderId } }),
+    );
   }
 
-  async attachLeaders<T extends LeaderRef>(items: T[]): Promise<Array<T & { leader: LeaderSummary | null }>> {
+  async attachLeaders<T extends LeaderRef>(
+    items: T[],
+  ): Promise<Array<T & { leader: LeaderSummary | null }>> {
     if (items.length === 0) return [];
 
     const memberIds = new Set<string>();
@@ -45,29 +58,45 @@ export class LeaderResolverService {
 
     for (const item of items) {
       if (!item.leader_id) continue;
-      if (item.leader_type === 'minister') ministerIds.add(item.leader_id);
-      else if (item.leader_type === 'member') memberIds.add(item.leader_id);
+      if (item.leader_type === "minister") ministerIds.add(item.leader_id);
+      else if (item.leader_type === "member") memberIds.add(item.leader_id);
       else unknownIds.add(item.leader_id);
     }
 
-    const [members, ministers, unknownMembers, unknownMinisters] = await Promise.all([
-      memberIds.size ? this.membersRepository.find({ where: { id: In([...memberIds]) } }) : Promise.resolve([]),
-      ministerIds.size ? this.ministersRepository.find({ where: { id: In([...ministerIds]) } }) : Promise.resolve([]),
-      unknownIds.size ? this.membersRepository.find({ where: { id: In([...unknownIds]) } }) : Promise.resolve([]),
-      unknownIds.size ? this.ministersRepository.find({ where: { id: In([...unknownIds]) } }) : Promise.resolve([]),
-    ]);
+    const [members, ministers, unknownMembers, unknownMinisters] =
+      await Promise.all([
+        memberIds.size
+          ? this.membersRepository.find({ where: { id: In([...memberIds]) } })
+          : Promise.resolve([]),
+        ministerIds.size
+          ? this.ministersRepository.find({
+              where: { id: In([...ministerIds]) },
+            })
+          : Promise.resolve([]),
+        unknownIds.size
+          ? this.membersRepository.find({ where: { id: In([...unknownIds]) } })
+          : Promise.resolve([]),
+        unknownIds.size
+          ? this.ministersRepository.find({
+              where: { id: In([...unknownIds]) },
+            })
+          : Promise.resolve([]),
+      ]);
 
     const byKey = new Map<string, LeaderSummary>();
     for (const m of members) byKey.set(`member:${m.id}`, this.fromMember(m)!);
-    for (const m of ministers) byKey.set(`minister:${m.id}`, this.fromMinister(m)!);
-    for (const m of unknownMembers) byKey.set(`unknown:${m.id}`, this.fromMember(m)!);
+    for (const m of ministers)
+      byKey.set(`minister:${m.id}`, this.fromMinister(m)!);
+    for (const m of unknownMembers)
+      byKey.set(`unknown:${m.id}`, this.fromMember(m)!);
     for (const m of unknownMinisters) {
-      if (!byKey.has(`unknown:${m.id}`)) byKey.set(`unknown:${m.id}`, this.fromMinister(m)!);
+      if (!byKey.has(`unknown:${m.id}`))
+        byKey.set(`unknown:${m.id}`, this.fromMinister(m)!);
     }
 
     return items.map((item) => {
       if (!item.leader_id) return { ...item, leader: null };
-      if (item.leader_type === 'minister' || item.leader_type === 'member') {
+      if (item.leader_type === "minister" || item.leader_type === "member") {
         return {
           ...item,
           leader: byKey.get(`${item.leader_type}:${item.leader_id}`) ?? null,
@@ -89,7 +118,7 @@ export class LeaderResolverService {
       last_name: member.last_name,
       email: member.email,
       phone: member.phone,
-      type: 'member' as LeaderType,
+      type: "member" as LeaderType,
     };
   }
 
@@ -103,7 +132,7 @@ export class LeaderResolverService {
       email: minister.email,
       phone: minister.phone,
       title: minister.title,
-      type: 'minister' as LeaderType,
+      type: "minister" as LeaderType,
     };
   }
 }

@@ -2,18 +2,18 @@ import {
   Injectable,
   Logger,
   ServiceUnavailableException,
-} from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { v2 as cloudinary, UploadApiResponse } from 'cloudinary';
-import { writeFileSync, unlinkSync, existsSync, readFileSync } from 'fs';
-import { join } from 'path';
+} from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
+import { v2 as cloudinary, UploadApiResponse } from "cloudinary";
+import { writeFileSync, unlinkSync, existsSync, readFileSync } from "fs";
+import { join } from "path";
 import {
   getDocumentsUploadDir,
   getImagesUploadDir,
   uploadDocumentFilename,
   uploadImageFilename,
-} from '../../common/config/multer.config';
-import type { ProcessedImage } from './image-types';
+} from "../../common/config/multer.config";
+import type { ProcessedImage } from "./image-types";
 
 export type UploadedDocument = {
   url: string;
@@ -29,17 +29,17 @@ export class CloudinaryService {
   private readonly cloudRequested: boolean;
 
   constructor(private readonly config: ConfigService) {
-    this.cloudRequested = this.config.get<string>('CLOUD_STORAGE') === 'true';
-    const cloudName = this.config.get<string>('CLOUDINARY_CLOUD_NAME');
-    const apiKey = this.config.get<string>('CLOUDINARY_API_KEY');
-    const apiSecret = this.config.get<string>('CLOUDINARY_API_SECRET');
+    this.cloudRequested = this.config.get<string>("CLOUD_STORAGE") === "true";
+    const cloudName = this.config.get<string>("CLOUDINARY_CLOUD_NAME");
+    const apiKey = this.config.get<string>("CLOUDINARY_API_KEY");
+    const apiSecret = this.config.get<string>("CLOUDINARY_API_SECRET");
     const hasCredentials = Boolean(cloudName && apiKey && apiSecret);
 
     this.enabled = this.cloudRequested && hasCredentials;
 
     if (this.cloudRequested && !hasCredentials) {
       this.logger.error(
-        'CLOUD_STORAGE=true but CLOUDINARY_* credentials are missing',
+        "CLOUD_STORAGE=true but CLOUDINARY_* credentials are missing",
       );
     }
 
@@ -50,9 +50,9 @@ export class CloudinaryService {
         api_secret: apiSecret,
         secure: true,
       });
-      this.logger.log('Cloud storage enabled (Cloudinary)');
+      this.logger.log("Cloud storage enabled (Cloudinary)");
     } else if (!this.cloudRequested) {
-      this.logger.log('Cloud storage disabled — using local uploads/');
+      this.logger.log("Cloud storage disabled — using local uploads/");
     }
   }
 
@@ -62,7 +62,7 @@ export class CloudinaryService {
 
   async uploadImage(
     file: Express.Multer.File,
-    folder = 'cms/images',
+    folder = "cms/images",
   ): Promise<ProcessedImage> {
     this.assertCloudReady();
     if (this.enabled) {
@@ -73,7 +73,7 @@ export class CloudinaryService {
 
   async uploadDocument(
     file: Express.Multer.File,
-    folder = 'cms/documents',
+    folder = "cms/documents",
   ): Promise<UploadedDocument> {
     this.assertCloudReady();
     if (this.enabled) {
@@ -85,7 +85,7 @@ export class CloudinaryService {
   private assertCloudReady(): void {
     if (this.cloudRequested && !this.enabled) {
       throw new ServiceUnavailableException(
-        'CLOUD_STORAGE=true but Cloudinary credentials are not configured',
+        "CLOUD_STORAGE=true but Cloudinary credentials are not configured",
       );
     }
   }
@@ -97,22 +97,22 @@ export class CloudinaryService {
     // No local transform — Cloudinary handles resize/webp via eager transforms.
     const result = await this.uploadBuffer(file, {
       folder,
-      resource_type: 'image',
+      resource_type: "image",
       eager: [
         {
           width: 800,
           height: 800,
-          crop: 'limit',
+          crop: "limit",
           quality: 78,
-          fetch_format: 'webp',
+          fetch_format: "webp",
         },
         {
           width: 320,
           height: 320,
-          crop: 'fill',
-          gravity: 'auto',
+          crop: "fill",
+          gravity: "auto",
           quality: 72,
-          fetch_format: 'webp',
+          fetch_format: "webp",
         },
       ],
       // Async eager avoids holding the upload connection while variants build
@@ -121,9 +121,9 @@ export class CloudinaryService {
         {
           width: 1920,
           height: 1920,
-          crop: 'limit',
+          crop: "limit",
           quality: 82,
-          fetch_format: 'webp',
+          fetch_format: "webp",
         },
       ],
     });
@@ -146,9 +146,9 @@ export class CloudinaryService {
     file: Express.Multer.File,
     folder: string,
   ): Promise<UploadedDocument> {
-    const isImage = file.mimetype.startsWith('image/');
-    const isVideo = file.mimetype.startsWith('video/');
-    const resourceType = isVideo ? 'video' : isImage ? 'image' : 'raw';
+    const isImage = file.mimetype.startsWith("image/");
+    const isVideo = file.mimetype.startsWith("video/");
+    const resourceType = isVideo ? "video" : isImage ? "image" : "raw";
 
     const result = await this.uploadBuffer(file, {
       folder,
@@ -175,7 +175,9 @@ export class CloudinaryService {
         options,
         (error, result) => {
           if (error || !result) {
-            reject(error ?? new Error('Cloudinary upload returned empty result'));
+            reject(
+              error ?? new Error("Cloudinary upload returned empty result"),
+            );
             return;
           }
           resolve(result);
@@ -193,7 +195,7 @@ export class CloudinaryService {
     writeFileSync(dest, this.getBuffer(file));
 
     // Dynamic import — Sharp never loads when CLOUD_STORAGE=true
-    const { processUploadedImage } = await import('./image-processor');
+    const { processUploadedImage } = await import("./image-processor");
     return processUploadedImage(dest, filename);
   }
 
@@ -220,6 +222,6 @@ export class CloudinaryService {
       }
       return buf;
     }
-    throw new Error('Uploaded file has no buffer or path');
+    throw new Error("Uploaded file has no buffer or path");
   }
 }

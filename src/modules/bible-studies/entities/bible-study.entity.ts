@@ -5,42 +5,45 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   OneToMany,
-} from 'typeorm';
-import { BibleStudyMember } from './bible-study-member.entity';
-import type { LeaderSummary, LeaderType } from '../../../common/leadership/leader.types';
+} from "typeorm";
+import { BibleStudyMember } from "./bible-study-member.entity";
+import type {
+  LeaderSummary,
+  LeaderType,
+} from "../../../common/leadership/leader.types";
 
-export type BibleStudyContentType = 'book' | 'study_material';
+export type BibleStudyContentType = "book" | "study_material";
 
-@Entity('bible_studies')
+@Entity("bible_studies")
 export class BibleStudy {
-  @PrimaryGeneratedColumn('uuid')
+  @PrimaryGeneratedColumn("uuid")
   id: string;
 
   @Column()
   name: string;
 
-  @Column({ type: 'text', nullable: true })
+  @Column({ type: "text", nullable: true })
   about: string | null;
 
-  @Column({ type: 'varchar', nullable: true })
+  @Column({ type: "varchar", nullable: true })
   schedule: string | null;
 
   @Column()
   location: string;
 
-  @Column({ type: 'varchar', length: 32 })
+  @Column({ type: "varchar", length: 32 })
   content_type: BibleStudyContentType;
 
-  @Column({ type: 'varchar', nullable: true })
+  @Column({ type: "varchar", nullable: true })
   bible_book: string | null;
 
-  @Column({ type: 'varchar', nullable: true })
+  @Column({ type: "varchar", nullable: true })
   material_url: string | null;
 
-  @Column({ type: 'uuid', nullable: true })
+  @Column({ type: "uuid", nullable: true })
   leader_id: string | null;
 
-  @Column({ type: 'varchar', length: 16, nullable: true })
+  @Column({ type: "varchar", length: 16, nullable: true })
   leader_type: LeaderType | null;
 
   /** Populated by service — not a DB column */

@@ -51,7 +51,7 @@ let MinistriesController = class MinistriesController {
 exports.MinistriesController = MinistriesController;
 __decorate([
     (0, common_1.Post)(),
-    (0, permissions_decorator_1.RequiresPermissions)('ministries.create'),
+    (0, permissions_decorator_1.RequiresPermissions)("ministries.create"),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [create_ministry_dto_1.CreateMinistryDto]),
@@ -59,64 +59,64 @@ __decorate([
 ], MinistriesController.prototype, "create", null);
 __decorate([
     (0, common_1.Get)(),
-    (0, permissions_decorator_1.RequiresPermissions)('ministries.read'),
+    (0, permissions_decorator_1.RequiresPermissions)("ministries.read"),
     __param(0, (0, common_1.Query)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [pagination_query_dto_1.PaginationQueryDto]),
     __metadata("design:returntype", Promise)
 ], MinistriesController.prototype, "findAll", null);
 __decorate([
-    (0, common_1.Get)(':id'),
-    (0, permissions_decorator_1.RequiresPermissions)('ministries.read'),
-    __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
+    (0, common_1.Get)(":id"),
+    (0, permissions_decorator_1.RequiresPermissions)("ministries.read"),
+    __param(0, (0, common_1.Param)("id", common_1.ParseUUIDPipe)),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], MinistriesController.prototype, "findOne", null);
 __decorate([
-    (0, common_1.Patch)(':id'),
-    (0, permissions_decorator_1.RequiresPermissions)('ministries.update'),
-    __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
+    (0, common_1.Patch)(":id"),
+    (0, permissions_decorator_1.RequiresPermissions)("ministries.update"),
+    __param(0, (0, common_1.Param)("id", common_1.ParseUUIDPipe)),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String, update_ministry_dto_1.UpdateMinistryDto]),
     __metadata("design:returntype", Promise)
 ], MinistriesController.prototype, "update", null);
 __decorate([
-    (0, common_1.Delete)(':id'),
-    (0, permissions_decorator_1.RequiresPermissions)('ministries.delete'),
-    __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
+    (0, common_1.Delete)(":id"),
+    (0, permissions_decorator_1.RequiresPermissions)("ministries.delete"),
+    __param(0, (0, common_1.Param)("id", common_1.ParseUUIDPipe)),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], MinistriesController.prototype, "remove", null);
 __decorate([
-    (0, common_1.Get)(':id/members'),
-    (0, permissions_decorator_1.RequiresPermissions)('ministries.read'),
-    __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
+    (0, common_1.Get)(":id/members"),
+    (0, permissions_decorator_1.RequiresPermissions)("ministries.read"),
+    __param(0, (0, common_1.Param)("id", common_1.ParseUUIDPipe)),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], MinistriesController.prototype, "getMinistryMembers", null);
 __decorate([
-    (0, common_1.Post)(':id/members/:memberId'),
-    (0, permissions_decorator_1.RequiresPermissions)('ministries.update'),
-    __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
-    __param(1, (0, common_1.Param)('memberId', common_1.ParseUUIDPipe)),
+    (0, common_1.Post)(":id/members/:memberId"),
+    (0, permissions_decorator_1.RequiresPermissions)("ministries.update"),
+    __param(0, (0, common_1.Param)("id", common_1.ParseUUIDPipe)),
+    __param(1, (0, common_1.Param)("memberId", common_1.ParseUUIDPipe)),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String, String]),
     __metadata("design:returntype", Promise)
 ], MinistriesController.prototype, "addMember", null);
 __decorate([
-    (0, common_1.Delete)(':id/members/:memberId'),
-    (0, permissions_decorator_1.RequiresPermissions)('ministries.update'),
-    __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
-    __param(1, (0, common_1.Param)('memberId', common_1.ParseUUIDPipe)),
+    (0, common_1.Delete)(":id/members/:memberId"),
+    (0, permissions_decorator_1.RequiresPermissions)("ministries.update"),
+    __param(0, (0, common_1.Param)("id", common_1.ParseUUIDPipe)),
+    __param(1, (0, common_1.Param)("memberId", common_1.ParseUUIDPipe)),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String, String]),
     __metadata("design:returntype", Promise)
 ], MinistriesController.prototype, "removeMember", null);
 exports.MinistriesController = MinistriesController = __decorate([
-    (0, common_1.Controller)('ministries'),
+    (0, common_1.Controller)("ministries"),
     __metadata("design:paramtypes", [ministries_service_1.MinistriesService])
 ], MinistriesController);

@@ -74,9 +74,9 @@ __decorate([
 __decorate([
     (0, class_validator_1.IsOptional)(),
     (0, class_transformer_1.Transform)(({ value }) => {
-        if (value === 'true' || value === 'yes')
+        if (value === "true" || value === "yes")
             return true;
-        if (value === 'false' || value === 'no')
+        if (value === "false" || value === "no")
             return false;
         return value;
     }),
@@ -121,9 +121,9 @@ __decorate([
 __decorate([
     (0, class_validator_1.IsOptional)(),
     (0, class_transformer_1.Transform)(({ value }) => {
-        if (value === 'true' || value === 'yes')
+        if (value === "true" || value === "yes")
             return true;
-        if (value === 'false' || value === 'no')
+        if (value === "false" || value === "no")
             return false;
         return value;
     }),
@@ -133,9 +133,9 @@ __decorate([
 __decorate([
     (0, class_validator_1.IsOptional)(),
     (0, class_transformer_1.Transform)(({ value }) => {
-        if (value === 'true' || value === 'yes')
+        if (value === "true" || value === "yes")
             return true;
-        if (value === 'false' || value === 'no')
+        if (value === "false" || value === "no")
             return false;
         return value;
     }),
@@ -155,9 +155,9 @@ __decorate([
 __decorate([
     (0, class_validator_1.IsOptional)(),
     (0, class_transformer_1.Transform)(({ value }) => {
-        if (value === 'true' || value === 'yes')
+        if (value === "true" || value === "yes")
             return true;
-        if (value === 'false' || value === 'no')
+        if (value === "false" || value === "no")
             return false;
         return value;
     }),

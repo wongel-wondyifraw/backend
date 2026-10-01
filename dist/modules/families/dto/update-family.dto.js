@@ -20,7 +20,7 @@ __decorate([
     __metadata("design:type", String)
 ], UpdateFamilyDto.prototype, "husband_id", void 0);
 __decorate([
-    (0, class_validator_1.IsIn)(['member', 'minister']),
+    (0, class_validator_1.IsIn)(["member", "minister"]),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], UpdateFamilyDto.prototype, "husband_type", void 0);
@@ -30,13 +30,13 @@ __decorate([
     __metadata("design:type", String)
 ], UpdateFamilyDto.prototype, "wife_id", void 0);
 __decorate([
-    (0, class_validator_1.IsIn)(['member', 'minister']),
+    (0, class_validator_1.IsIn)(["member", "minister"]),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], UpdateFamilyDto.prototype, "wife_type", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsIn)(['registered', 'pending', 'external', 'none']),
+    (0, class_validator_1.IsIn)(["registered", "pending", "external", "none"]),
     __metadata("design:type", String)
 ], UpdateFamilyDto.prototype, "spouse_status", void 0);
 __decorate([

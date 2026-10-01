@@ -19,7 +19,10 @@ let MinistriesModule = class MinistriesModule {
 exports.MinistriesModule = MinistriesModule;
 exports.MinistriesModule = MinistriesModule = __decorate([
     (0, common_1.Module)({
-        imports: [typeorm_1.TypeOrmModule.forFeature([ministry_entity_1.Ministry, ministry_member_entity_1.MinistryMember]), leadership_module_1.LeadershipModule],
+        imports: [
+            typeorm_1.TypeOrmModule.forFeature([ministry_entity_1.Ministry, ministry_member_entity_1.MinistryMember]),
+            leadership_module_1.LeadershipModule,
+        ],
         controllers: [ministries_controller_1.MinistriesController],
         providers: [ministries_service_1.MinistriesService],
         exports: [ministries_service_1.MinistriesService],

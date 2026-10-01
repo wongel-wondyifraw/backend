@@ -19,7 +19,10 @@ let HomeGroupsModule = class HomeGroupsModule {
 exports.HomeGroupsModule = HomeGroupsModule;
 exports.HomeGroupsModule = HomeGroupsModule = __decorate([
     (0, common_1.Module)({
-        imports: [typeorm_1.TypeOrmModule.forFeature([home_group_entity_1.HomeGroup, home_group_member_entity_1.HomeGroupMember]), leadership_module_1.LeadershipModule],
+        imports: [
+            typeorm_1.TypeOrmModule.forFeature([home_group_entity_1.HomeGroup, home_group_member_entity_1.HomeGroupMember]),
+            leadership_module_1.LeadershipModule,
+        ],
         controllers: [home_groups_controller_1.HomeGroupsController],
         providers: [home_groups_service_1.HomeGroupsService],
         exports: [home_groups_service_1.HomeGroupsService],

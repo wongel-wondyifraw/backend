@@ -85,7 +85,7 @@ let AccessSeederService = AccessSeederService_1 = class AccessSeederService {
     }
     async upsertSystemRoles(allPermissions) {
         var _a, _b, _c, _d;
-        const reseed = this.config.get('RBAC_RESEED_SYSTEM') === 'true';
+        const reseed = this.config.get("RBAC_RESEED_SYSTEM") === "true";
         const slugToPermission = new Map(allPermissions.map((p) => [p.slug, p]));
         const allSlugs = allPermissions.map((p) => p.slug);
         for (const def of systemRoleDefs) {
@@ -104,16 +104,17 @@ let AccessSeederService = AccessSeederService_1 = class AccessSeederService {
                 });
                 role = await this.roles.save(role);
             }
-            else if (role.name !== def.name || role.description !== ((_b = def.description) !== null && _b !== void 0 ? _b : null)) {
+            else if (role.name !== def.name ||
+                role.description !== ((_b = def.description) !== null && _b !== void 0 ? _b : null)) {
                 role.name = def.name;
                 role.description = (_c = def.description) !== null && _c !== void 0 ? _c : null;
                 await this.roles.save(role);
             }
-            const desiredSlugs = def.permissionSlugs === '*'
+            const desiredSlugs = def.permissionSlugs === "*"
                 ? allSlugs
                 : def.permissionSlugs.filter((s) => slugToPermission.has(s));
             const currentSlugs = new Set(((_d = role.permissions) !== null && _d !== void 0 ? _d : []).map((p) => p.slug));
-            const isWildcard = def.permissionSlugs === '*';
+            const isWildcard = def.permissionSlugs === "*";
             const wildcardMissingPerms = isWildcard && desiredSlugs.some((s) => !currentSlugs.has(s));
             const hasNoPermissions = currentSlugs.size === 0;
             const shouldSyncPerms = isNew || reseed || hasNoPermissions || wildcardMissingPerms;
@@ -133,7 +134,7 @@ let AccessSeederService = AccessSeederService_1 = class AccessSeederService {
         });
     }
     async findAllPermissions() {
-        return this.permissions.find({ order: { category: 'ASC', slug: 'ASC' } });
+        return this.permissions.find({ order: { category: "ASC", slug: "ASC" } });
     }
     async backfillUserRoleIds() {
         var _a;
@@ -141,7 +142,7 @@ let AccessSeederService = AccessSeederService_1 = class AccessSeederService {
         for (const user of users) {
             if (user.role_id)
                 continue;
-            const key = (_a = user.role) !== null && _a !== void 0 ? _a : 'staff';
+            const key = (_a = user.role) !== null && _a !== void 0 ? _a : "staff";
             const role = await this.findRoleByKey(key);
             if (!role)
                 continue;

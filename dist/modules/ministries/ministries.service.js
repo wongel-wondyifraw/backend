@@ -34,7 +34,7 @@ let MinistriesService = class MinistriesService {
         }
         return {
             leader_id: dto.leader_id,
-            leader_type: dto.leader_type || 'member',
+            leader_type: dto.leader_type || "member",
         };
     }
     async create(createMinistryDto) {
@@ -48,24 +48,24 @@ let MinistriesService = class MinistriesService {
         });
         const saved = await this.ministriesRepository.save(ministry);
         this.events.emit(notification_events_1.NOTIFICATION_EVENT, {
-            eventName: 'ministry.created',
-            kind: 'ministry',
-            severity: 'success',
-            title: 'New ministry created',
+            eventName: "ministry.created",
+            kind: "ministry",
+            severity: "success",
+            title: "New ministry created",
             message: `${saved.name} was added.`,
             href: `/ministries/details/${saved.id}`,
             dedupeKey: `ministry.created:${saved.id}`,
-            targetRoles: ['admin', 'minister'],
+            targetRoles: ["admin", "minister"],
         });
         return this.findOne(saved.id);
     }
     async findAllPaginated(page = 1, limit = 20, search) {
-        const qb = this.ministriesRepository.createQueryBuilder('ministry');
+        const qb = this.ministriesRepository.createQueryBuilder("ministry");
         if (search === null || search === void 0 ? void 0 : search.trim()) {
             const pattern = `%${search.trim().toLowerCase()}%`;
-            qb.where('LOWER(ministry.name) LIKE :pattern', { pattern });
+            qb.where("LOWER(ministry.name) LIKE :pattern", { pattern });
         }
-        qb.orderBy('ministry.created_at', 'DESC');
+        qb.orderBy("ministry.created_at", "DESC");
         qb.skip((page - 1) * limit).take(limit);
         const [rows, total] = await qb.getManyAndCount();
         const data = await this.leaders.attachLeaders(rows);
@@ -78,7 +78,9 @@ let MinistriesService = class MinistriesService {
         };
     }
     async findAll() {
-        const rows = await this.ministriesRepository.find({ order: { created_at: 'DESC' } });
+        const rows = await this.ministriesRepository.find({
+            order: { created_at: "DESC" },
+        });
         return this.leaders.attachLeaders(rows);
     }
     async findOne(id) {
@@ -91,20 +93,21 @@ let MinistriesService = class MinistriesService {
     }
     async update(id, updateMinistryDto) {
         const patch = { ...updateMinistryDto };
-        if ('leader_id' in updateMinistryDto || 'leader_type' in updateMinistryDto) {
+        if ("leader_id" in updateMinistryDto ||
+            "leader_type" in updateMinistryDto) {
             Object.assign(patch, this.normalizeLeader(updateMinistryDto));
         }
         await this.ministriesRepository.update(id, patch);
         const ministry = await this.findOne(id);
         this.events.emit(notification_events_1.NOTIFICATION_EVENT, {
-            eventName: 'ministry.updated',
-            kind: 'ministry',
-            severity: 'info',
-            title: 'Ministry updated',
+            eventName: "ministry.updated",
+            kind: "ministry",
+            severity: "info",
+            title: "Ministry updated",
             message: `${ministry.name} was updated.`,
             href: `/ministries/details/${id}`,
             dedupeKey: `ministry.updated:${id}:${Date.now()}`,
-            targetRoles: ['admin', 'minister'],
+            targetRoles: ["admin", "minister"],
         });
         return ministry;
     }
@@ -116,13 +119,13 @@ let MinistriesService = class MinistriesService {
         }
         if (ministry) {
             this.events.emit(notification_events_1.NOTIFICATION_EVENT, {
-                eventName: 'ministry.deleted',
-                kind: 'ministry',
-                severity: 'warning',
-                title: 'Ministry removed',
+                eventName: "ministry.deleted",
+                kind: "ministry",
+                severity: "warning",
+                title: "Ministry removed",
                 message: `${ministry.name} was removed.`,
                 dedupeKey: `ministry.deleted:${id}`,
-                targetRoles: ['admin', 'minister'],
+                targetRoles: ["admin", "minister"],
             });
         }
     }
@@ -131,7 +134,7 @@ let MinistriesService = class MinistriesService {
             where: { ministry_id: ministryId, member_id: memberId },
         });
         if (existing) {
-            throw new common_1.ConflictException('Member is already in this ministry');
+            throw new common_1.ConflictException("Member is already in this ministry");
         }
         const record = this.ministryMembersRepository.create({
             ministry_id: ministryId,
@@ -140,14 +143,14 @@ let MinistriesService = class MinistriesService {
         const saved = await this.ministryMembersRepository.save(record);
         const ministry = await this.findOne(ministryId);
         this.events.emit(notification_events_1.NOTIFICATION_EVENT, {
-            eventName: 'ministry.member.added',
-            kind: 'ministry',
-            severity: 'info',
-            title: 'Ministry membership updated',
+            eventName: "ministry.member.added",
+            kind: "ministry",
+            severity: "info",
+            title: "Ministry membership updated",
             message: `A member was added to ${ministry.name}.`,
             href: `/ministries/details/${ministryId}`,
             dedupeKey: `ministry.member.added:${ministryId}:${memberId}`,
-            targetRoles: ['admin', 'minister'],
+            targetRoles: ["admin", "minister"],
         });
         return saved;
     }
@@ -158,30 +161,30 @@ let MinistriesService = class MinistriesService {
             member_id: memberId,
         });
         if (result.affected === 0) {
-            throw new common_1.NotFoundException('Member not found in this ministry');
+            throw new common_1.NotFoundException("Member not found in this ministry");
         }
         this.events.emit(notification_events_1.NOTIFICATION_EVENT, {
-            eventName: 'ministry.member.removed',
-            kind: 'ministry',
-            severity: 'info',
-            title: 'Ministry membership updated',
+            eventName: "ministry.member.removed",
+            kind: "ministry",
+            severity: "info",
+            title: "Ministry membership updated",
             message: `A member was removed from ${ministry.name}.`,
             href: `/ministries/details/${ministryId}`,
             dedupeKey: `ministry.member.removed:${ministryId}:${memberId}`,
-            targetRoles: ['admin', 'minister'],
+            targetRoles: ["admin", "minister"],
         });
     }
     async getMinistryMembers(ministryId) {
         return this.ministryMembersRepository.find({
             where: { ministry_id: ministryId },
-            relations: ['member'],
-            order: { joined_at: 'DESC' },
+            relations: ["member"],
+            order: { joined_at: "DESC" },
         });
     }
     async getMemberMinistries(memberId) {
         return this.ministryMembersRepository.find({
             where: { member_id: memberId },
-            order: { joined_at: 'DESC' },
+            order: { joined_at: "DESC" },
         });
     }
 };

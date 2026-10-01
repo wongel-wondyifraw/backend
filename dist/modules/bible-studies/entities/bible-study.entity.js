@@ -16,7 +16,7 @@ let BibleStudy = class BibleStudy {
 };
 exports.BibleStudy = BibleStudy;
 __decorate([
-    (0, typeorm_1.PrimaryGeneratedColumn)('uuid'),
+    (0, typeorm_1.PrimaryGeneratedColumn)("uuid"),
     __metadata("design:type", String)
 ], BibleStudy.prototype, "id", void 0);
 __decorate([
@@ -24,11 +24,11 @@ __decorate([
     __metadata("design:type", String)
 ], BibleStudy.prototype, "name", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'text', nullable: true }),
+    (0, typeorm_1.Column)({ type: "text", nullable: true }),
     __metadata("design:type", Object)
 ], BibleStudy.prototype, "about", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'varchar', nullable: true }),
+    (0, typeorm_1.Column)({ type: "varchar", nullable: true }),
     __metadata("design:type", Object)
 ], BibleStudy.prototype, "schedule", void 0);
 __decorate([
@@ -36,23 +36,23 @@ __decorate([
     __metadata("design:type", String)
 ], BibleStudy.prototype, "location", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'varchar', length: 32 }),
+    (0, typeorm_1.Column)({ type: "varchar", length: 32 }),
     __metadata("design:type", String)
 ], BibleStudy.prototype, "content_type", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'varchar', nullable: true }),
+    (0, typeorm_1.Column)({ type: "varchar", nullable: true }),
     __metadata("design:type", Object)
 ], BibleStudy.prototype, "bible_book", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'varchar', nullable: true }),
+    (0, typeorm_1.Column)({ type: "varchar", nullable: true }),
     __metadata("design:type", Object)
 ], BibleStudy.prototype, "material_url", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'uuid', nullable: true }),
+    (0, typeorm_1.Column)({ type: "uuid", nullable: true }),
     __metadata("design:type", Object)
 ], BibleStudy.prototype, "leader_id", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'varchar', length: 16, nullable: true }),
+    (0, typeorm_1.Column)({ type: "varchar", length: 16, nullable: true }),
     __metadata("design:type", Object)
 ], BibleStudy.prototype, "leader_type", void 0);
 __decorate([
@@ -68,5 +68,5 @@ __decorate([
     __metadata("design:type", Array)
 ], BibleStudy.prototype, "bible_study_members", void 0);
 exports.BibleStudy = BibleStudy = __decorate([
-    (0, typeorm_1.Entity)('bible_studies')
+    (0, typeorm_1.Entity)("bible_studies")
 ], BibleStudy);

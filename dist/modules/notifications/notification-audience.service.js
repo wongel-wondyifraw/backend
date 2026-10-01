@@ -23,9 +23,9 @@ let NotificationAudienceService = class NotificationAudienceService {
     }
     async resolveRecipients(options) {
         var _a;
-        const roleKeys = new Set((_a = options.targetRoles) !== null && _a !== void 0 ? _a : ['admin', 'minister']);
+        const roleKeys = new Set((_a = options.targetRoles) !== null && _a !== void 0 ? _a : ["admin", "minister"]);
         if (options.includeAdmins !== false) {
-            roleKeys.add('admin');
+            roleKeys.add("admin");
         }
         const users = await this.users.find({
             where: { is_active: true },

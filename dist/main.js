@@ -18,10 +18,10 @@ async function bootstrap() {
         bufferLogs: true,
     });
     const config = app.get(config_1.ConfigService);
-    const port = config.get('PORT', 3001);
-    const frontendUrl = config.get('FRONTEND_URL', 'http://localhost:3000');
-    const frontendUrls = (config.get('FRONTEND_URLS') || '')
-        .split(',')
+    const port = config.get("PORT", 3001);
+    const frontendUrl = config.get("FRONTEND_URL", "http://localhost:3000");
+    const frontendUrls = (config.get("FRONTEND_URLS") || "")
+        .split(",")
         .map((value) => value.trim())
         .filter(Boolean);
     const allowedOrigins = new Set([frontendUrl, ...frontendUrls]);
@@ -32,7 +32,7 @@ async function bootstrap() {
     app.useGlobalFilters(new http_exception_filter_1.HttpExceptionFilter(logger));
     // 2. Security: Set security headers (MUST come before static assets)
     app.use((0, helmet_1.default)({
-        crossOriginResourcePolicy: { policy: 'cross-origin' },
+        crossOriginResourcePolicy: { policy: "cross-origin" },
         crossOriginEmbedderPolicy: false,
     }));
     app.enableCors({
@@ -41,8 +41,8 @@ async function bootstrap() {
                 callback(null, true);
                 return;
             }
-            const isDevLocalhost = process.env.NODE_ENV !== 'production'
-                && /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin);
+            const isDevLocalhost = process.env.NODE_ENV !== "production" &&
+                /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin);
             let isVercelPreview = false;
             try {
                 isVercelPreview = /\.vercel\.app$/.test(new URL(origin).hostname);
@@ -59,18 +59,18 @@ async function bootstrap() {
         credentials: true,
     });
     // 3. Static Assets: Serve from project root (use process.cwd() for reliable pathing)
-    app.useStaticAssets((0, path_1.join)(process.cwd(), 'uploads'), {
-        prefix: '/uploads',
+    app.useStaticAssets((0, path_1.join)(process.cwd(), "uploads"), {
+        prefix: "/uploads",
         setHeaders: (res) => {
-            res.set('Cross-Origin-Resource-Policy', 'cross-origin');
-            res.set('Access-Control-Allow-Origin', frontendUrl);
+            res.set("Cross-Origin-Resource-Policy", "cross-origin");
+            res.set("Access-Control-Allow-Origin", frontendUrl);
         },
     });
     // 4. Scalability: Enable API Versioning (e.g., /v1/users)
-    app.setGlobalPrefix('api');
+    app.setGlobalPrefix("api");
     app.enableVersioning({
         type: common_1.VersioningType.URI,
-        defaultVersion: '1',
+        defaultVersion: "1",
     });
     // 5. Validation: Global sanitization of inputs
     app.useGlobalPipes(new common_1.ValidationPipe({
@@ -82,15 +82,15 @@ async function bootstrap() {
         },
     }));
     const swaggerConfig = new swagger_1.DocumentBuilder()
-        .setTitle('CMS API')
-        .setDescription('Church Management System REST API')
-        .setVersion('1.0')
+        .setTitle("CMS API")
+        .setDescription("Church Management System REST API")
+        .setVersion("1.0")
         .addBearerAuth()
         .build();
     // Skip Swagger in production — saves heap on small (512MB) hosts
-    if (config.get('NODE_ENV') !== 'production') {
+    if (config.get("NODE_ENV") !== "production") {
         const document = swagger_1.SwaggerModule.createDocument(app, swaggerConfig);
-        swagger_1.SwaggerModule.setup('api/docs', app, document);
+        swagger_1.SwaggerModule.setup("api/docs", app, document);
     }
     await app.listen(port);
     logger.log(`Backend running on http://localhost:${port}`);

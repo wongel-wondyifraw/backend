@@ -1,4 +1,10 @@
-import { ArrayUnique, IsArray, IsOptional, IsString, Length } from 'class-validator';
+import {
+  ArrayUnique,
+  IsArray,
+  IsOptional,
+  IsString,
+  Length,
+} from "class-validator";
 
 export class UpdateRoleDto {
   @IsOptional()

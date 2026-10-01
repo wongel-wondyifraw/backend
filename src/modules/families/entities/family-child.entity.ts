@@ -6,28 +6,28 @@ import {
   UpdateDateColumn,
   ManyToOne,
   JoinColumn,
-} from 'typeorm';
-import { Family } from './family.entity';
+} from "typeorm";
+import { Family } from "./family.entity";
 
-@Entity('family_children')
+@Entity("family_children")
 export class FamilyChild {
-  @PrimaryGeneratedColumn('uuid')
+  @PrimaryGeneratedColumn("uuid")
   id: string;
 
-  @Column({ type: 'uuid' })
+  @Column({ type: "uuid" })
   family_id: string;
 
-  @ManyToOne(() => Family, (family) => family.children, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'family_id' })
+  @ManyToOne(() => Family, (family) => family.children, { onDelete: "CASCADE" })
+  @JoinColumn({ name: "family_id" })
   family: Family;
 
   @Column()
   name: string;
 
-  @Column({ type: 'int', nullable: true })
+  @Column({ type: "int", nullable: true })
   age: number | null;
 
-  @Column({ type: 'date', nullable: true })
+  @Column({ type: "date", nullable: true })
   date_of_birth: Date | null;
 
   @CreateDateColumn()

@@ -4,17 +4,17 @@ import {
   Logger,
   MessageEvent,
   NotFoundException,
-} from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Subject, Observable, interval, map } from 'rxjs';
-import { IsNull, Repository } from 'typeorm';
+} from "@nestjs/common";
+import { InjectRepository } from "@nestjs/typeorm";
+import { Subject, Observable, interval, map } from "rxjs";
+import { IsNull, Repository } from "typeorm";
 import {
   Notification,
   NotificationKind,
   NotificationSeverity,
-} from './entities/notification.entity';
-import { NotificationPreference } from './entities/notification-preference.entity';
-import { User } from '../users/entities/user.entity';
+} from "./entities/notification.entity";
+import { NotificationPreference } from "./entities/notification-preference.entity";
+import { User } from "../users/entities/user.entity";
 
 export interface CreateNotificationInput {
   userId: string;
@@ -27,9 +27,7 @@ export interface CreateNotificationInput {
   dedupeKey?: string;
 }
 
-type NotificationStreamEvent =
-  | Record<string, unknown>
-  | { type: 'heartbeat' };
+type NotificationStreamEvent = Record<string, unknown> | { type: "heartbeat" };
 
 interface UserStreamState {
   subject: Subject<NotificationStreamEvent>;
@@ -51,7 +49,7 @@ export class NotificationsService {
   async listForUser(userId: string, limit = 20) {
     const items = await this.notifications.find({
       where: { user_id: userId, dismissed_at: IsNull() },
-      order: { created_at: 'DESC' },
+      order: { created_at: "DESC" },
       take: limit,
     });
     const unreadCount = await this.notifications.count({
@@ -85,10 +83,17 @@ export class NotificationsService {
 
     try {
       const saved = await this.notifications.save(row);
-      this.pushToStream(input.userId, { type: 'notification', notification: saved });
+      this.pushToStream(input.userId, {
+        type: "notification",
+        notification: saved,
+      });
       return saved;
     } catch (err) {
-      if (input.dedupeKey && err instanceof Error && err.message.includes('duplicate')) {
+      if (
+        input.dedupeKey &&
+        err instanceof Error &&
+        err.message.includes("duplicate")
+      ) {
         return null;
       }
       throw err;
@@ -101,7 +106,7 @@ export class NotificationsService {
       { read_at: new Date() },
     );
     if (result.affected === 0) {
-      throw new NotFoundException('Notification not found');
+      throw new NotFoundException("Notification not found");
     }
   }
 
@@ -118,7 +123,7 @@ export class NotificationsService {
       { dismissed_at: new Date(), read_at: new Date() },
     );
     if (result.affected === 0) {
-      throw new NotFoundException('Notification not found');
+      throw new NotFoundException("Notification not found");
     }
   }
 
@@ -136,7 +141,9 @@ export class NotificationsService {
     return this.preferences.save(prefs);
   }
 
-  private async getOrCreatePreferences(userId: string): Promise<NotificationPreference> {
+  private async getOrCreatePreferences(
+    userId: string,
+  ): Promise<NotificationPreference> {
     let prefs = await this.preferences.findOne({ where: { user_id: userId } });
     if (!prefs) {
       prefs = this.preferences.create({
@@ -158,14 +165,14 @@ export class NotificationsService {
   streamForUser(userId: string): Observable<MessageEvent> {
     const state = this.acquireStream(userId);
     const heartbeat = interval(30000).pipe(
-      map((): { type: 'heartbeat' } => ({ type: 'heartbeat' })),
+      map((): { type: "heartbeat" } => ({ type: "heartbeat" })),
     );
 
     return new Observable<MessageEvent>((subscriber) => {
       const sub = state.subject.subscribe((event: NotificationStreamEvent) => {
         subscriber.next({ data: event });
       });
-      const hb = heartbeat.subscribe((event: { type: 'heartbeat' }) => {
+      const hb = heartbeat.subscribe((event: { type: "heartbeat" }) => {
         subscriber.next({ data: event });
       });
 

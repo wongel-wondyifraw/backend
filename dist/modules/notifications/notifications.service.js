@@ -30,7 +30,7 @@ let NotificationsService = NotificationsService_1 = class NotificationsService {
     async listForUser(userId, limit = 20) {
         const items = await this.notifications.find({
             where: { user_id: userId, dismissed_at: (0, typeorm_2.IsNull)() },
-            order: { created_at: 'DESC' },
+            order: { created_at: "DESC" },
             take: limit,
         });
         const unreadCount = await this.notifications.count({
@@ -64,11 +64,16 @@ let NotificationsService = NotificationsService_1 = class NotificationsService {
         });
         try {
             const saved = await this.notifications.save(row);
-            this.pushToStream(input.userId, { type: 'notification', notification: saved });
+            this.pushToStream(input.userId, {
+                type: "notification",
+                notification: saved,
+            });
             return saved;
         }
         catch (err) {
-            if (input.dedupeKey && err instanceof Error && err.message.includes('duplicate')) {
+            if (input.dedupeKey &&
+                err instanceof Error &&
+                err.message.includes("duplicate")) {
                 return null;
             }
             throw err;
@@ -77,7 +82,7 @@ let NotificationsService = NotificationsService_1 = class NotificationsService {
     async markRead(userId, id) {
         const result = await this.notifications.update({ id, user_id: userId }, { read_at: new Date() });
         if (result.affected === 0) {
-            throw new common_1.NotFoundException('Notification not found');
+            throw new common_1.NotFoundException("Notification not found");
         }
     }
     async markAllRead(userId) {
@@ -86,7 +91,7 @@ let NotificationsService = NotificationsService_1 = class NotificationsService {
     async dismiss(userId, id) {
         const result = await this.notifications.update({ id, user_id: userId }, { dismissed_at: new Date(), read_at: new Date() });
         if (result.affected === 0) {
-            throw new common_1.NotFoundException('Notification not found');
+            throw new common_1.NotFoundException("Notification not found");
         }
     }
     async getPreferences(userId) {
@@ -120,7 +125,7 @@ let NotificationsService = NotificationsService_1 = class NotificationsService {
     }
     streamForUser(userId) {
         const state = this.acquireStream(userId);
-        const heartbeat = (0, rxjs_1.interval)(30000).pipe((0, rxjs_1.map)(() => ({ type: 'heartbeat' })));
+        const heartbeat = (0, rxjs_1.interval)(30000).pipe((0, rxjs_1.map)(() => ({ type: "heartbeat" })));
         return new rxjs_1.Observable((subscriber) => {
             const sub = state.subject.subscribe((event) => {
                 subscriber.next({ data: event });

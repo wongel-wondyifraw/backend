@@ -22,10 +22,10 @@ let AdminSeedService = AdminSeedService_1 = class AdminSeedService {
     }
     async onModuleInit() {
         var _a;
-        const email = (_a = this.config.get('ADMIN_EMAIL')) === null || _a === void 0 ? void 0 : _a.trim().toLowerCase();
-        const password = this.config.get('ADMIN_PASSWORD');
+        const email = (_a = this.config.get("ADMIN_EMAIL")) === null || _a === void 0 ? void 0 : _a.trim().toLowerCase();
+        const password = this.config.get("ADMIN_PASSWORD");
         if (!email || !password) {
-            this.logger.debug('Admin seed skipped: ADMIN_EMAIL or ADMIN_PASSWORD not set');
+            this.logger.debug("Admin seed skipped: ADMIN_EMAIL or ADMIN_PASSWORD not set");
             return;
         }
         const existing = await this.usersService.findOneByEmail(email);
@@ -35,12 +35,12 @@ let AdminSeedService = AdminSeedService_1 = class AdminSeedService {
             return;
         }
         await this.usersService.create({
-            first_name: this.config.get('ADMIN_FIRST_NAME', 'System'),
-            middle_name: this.config.get('ADMIN_MIDDLE_NAME', ''),
-            last_name: this.config.get('ADMIN_LAST_NAME', 'Admin'),
+            first_name: this.config.get("ADMIN_FIRST_NAME", "System"),
+            middle_name: this.config.get("ADMIN_MIDDLE_NAME", ""),
+            last_name: this.config.get("ADMIN_LAST_NAME", "Admin"),
             email,
             password,
-            role: 'admin',
+            role: "admin",
             is_active: true,
         });
         this.logger.log(`Admin user seeded: ${email}`);

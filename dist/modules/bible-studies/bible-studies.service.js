@@ -35,14 +35,14 @@ let BibleStudiesService = class BibleStudiesService {
         }
         return {
             leader_id: dto.leader_id,
-            leader_type: dto.leader_type || 'member',
+            leader_type: dto.leader_type || "member",
         };
     }
     async create(dto) {
         var _a, _b, _c, _d;
-        if (dto.content_type === 'book') {
+        if (dto.content_type === "book") {
             if (!dto.bible_book || !bible_books_1.BIBLE_BOOK_SET.has(dto.bible_book)) {
-                throw new common_1.BadRequestException('A valid Bible book is required when content type is Book');
+                throw new common_1.BadRequestException("A valid Bible book is required when content type is Book");
             }
         }
         const leader = this.normalizeLeader(dto);
@@ -53,29 +53,31 @@ let BibleStudiesService = class BibleStudiesService {
             location: dto.location,
             content_type: dto.content_type,
             ...leader,
-            bible_book: dto.content_type === 'book' ? ((_c = dto.bible_book) !== null && _c !== void 0 ? _c : null) : null,
-            material_url: dto.content_type === 'study_material' ? ((_d = dto.material_url) !== null && _d !== void 0 ? _d : null) : null,
+            bible_book: dto.content_type === "book" ? ((_c = dto.bible_book) !== null && _c !== void 0 ? _c : null) : null,
+            material_url: dto.content_type === "study_material"
+                ? ((_d = dto.material_url) !== null && _d !== void 0 ? _d : null)
+                : null,
         });
         const saved = await this.bibleStudiesRepository.save(study);
         this.events.emit(notification_events_1.NOTIFICATION_EVENT, {
-            eventName: 'bible_study.created',
-            kind: 'system',
-            severity: 'success',
-            title: 'New Bible study created',
+            eventName: "bible_study.created",
+            kind: "system",
+            severity: "success",
+            title: "New Bible study created",
             message: `${saved.name} was added.`,
             href: `/bible-study/details/${saved.id}`,
             dedupeKey: `bible_study.created:${saved.id}`,
-            targetRoles: ['admin', 'minister'],
+            targetRoles: ["admin", "minister"],
         });
         return this.findOne(saved.id);
     }
     async findAllPaginated(page = 1, limit = 20, search) {
-        const qb = this.bibleStudiesRepository.createQueryBuilder('bible_study');
+        const qb = this.bibleStudiesRepository.createQueryBuilder("bible_study");
         if (search === null || search === void 0 ? void 0 : search.trim()) {
             const pattern = `%${search.trim().toLowerCase()}%`;
-            qb.where('LOWER(bible_study.name) LIKE :pattern OR LOWER(bible_study.location) LIKE :pattern OR LOWER(bible_study.bible_book) LIKE :pattern', { pattern });
+            qb.where("LOWER(bible_study.name) LIKE :pattern OR LOWER(bible_study.location) LIKE :pattern OR LOWER(bible_study.bible_book) LIKE :pattern", { pattern });
         }
-        qb.orderBy('bible_study.created_at', 'DESC');
+        qb.orderBy("bible_study.created_at", "DESC");
         qb.skip((page - 1) * limit).take(limit);
         const [rows, total] = await qb.getManyAndCount();
         const data = await this.leaders.attachLeaders(rows);
@@ -99,10 +101,10 @@ let BibleStudiesService = class BibleStudiesService {
         var _a, _b, _c, _d, _e, _f;
         const existing = await this.findOne(id);
         const contentType = (_a = dto.content_type) !== null && _a !== void 0 ? _a : existing.content_type;
-        if (contentType === 'book') {
+        if (contentType === "book") {
             const book = (_b = dto.bible_book) !== null && _b !== void 0 ? _b : existing.bible_book;
             if (!book || !bible_books_1.BIBLE_BOOK_SET.has(book)) {
-                throw new common_1.BadRequestException('A valid Bible book is required when content type is Book');
+                throw new common_1.BadRequestException("A valid Bible book is required when content type is Book");
             }
         }
         const patch = {
@@ -116,10 +118,10 @@ let BibleStudiesService = class BibleStudiesService {
             patch.schedule = (_d = dto.schedule) !== null && _d !== void 0 ? _d : null;
         if (dto.location !== undefined)
             patch.location = dto.location;
-        if ('leader_id' in dto || 'leader_type' in dto) {
+        if ("leader_id" in dto || "leader_type" in dto) {
             Object.assign(patch, this.normalizeLeader(dto));
         }
-        if (contentType === 'book') {
+        if (contentType === "book") {
             patch.bible_book = (_e = dto.bible_book) !== null && _e !== void 0 ? _e : existing.bible_book;
             patch.material_url = null;
         }
@@ -132,14 +134,14 @@ let BibleStudiesService = class BibleStudiesService {
         await this.bibleStudiesRepository.update(id, patch);
         const study = await this.findOne(id);
         this.events.emit(notification_events_1.NOTIFICATION_EVENT, {
-            eventName: 'bible_study.updated',
-            kind: 'system',
-            severity: 'info',
-            title: 'Bible study updated',
+            eventName: "bible_study.updated",
+            kind: "system",
+            severity: "info",
+            title: "Bible study updated",
             message: `${study.name} was updated.`,
             href: `/bible-study/details/${id}`,
             dedupeKey: `bible_study.updated:${id}:${Date.now()}`,
-            targetRoles: ['admin', 'minister'],
+            targetRoles: ["admin", "minister"],
         });
         return study;
     }
@@ -151,13 +153,13 @@ let BibleStudiesService = class BibleStudiesService {
         }
         if (study) {
             this.events.emit(notification_events_1.NOTIFICATION_EVENT, {
-                eventName: 'bible_study.deleted',
-                kind: 'system',
-                severity: 'warning',
-                title: 'Bible study removed',
+                eventName: "bible_study.deleted",
+                kind: "system",
+                severity: "warning",
+                title: "Bible study removed",
                 message: `${study.name} was removed.`,
                 dedupeKey: `bible_study.deleted:${id}`,
-                targetRoles: ['admin', 'minister'],
+                targetRoles: ["admin", "minister"],
             });
         }
     }
@@ -166,7 +168,7 @@ let BibleStudiesService = class BibleStudiesService {
             where: { bible_study_id: bibleStudyId, member_id: memberId },
         });
         if (existing) {
-            throw new common_1.ConflictException('Member is already in this Bible study');
+            throw new common_1.ConflictException("Member is already in this Bible study");
         }
         const record = this.bibleStudyMembersRepository.create({
             bible_study_id: bibleStudyId,
@@ -175,14 +177,14 @@ let BibleStudiesService = class BibleStudiesService {
         const saved = await this.bibleStudyMembersRepository.save(record);
         const study = await this.findOne(bibleStudyId);
         this.events.emit(notification_events_1.NOTIFICATION_EVENT, {
-            eventName: 'bible_study.member.added',
-            kind: 'system',
-            severity: 'info',
-            title: 'Bible study membership updated',
+            eventName: "bible_study.member.added",
+            kind: "system",
+            severity: "info",
+            title: "Bible study membership updated",
             message: `A member was added to ${study.name}.`,
             href: `/bible-study/details/${bibleStudyId}`,
             dedupeKey: `bible_study.member.added:${bibleStudyId}:${memberId}`,
-            targetRoles: ['admin', 'minister'],
+            targetRoles: ["admin", "minister"],
         });
         return saved;
     }
@@ -193,24 +195,24 @@ let BibleStudiesService = class BibleStudiesService {
             member_id: memberId,
         });
         if (result.affected === 0) {
-            throw new common_1.NotFoundException('Member not found in this Bible study');
+            throw new common_1.NotFoundException("Member not found in this Bible study");
         }
         this.events.emit(notification_events_1.NOTIFICATION_EVENT, {
-            eventName: 'bible_study.member.removed',
-            kind: 'system',
-            severity: 'info',
-            title: 'Bible study membership updated',
+            eventName: "bible_study.member.removed",
+            kind: "system",
+            severity: "info",
+            title: "Bible study membership updated",
             message: `A member was removed from ${study.name}.`,
             href: `/bible-study/details/${bibleStudyId}`,
             dedupeKey: `bible_study.member.removed:${bibleStudyId}:${memberId}`,
-            targetRoles: ['admin', 'minister'],
+            targetRoles: ["admin", "minister"],
         });
     }
     async getMembers(bibleStudyId) {
         return this.bibleStudyMembersRepository.find({
             where: { bible_study_id: bibleStudyId },
-            relations: ['member'],
-            order: { joined_at: 'DESC' },
+            relations: ["member"],
+            order: { joined_at: "DESC" },
         });
     }
 };

@@ -24,11 +24,11 @@ let UploadsController = class UploadsController {
     }
     async uploadImage(file) {
         if (!file) {
-            throw new common_1.BadRequestException('File not found');
+            throw new common_1.BadRequestException("File not found");
         }
-        const processed = await this.cloudinary.uploadImage(file, 'cms/images');
+        const processed = await this.cloudinary.uploadImage(file, "cms/images");
         return {
-            message: 'File uploaded successfully',
+            message: "File uploaded successfully",
             url: processed.url,
             variants: processed.variants,
             width: processed.width,
@@ -37,11 +37,11 @@ let UploadsController = class UploadsController {
     }
     async uploadDocument(file) {
         if (!file) {
-            throw new common_1.BadRequestException('File not found');
+            throw new common_1.BadRequestException("File not found");
         }
-        const uploaded = await this.cloudinary.uploadDocument(file, 'cms/documents');
+        const uploaded = await this.cloudinary.uploadDocument(file, "cms/documents");
         return {
-            message: 'Document uploaded successfully',
+            message: "Document uploaded successfully",
             url: uploaded.url,
             original_name: uploaded.original_name,
         };
@@ -49,9 +49,9 @@ let UploadsController = class UploadsController {
 };
 exports.UploadsController = UploadsController;
 __decorate([
-    (0, common_1.Post)('image'),
-    (0, permissions_decorator_1.RequiresPermissions)('uploads.create', 'website.manage', 'members.update', 'members.create'),
-    (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)('file', {
+    (0, common_1.Post)("image"),
+    (0, permissions_decorator_1.RequiresPermissions)("uploads.create", "website.manage", "members.update", "members.create"),
+    (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)("file", {
         storage: (0, multer_config_1.createImageMemoryStorage)(),
         fileFilter: multer_config_1.imageFileFilter,
         limits: multer_config_1.imageUploadLimits,
@@ -62,9 +62,9 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], UploadsController.prototype, "uploadImage", null);
 __decorate([
-    (0, common_1.Post)('document'),
-    (0, permissions_decorator_1.RequiresPermissions)('uploads.create', 'website.manage', 'members.update', 'members.create'),
-    (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)('file', {
+    (0, common_1.Post)("document"),
+    (0, permissions_decorator_1.RequiresPermissions)("uploads.create", "website.manage", "members.update", "members.create"),
+    (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)("file", {
         storage: (0, multer_config_1.createDocumentMemoryStorage)(),
         fileFilter: multer_config_1.documentFileFilter,
         limits: multer_config_1.documentUploadLimits,
@@ -75,6 +75,6 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], UploadsController.prototype, "uploadDocument", null);
 exports.UploadsController = UploadsController = __decorate([
-    (0, common_1.Controller)('uploads'),
+    (0, common_1.Controller)("uploads"),
     __metadata("design:paramtypes", [cloudinary_service_1.CloudinaryService])
 ], UploadsController);

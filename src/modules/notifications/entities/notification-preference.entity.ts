@@ -5,21 +5,21 @@ import {
   Index,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
-} from 'typeorm';
+} from "typeorm";
 
-@Entity('notification_preferences')
-@Index(['user_id'], { unique: true })
+@Entity("notification_preferences")
+@Index(["user_id"], { unique: true })
 export class NotificationPreference {
-  @PrimaryGeneratedColumn('uuid')
+  @PrimaryGeneratedColumn("uuid")
   id: string;
 
-  @Column({ type: 'uuid' })
+  @Column({ type: "uuid" })
   user_id: string;
 
-  @Column({ type: 'boolean', default: true })
+  @Column({ type: "boolean", default: true })
   enabled: boolean;
 
-  @Column({ type: 'jsonb', default: () => "'{}'" })
+  @Column({ type: "jsonb", default: () => "'{}'" })
   kinds: Record<string, boolean>;
 
   @CreateDateColumn()

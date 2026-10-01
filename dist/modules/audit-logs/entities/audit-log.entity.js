@@ -15,7 +15,7 @@ let AuditLog = class AuditLog {
 };
 exports.AuditLog = AuditLog;
 __decorate([
-    (0, typeorm_1.PrimaryGeneratedColumn)('uuid'),
+    (0, typeorm_1.PrimaryGeneratedColumn)("uuid"),
     __metadata("design:type", String)
 ], AuditLog.prototype, "id", void 0);
 __decorate([
@@ -23,19 +23,19 @@ __decorate([
     __metadata("design:type", String)
 ], AuditLog.prototype, "action", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'varchar' }),
+    (0, typeorm_1.Column)({ type: "varchar" }),
     __metadata("design:type", String)
 ], AuditLog.prototype, "entity_type", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'uuid' }),
+    (0, typeorm_1.Column)({ type: "uuid" }),
     __metadata("design:type", String)
 ], AuditLog.prototype, "entity_id", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'uuid', nullable: true }),
+    (0, typeorm_1.Column)({ type: "uuid", nullable: true }),
     __metadata("design:type", Object)
 ], AuditLog.prototype, "user_id", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'jsonb', nullable: true }),
+    (0, typeorm_1.Column)({ type: "jsonb", nullable: true }),
     __metadata("design:type", Object)
 ], AuditLog.prototype, "changes", void 0);
 __decorate([
@@ -43,5 +43,5 @@ __decorate([
     __metadata("design:type", Date)
 ], AuditLog.prototype, "created_at", void 0);
 exports.AuditLog = AuditLog = __decorate([
-    (0, typeorm_1.Entity)('audit_logs')
+    (0, typeorm_1.Entity)("audit_logs")
 ], AuditLog);

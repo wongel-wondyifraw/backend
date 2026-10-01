@@ -51,7 +51,7 @@ let HomeGroupsController = class HomeGroupsController {
 exports.HomeGroupsController = HomeGroupsController;
 __decorate([
     (0, common_1.Post)(),
-    (0, permissions_decorator_1.RequiresPermissions)('home_groups.create'),
+    (0, permissions_decorator_1.RequiresPermissions)("home_groups.create"),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [create_home_group_dto_1.CreateHomeGroupDto]),
@@ -59,64 +59,64 @@ __decorate([
 ], HomeGroupsController.prototype, "create", null);
 __decorate([
     (0, common_1.Get)(),
-    (0, permissions_decorator_1.RequiresPermissions)('home_groups.read'),
+    (0, permissions_decorator_1.RequiresPermissions)("home_groups.read"),
     __param(0, (0, common_1.Query)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [pagination_query_dto_1.PaginationQueryDto]),
     __metadata("design:returntype", void 0)
 ], HomeGroupsController.prototype, "findAll", null);
 __decorate([
-    (0, common_1.Get)(':id'),
-    (0, permissions_decorator_1.RequiresPermissions)('home_groups.read'),
-    __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
+    (0, common_1.Get)(":id"),
+    (0, permissions_decorator_1.RequiresPermissions)("home_groups.read"),
+    __param(0, (0, common_1.Param)("id", common_1.ParseUUIDPipe)),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", void 0)
 ], HomeGroupsController.prototype, "findOne", null);
 __decorate([
-    (0, common_1.Patch)(':id'),
-    (0, permissions_decorator_1.RequiresPermissions)('home_groups.update'),
-    __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
+    (0, common_1.Patch)(":id"),
+    (0, permissions_decorator_1.RequiresPermissions)("home_groups.update"),
+    __param(0, (0, common_1.Param)("id", common_1.ParseUUIDPipe)),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String, update_home_group_dto_1.UpdateHomeGroupDto]),
     __metadata("design:returntype", void 0)
 ], HomeGroupsController.prototype, "update", null);
 __decorate([
-    (0, common_1.Delete)(':id'),
-    (0, permissions_decorator_1.RequiresPermissions)('home_groups.delete'),
-    __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
+    (0, common_1.Delete)(":id"),
+    (0, permissions_decorator_1.RequiresPermissions)("home_groups.delete"),
+    __param(0, (0, common_1.Param)("id", common_1.ParseUUIDPipe)),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", void 0)
 ], HomeGroupsController.prototype, "remove", null);
 __decorate([
-    (0, common_1.Get)(':id/members'),
-    (0, permissions_decorator_1.RequiresPermissions)('home_groups.read'),
-    __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
+    (0, common_1.Get)(":id/members"),
+    (0, permissions_decorator_1.RequiresPermissions)("home_groups.read"),
+    __param(0, (0, common_1.Param)("id", common_1.ParseUUIDPipe)),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", void 0)
 ], HomeGroupsController.prototype, "getMembers", null);
 __decorate([
-    (0, common_1.Post)(':id/members/:memberId'),
-    (0, permissions_decorator_1.RequiresPermissions)('home_groups.update'),
-    __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
-    __param(1, (0, common_1.Param)('memberId', common_1.ParseUUIDPipe)),
+    (0, common_1.Post)(":id/members/:memberId"),
+    (0, permissions_decorator_1.RequiresPermissions)("home_groups.update"),
+    __param(0, (0, common_1.Param)("id", common_1.ParseUUIDPipe)),
+    __param(1, (0, common_1.Param)("memberId", common_1.ParseUUIDPipe)),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String, String]),
     __metadata("design:returntype", void 0)
 ], HomeGroupsController.prototype, "addMember", null);
 __decorate([
-    (0, common_1.Delete)(':id/members/:memberId'),
-    (0, permissions_decorator_1.RequiresPermissions)('home_groups.update'),
-    __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
-    __param(1, (0, common_1.Param)('memberId', common_1.ParseUUIDPipe)),
+    (0, common_1.Delete)(":id/members/:memberId"),
+    (0, permissions_decorator_1.RequiresPermissions)("home_groups.update"),
+    __param(0, (0, common_1.Param)("id", common_1.ParseUUIDPipe)),
+    __param(1, (0, common_1.Param)("memberId", common_1.ParseUUIDPipe)),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String, String]),
     __metadata("design:returntype", void 0)
 ], HomeGroupsController.prototype, "removeMember", null);
 exports.HomeGroupsController = HomeGroupsController = __decorate([
-    (0, common_1.Controller)('home-groups'),
+    (0, common_1.Controller)("home-groups"),
     __metadata("design:paramtypes", [home_groups_service_1.HomeGroupsService])
 ], HomeGroupsController);

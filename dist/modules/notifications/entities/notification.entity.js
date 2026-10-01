@@ -30,56 +30,56 @@ let Notification = class Notification {
 };
 exports.Notification = Notification;
 __decorate([
-    (0, typeorm_1.PrimaryGeneratedColumn)('uuid'),
+    (0, typeorm_1.PrimaryGeneratedColumn)("uuid"),
     __metadata("design:type", String)
 ], Notification.prototype, "id", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'uuid' }),
+    (0, typeorm_1.Column)({ type: "uuid" }),
     __metadata("design:type", String)
 ], Notification.prototype, "user_id", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'varchar', length: 32 }),
+    (0, typeorm_1.Column)({ type: "varchar", length: 32 }),
     __metadata("design:type", String)
 ], Notification.prototype, "kind", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'varchar', length: 16 }),
+    (0, typeorm_1.Column)({ type: "varchar", length: 16 }),
     __metadata("design:type", String)
 ], Notification.prototype, "severity", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'varchar' }),
+    (0, typeorm_1.Column)({ type: "varchar" }),
     __metadata("design:type", String)
 ], Notification.prototype, "title", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'text' }),
+    (0, typeorm_1.Column)({ type: "text" }),
     __metadata("design:type", String)
 ], Notification.prototype, "message", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'varchar', nullable: true }),
+    (0, typeorm_1.Column)({ type: "varchar", nullable: true }),
     __metadata("design:type", Object)
 ], Notification.prototype, "href", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'jsonb', nullable: true }),
+    (0, typeorm_1.Column)({ type: "jsonb", nullable: true }),
     __metadata("design:type", Object)
 ], Notification.prototype, "payload", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'varchar', nullable: true }),
+    (0, typeorm_1.Column)({ type: "varchar", nullable: true }),
     __metadata("design:type", Object)
 ], Notification.prototype, "dedupe_key", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'timestamptz', nullable: true }),
+    (0, typeorm_1.Column)({ type: "timestamptz", nullable: true }),
     __metadata("design:type", Object)
 ], Notification.prototype, "read_at", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'timestamptz', nullable: true }),
+    (0, typeorm_1.Column)({ type: "timestamptz", nullable: true }),
     __metadata("design:type", Object)
 ], Notification.prototype, "dismissed_at", void 0);
 __decorate([
-    (0, typeorm_1.CreateDateColumn)({ type: 'timestamptz' }),
+    (0, typeorm_1.CreateDateColumn)({ type: "timestamptz" }),
     __metadata("design:type", Date)
 ], Notification.prototype, "created_at", void 0);
 exports.Notification = Notification = __decorate([
-    (0, typeorm_1.Entity)('notifications'),
-    (0, typeorm_1.Index)(['user_id', 'created_at']),
-    (0, typeorm_1.Index)(['user_id', 'read_at']),
-    (0, typeorm_1.Index)(['user_id', 'dismissed_at'])
+    (0, typeorm_1.Entity)("notifications"),
+    (0, typeorm_1.Index)(["user_id", "created_at"]),
+    (0, typeorm_1.Index)(["user_id", "read_at"]),
+    (0, typeorm_1.Index)(["user_id", "dismissed_at"])
 ], Notification);

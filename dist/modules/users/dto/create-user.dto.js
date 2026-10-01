@@ -46,9 +46,9 @@ __decorate([
     __metadata("design:type", String)
 ], CreateUserDto.prototype, "role", void 0);
 __decorate([
-    (0, class_validator_1.ValidateIf)(o => o.role === 'minister' || o.role === 'staff'),
+    (0, class_validator_1.ValidateIf)((o) => o.role === "minister" || o.role === "staff"),
     (0, class_validator_1.IsString)(),
-    (0, class_validator_1.IsNotEmpty)({ message: 'Title is mandatory for Ministers and Staff' }),
+    (0, class_validator_1.IsNotEmpty)({ message: "Title is mandatory for Ministers and Staff" }),
     __metadata("design:type", String)
 ], CreateUserDto.prototype, "title", void 0);
 __decorate([

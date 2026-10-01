@@ -51,14 +51,14 @@ const crypto_1 = require("crypto");
 const multer_1 = require("multer");
 exports.IMAGE_UPLOAD_MAX_BYTES = 5 * 1024 * 1024;
 const ALLOWED_MIME_TYPES = new Set([
-    'image/jpeg',
-    'image/png',
-    'image/gif',
-    'image/webp',
+    "image/jpeg",
+    "image/png",
+    "image/gif",
+    "image/webp",
 ]);
 const ALLOWED_EXTENSION = /\.(jpe?g|png|gif|webp)$/i;
 function getImagesUploadDir() {
-    const dir = (0, path_1.join)(process.cwd(), 'uploads', 'images');
+    const dir = (0, path_1.join)(process.cwd(), "uploads", "images");
     if (!fs.existsSync(dir)) {
         fs.mkdirSync(dir, { recursive: true });
     }
@@ -68,7 +68,7 @@ function imageFileFilter(_req, file, cb) {
     const mimeOk = ALLOWED_MIME_TYPES.has(file.mimetype);
     const extOk = ALLOWED_EXTENSION.test(file.originalname);
     if (!mimeOk || !extOk) {
-        cb(new Error('Only image files (JPEG, PNG, GIF, WebP) are allowed'), false);
+        cb(new Error("Only image files (JPEG, PNG, GIF, WebP) are allowed"), false);
         return;
     }
     cb(null, true);
@@ -99,19 +99,19 @@ function uploadImageFilename(originalname) {
 }
 exports.DOCUMENT_UPLOAD_MAX_BYTES = 15 * 1024 * 1024;
 const ALLOWED_DOCUMENT_MIME_TYPES = new Set([
-    'application/pdf',
-    'application/msword',
-    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-    'text/plain',
-    'image/jpeg',
-    'image/png',
-    'video/mp4',
-    'video/webm',
-    'video/quicktime',
+    "application/pdf",
+    "application/msword",
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    "text/plain",
+    "image/jpeg",
+    "image/png",
+    "video/mp4",
+    "video/webm",
+    "video/quicktime",
 ]);
 const ALLOWED_DOCUMENT_EXTENSION = /\.(pdf|docx?|txt|jpe?g|png|mp4|webm|mov)$/i;
 function getDocumentsUploadDir() {
-    const dir = (0, path_1.join)(process.cwd(), 'uploads', 'documents');
+    const dir = (0, path_1.join)(process.cwd(), "uploads", "documents");
     if (!fs.existsSync(dir)) {
         fs.mkdirSync(dir, { recursive: true });
     }
@@ -121,7 +121,7 @@ function documentFileFilter(_req, file, cb) {
     const mimeOk = ALLOWED_DOCUMENT_MIME_TYPES.has(file.mimetype);
     const extOk = ALLOWED_DOCUMENT_EXTENSION.test(file.originalname);
     if (!mimeOk || !extOk) {
-        cb(new Error('Only PDF, DOC, DOCX, TXT, JPEG, PNG, or video (MP4/WebM) files are allowed'), false);
+        cb(new Error("Only PDF, DOC, DOCX, TXT, JPEG, PNG, or video (MP4/WebM) files are allowed"), false);
         return;
     }
     cb(null, true);

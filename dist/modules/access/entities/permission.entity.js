@@ -16,24 +16,24 @@ let Permission = class Permission {
 };
 exports.Permission = Permission;
 __decorate([
-    (0, typeorm_1.PrimaryGeneratedColumn)('uuid'),
+    (0, typeorm_1.PrimaryGeneratedColumn)("uuid"),
     __metadata("design:type", String)
 ], Permission.prototype, "id", void 0);
 __decorate([
     (0, typeorm_1.Index)({ unique: true }),
-    (0, typeorm_1.Column)({ type: 'varchar', length: 128 }),
+    (0, typeorm_1.Column)({ type: "varchar", length: 128 }),
     __metadata("design:type", String)
 ], Permission.prototype, "slug", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'varchar', length: 128 }),
+    (0, typeorm_1.Column)({ type: "varchar", length: 128 }),
     __metadata("design:type", String)
 ], Permission.prototype, "name", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'varchar', length: 64 }),
+    (0, typeorm_1.Column)({ type: "varchar", length: 64 }),
     __metadata("design:type", String)
 ], Permission.prototype, "category", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'varchar', length: 512, nullable: true }),
+    (0, typeorm_1.Column)({ type: "varchar", length: 512, nullable: true }),
     __metadata("design:type", Object)
 ], Permission.prototype, "description", void 0);
 __decorate([
@@ -49,5 +49,5 @@ __decorate([
     __metadata("design:type", Date)
 ], Permission.prototype, "updated_at", void 0);
 exports.Permission = Permission = __decorate([
-    (0, typeorm_1.Entity)('permissions')
+    (0, typeorm_1.Entity)("permissions")
 ], Permission);

@@ -23,14 +23,17 @@ let LocationsService = class LocationsService {
     }
     async findAll(status) {
         if (status) {
-            return this.locationRepo.find({ where: { status }, order: { name: 'ASC' } });
+            return this.locationRepo.find({
+                where: { status },
+                order: { name: "ASC" },
+            });
         }
-        return this.locationRepo.find({ order: { name: 'ASC' } });
+        return this.locationRepo.find({ order: { name: "ASC" } });
     }
     async findOne(id) {
         const location = await this.locationRepo.findOne({ where: { id } });
         if (!location)
-            throw new common_1.NotFoundException('Location not found');
+            throw new common_1.NotFoundException("Location not found");
         return location;
     }
     async create(dto) {

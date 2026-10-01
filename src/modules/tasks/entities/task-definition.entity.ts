@@ -5,22 +5,22 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   OneToMany,
-} from 'typeorm';
-import { Task } from './task.entity';
+} from "typeorm";
+import { Task } from "./task.entity";
 
-@Entity('task_definitions')
+@Entity("task_definitions")
 export class TaskDefinition {
-  @PrimaryGeneratedColumn('uuid')
+  @PrimaryGeneratedColumn("uuid")
   id: string;
 
   @Column()
   name: string;
 
-  @Column({ type: 'text', nullable: true })
+  @Column({ type: "text", nullable: true })
   description: string | null;
 
   /** Stable code for system tasks, e.g. HOME_VISIT */
-  @Column({ type: 'varchar', length: 64, nullable: true, unique: true })
+  @Column({ type: "varchar", length: 64, nullable: true, unique: true })
   code: string | null;
 
   @Column({ default: false })

@@ -16,7 +16,7 @@ let User = class User {
 };
 exports.User = User;
 __decorate([
-    (0, typeorm_1.PrimaryGeneratedColumn)('uuid'),
+    (0, typeorm_1.PrimaryGeneratedColumn)("uuid"),
     __metadata("design:type", String)
 ], User.prototype, "id", void 0);
 __decorate([
@@ -49,7 +49,7 @@ __decorate([
 ], User.prototype, "role_id", void 0);
 __decorate([
     (0, typeorm_1.ManyToOne)(() => role_entity_1.Role, (role) => role.users, { eager: false }),
-    (0, typeorm_1.JoinColumn)({ name: 'role_id' }),
+    (0, typeorm_1.JoinColumn)({ name: "role_id" }),
     __metadata("design:type", role_entity_1.Role)
 ], User.prototype, "roleEntity", void 0);
 __decorate([
@@ -73,5 +73,5 @@ __decorate([
     __metadata("design:type", Date)
 ], User.prototype, "updated_at", void 0);
 exports.User = User = __decorate([
-    (0, typeorm_1.Entity)('users')
+    (0, typeorm_1.Entity)("users")
 ], User);

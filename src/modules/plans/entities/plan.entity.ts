@@ -5,46 +5,46 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   OneToMany,
-} from 'typeorm';
-import { PlanMinister } from './plan-minister.entity';
+} from "typeorm";
+import { PlanMinister } from "./plan-minister.entity";
 
 export type PlanType =
-  | 'program'
-  | 'crusade'
-  | 'general_assembly'
-  | 'training'
-  | 'fasting_day'
-  | 'gospel_campaign';
+  | "program"
+  | "crusade"
+  | "general_assembly"
+  | "training"
+  | "fasting_day"
+  | "gospel_campaign";
 
-export type PlanStatus = 'planned' | 'completed' | 'cancelled';
+export type PlanStatus = "planned" | "completed" | "cancelled";
 
-@Entity('plans')
+@Entity("plans")
 export class Plan {
-  @PrimaryGeneratedColumn('uuid')
+  @PrimaryGeneratedColumn("uuid")
   id: string;
 
   @Column()
   title: string;
 
-  @Column({ type: 'varchar', length: 32 })
+  @Column({ type: "varchar", length: 32 })
   type: PlanType;
 
-  @Column({ type: 'date' })
+  @Column({ type: "date" })
   plan_date: string;
 
-  @Column({ type: 'time', nullable: true })
+  @Column({ type: "time", nullable: true })
   start_time: string | null;
 
-  @Column({ type: 'time', nullable: true })
+  @Column({ type: "time", nullable: true })
   end_time: string | null;
 
-  @Column({ type: 'varchar', nullable: true })
+  @Column({ type: "varchar", nullable: true })
   location: string | null;
 
-  @Column({ type: 'text', nullable: true })
+  @Column({ type: "text", nullable: true })
   notes: string | null;
 
-  @Column({ type: 'varchar', length: 16, default: 'planned' })
+  @Column({ type: "varchar", length: 16, default: "planned" })
   status: PlanStatus;
 
   @CreateDateColumn()

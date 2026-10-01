@@ -51,7 +51,7 @@ let BibleStudiesController = class BibleStudiesController {
 exports.BibleStudiesController = BibleStudiesController;
 __decorate([
     (0, common_1.Post)(),
-    (0, permissions_decorator_1.RequiresPermissions)('bible_studies.create'),
+    (0, permissions_decorator_1.RequiresPermissions)("bible_studies.create"),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [create_bible_study_dto_1.CreateBibleStudyDto]),
@@ -59,64 +59,64 @@ __decorate([
 ], BibleStudiesController.prototype, "create", null);
 __decorate([
     (0, common_1.Get)(),
-    (0, permissions_decorator_1.RequiresPermissions)('bible_studies.read'),
+    (0, permissions_decorator_1.RequiresPermissions)("bible_studies.read"),
     __param(0, (0, common_1.Query)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [pagination_query_dto_1.PaginationQueryDto]),
     __metadata("design:returntype", void 0)
 ], BibleStudiesController.prototype, "findAll", null);
 __decorate([
-    (0, common_1.Get)(':id'),
-    (0, permissions_decorator_1.RequiresPermissions)('bible_studies.read'),
-    __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
+    (0, common_1.Get)(":id"),
+    (0, permissions_decorator_1.RequiresPermissions)("bible_studies.read"),
+    __param(0, (0, common_1.Param)("id", common_1.ParseUUIDPipe)),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", void 0)
 ], BibleStudiesController.prototype, "findOne", null);
 __decorate([
-    (0, common_1.Patch)(':id'),
-    (0, permissions_decorator_1.RequiresPermissions)('bible_studies.update'),
-    __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
+    (0, common_1.Patch)(":id"),
+    (0, permissions_decorator_1.RequiresPermissions)("bible_studies.update"),
+    __param(0, (0, common_1.Param)("id", common_1.ParseUUIDPipe)),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String, update_bible_study_dto_1.UpdateBibleStudyDto]),
     __metadata("design:returntype", void 0)
 ], BibleStudiesController.prototype, "update", null);
 __decorate([
-    (0, common_1.Delete)(':id'),
-    (0, permissions_decorator_1.RequiresPermissions)('bible_studies.delete'),
-    __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
+    (0, common_1.Delete)(":id"),
+    (0, permissions_decorator_1.RequiresPermissions)("bible_studies.delete"),
+    __param(0, (0, common_1.Param)("id", common_1.ParseUUIDPipe)),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", void 0)
 ], BibleStudiesController.prototype, "remove", null);
 __decorate([
-    (0, common_1.Get)(':id/members'),
-    (0, permissions_decorator_1.RequiresPermissions)('bible_studies.read'),
-    __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
+    (0, common_1.Get)(":id/members"),
+    (0, permissions_decorator_1.RequiresPermissions)("bible_studies.read"),
+    __param(0, (0, common_1.Param)("id", common_1.ParseUUIDPipe)),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", void 0)
 ], BibleStudiesController.prototype, "getMembers", null);
 __decorate([
-    (0, common_1.Post)(':id/members/:memberId'),
-    (0, permissions_decorator_1.RequiresPermissions)('bible_studies.update'),
-    __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
-    __param(1, (0, common_1.Param)('memberId', common_1.ParseUUIDPipe)),
+    (0, common_1.Post)(":id/members/:memberId"),
+    (0, permissions_decorator_1.RequiresPermissions)("bible_studies.update"),
+    __param(0, (0, common_1.Param)("id", common_1.ParseUUIDPipe)),
+    __param(1, (0, common_1.Param)("memberId", common_1.ParseUUIDPipe)),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String, String]),
     __metadata("design:returntype", void 0)
 ], BibleStudiesController.prototype, "addMember", null);
 __decorate([
-    (0, common_1.Delete)(':id/members/:memberId'),
-    (0, permissions_decorator_1.RequiresPermissions)('bible_studies.update'),
-    __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
-    __param(1, (0, common_1.Param)('memberId', common_1.ParseUUIDPipe)),
+    (0, common_1.Delete)(":id/members/:memberId"),
+    (0, permissions_decorator_1.RequiresPermissions)("bible_studies.update"),
+    __param(0, (0, common_1.Param)("id", common_1.ParseUUIDPipe)),
+    __param(1, (0, common_1.Param)("memberId", common_1.ParseUUIDPipe)),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String, String]),
     __metadata("design:returntype", void 0)
 ], BibleStudiesController.prototype, "removeMember", null);
 exports.BibleStudiesController = BibleStudiesController = __decorate([
-    (0, common_1.Controller)('bible-studies'),
+    (0, common_1.Controller)("bible-studies"),
     __metadata("design:paramtypes", [bible_studies_service_1.BibleStudiesService])
 ], BibleStudiesController);

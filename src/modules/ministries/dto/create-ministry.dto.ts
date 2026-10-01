@@ -1,4 +1,11 @@
-import { IsIn, IsNotEmpty, IsOptional, IsString, IsUUID, ValidateIf } from 'class-validator';
+import {
+  IsIn,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  IsUUID,
+  ValidateIf,
+} from "class-validator";
 
 export class CreateMinistryDto {
   @IsString()
@@ -18,7 +25,7 @@ export class CreateMinistryDto {
   leader_id?: string | null;
 
   @ValidateIf((o: CreateMinistryDto) => !!o.leader_id)
-  @IsIn(['member', 'minister'])
+  @IsIn(["member", "minister"])
   @IsOptional()
-  leader_type?: 'member' | 'minister' | null;
+  leader_type?: "member" | "minister" | null;
 }

@@ -1,4 +1,4 @@
-export type LeaderType = 'member' | 'minister';
+export type LeaderType = "member" | "minister";
 
 export interface LeaderSummary {
   id: string;

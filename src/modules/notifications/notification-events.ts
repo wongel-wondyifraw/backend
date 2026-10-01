@@ -1,11 +1,12 @@
-export const NOTIFICATION_EVENT = 'notification.domain';
+export const NOTIFICATION_EVENT = "notification.domain";
 
-export type NotificationDomainKind = 'member' | 'ministry' | 'home_group' | 'system' | 'user';
+export type NotificationDomainKind =
+  "member" | "ministry" | "home_group" | "system" | "user";
 
 export interface NotificationDomainEvent {
   eventName: string;
   kind: NotificationDomainKind;
-  severity: 'info' | 'success' | 'warning' | 'danger';
+  severity: "info" | "success" | "warning" | "danger";
   title: string;
   message: string;
   href?: string;

@@ -32,7 +32,7 @@ exports.AuthModule = AuthModule = __decorate([
                     return ({
                         secret: (0, jwt_config_1.resolveJwtSecret)(configService),
                         signOptions: {
-                            expiresIn: ((_a = configService.get('JWT_EXPIRES_IN')) !== null && _a !== void 0 ? _a : '1d'),
+                            expiresIn: ((_a = configService.get("JWT_EXPIRES_IN")) !== null && _a !== void 0 ? _a : "1d"),
                         },
                     });
                 },

@@ -65,7 +65,7 @@ let UsersService = class UsersService {
     async create(createUserDto) {
         var _a;
         const { password_hash, avatar, avatar_url, password, role, ...rest } = createUserDto;
-        const roleEntity = await this.accessSeeder.findRoleByKey(role !== null && role !== void 0 ? role : 'staff');
+        const roleEntity = await this.accessSeeder.findRoleByKey(role !== null && role !== void 0 ? role : "staff");
         if (!roleEntity) {
             throw new common_1.NotFoundException(`Role "${role}" not found`);
         }
@@ -76,7 +76,7 @@ let UsersService = class UsersService {
             role: roleEntity.key,
             role_id: roleEntity.id,
             roleEntity,
-            is_active: rest.is_active === 'true' || rest.is_active === true,
+            is_active: rest.is_active === "true" || rest.is_active === true,
             created_at: rest.created_at || new Date(),
         };
         const plainPassword = password_hash !== null && password_hash !== void 0 ? password_hash : password;
@@ -86,14 +86,14 @@ let UsersService = class UsersService {
         const user = this.usersRepository.create(userData);
         const saved = await this.usersRepository.save(user);
         this.events.emit(notification_events_1.NOTIFICATION_EVENT, {
-            eventName: 'user.created',
-            kind: 'user',
-            severity: 'info',
-            title: 'New user account',
+            eventName: "user.created",
+            kind: "user",
+            severity: "info",
+            title: "New user account",
             message: `${saved.email} was added as ${roleEntity.key}.`,
-            href: '/settings',
+            href: "/settings",
             dedupeKey: `user.created:${saved.id}`,
-            targetRoles: ['admin'],
+            targetRoles: ["admin"],
         });
         return (0, user_mapper_1.toUserResponse)(saved, true);
     }
@@ -110,7 +110,9 @@ let UsersService = class UsersService {
         return bcrypt.hash(value, salt);
     }
     async findAll() {
-        const users = await this.usersRepository.find({ relations: this.userRelations });
+        const users = await this.usersRepository.find({
+            relations: this.userRelations,
+        });
         return users.map((u) => (0, user_mapper_1.toUserResponse)(u, true));
     }
     async findOne(id, includePermissions = true) {
@@ -135,8 +137,19 @@ let UsersService = class UsersService {
             where: { email: normalizedEmail },
             relations: this.userRelations,
             select: [
-                'id', 'email', 'password_hash', 'first_name', 'middle_name', 'last_name',
-                'is_active', 'created_at', 'updated_at', 'role', 'role_id', 'avatar_url', 'title',
+                "id",
+                "email",
+                "password_hash",
+                "first_name",
+                "middle_name",
+                "last_name",
+                "is_active",
+                "created_at",
+                "updated_at",
+                "role",
+                "role_id",
+                "avatar_url",
+                "title",
             ],
         });
     }
@@ -154,14 +167,14 @@ let UsersService = class UsersService {
         if (currentPassword && newPassword) {
             const user = await this.usersRepository.findOne({
                 where: { id },
-                select: ['id', 'password_hash'],
+                select: ["id", "password_hash"],
             });
             if (!user) {
-                throw new common_1.NotFoundException('User not found');
+                throw new common_1.NotFoundException("User not found");
             }
             const isMatch = await bcrypt.compare(currentPassword, user.password_hash);
             if (!isMatch) {
-                throw new common_1.ForbiddenException('Current password is incorrect');
+                throw new common_1.ForbiddenException("Current password is incorrect");
             }
             const salt = await bcrypt.genSalt(10);
             updateObject.password_hash = await bcrypt.hash(newPassword, salt);
@@ -176,19 +189,19 @@ let UsersService = class UsersService {
         const { currentPassword, newPassword } = changePasswordDto;
         const user = await this.usersRepository.findOne({
             where: { id: userId },
-            select: ['id', 'password_hash'],
+            select: ["id", "password_hash"],
         });
         if (!user) {
-            throw new common_1.NotFoundException('User not found');
+            throw new common_1.NotFoundException("User not found");
         }
         const isMatch = await bcrypt.compare(currentPassword, user.password_hash);
         if (!isMatch) {
-            throw new common_1.ForbiddenException('Current password is incorrect');
+            throw new common_1.ForbiddenException("Current password is incorrect");
         }
         const salt = await bcrypt.genSalt(10);
         const newHash = await bcrypt.hash(newPassword, salt);
         await this.usersRepository.update(userId, { password_hash: newHash });
-        return { message: 'Password changed successfully' };
+        return { message: "Password changed successfully" };
     }
     async remove(id) {
         const result = await this.usersRepository.delete(id);
@@ -202,7 +215,7 @@ let UsersService = class UsersService {
         for (const user of users) {
             if (user.role_id)
                 continue;
-            const key = (_a = user.role) !== null && _a !== void 0 ? _a : 'staff';
+            const key = (_a = user.role) !== null && _a !== void 0 ? _a : "staff";
             const roleEntity = await this.accessSeeder.findRoleByKey(key);
             if (!roleEntity)
                 continue;

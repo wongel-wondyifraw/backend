@@ -24,85 +24,29 @@ let WebsiteController = class WebsiteController {
     getPageContent(slug) {
         return this.websiteService.getPageContent(slug);
     }
-    getProjects(status) {
-        return this.websiteService.getProjects(status);
-    }
-    getProject(id) {
-        return this.websiteService.getProject(id);
-    }
     updatePageContent(slug, content) {
         return this.websiteService.updatePageContent(slug, content);
-    }
-    createProject(data) {
-        return this.websiteService.createProject(data);
-    }
-    updateProject(id, data) {
-        return this.websiteService.updateProject(id, data);
-    }
-    deleteProject(id) {
-        return this.websiteService.deleteProject(id);
     }
 };
 exports.WebsiteController = WebsiteController;
 __decorate([
     (0, public_decorator_1.Public)(),
-    (0, common_1.Get)('pages/:slug'),
-    __param(0, (0, common_1.Param)('slug')),
+    (0, common_1.Get)("pages/:slug"),
+    __param(0, (0, common_1.Param)("slug")),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", void 0)
 ], WebsiteController.prototype, "getPageContent", null);
 __decorate([
-    (0, public_decorator_1.Public)(),
-    (0, common_1.Get)('projects'),
-    __param(0, (0, common_1.Query)('status')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", void 0)
-], WebsiteController.prototype, "getProjects", null);
-__decorate([
-    (0, public_decorator_1.Public)(),
-    (0, common_1.Get)('projects/:id'),
-    __param(0, (0, common_1.Param)('id')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", void 0)
-], WebsiteController.prototype, "getProject", null);
-__decorate([
-    (0, common_1.Patch)('pages/:slug'),
-    (0, permissions_decorator_1.RequiresPermissions)('website.manage'),
-    __param(0, (0, common_1.Param)('slug')),
+    (0, common_1.Patch)("pages/:slug"),
+    (0, permissions_decorator_1.RequiresPermissions)("website.manage"),
+    __param(0, (0, common_1.Param)("slug")),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String, Object]),
     __metadata("design:returntype", void 0)
 ], WebsiteController.prototype, "updatePageContent", null);
-__decorate([
-    (0, common_1.Post)('projects'),
-    (0, permissions_decorator_1.RequiresPermissions)('projects.manage'),
-    __param(0, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
-    __metadata("design:returntype", void 0)
-], WebsiteController.prototype, "createProject", null);
-__decorate([
-    (0, common_1.Patch)('projects/:id'),
-    (0, permissions_decorator_1.RequiresPermissions)('projects.manage'),
-    __param(0, (0, common_1.Param)('id')),
-    __param(1, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, Object]),
-    __metadata("design:returntype", void 0)
-], WebsiteController.prototype, "updateProject", null);
-__decorate([
-    (0, common_1.Delete)('projects/:id'),
-    (0, permissions_decorator_1.RequiresPermissions)('projects.manage'),
-    __param(0, (0, common_1.Param)('id')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", void 0)
-], WebsiteController.prototype, "deleteProject", null);
 exports.WebsiteController = WebsiteController = __decorate([
-    (0, common_1.Controller)('website'),
+    (0, common_1.Controller)("website"),
     __metadata("design:paramtypes", [website_service_1.WebsiteService])
 ], WebsiteController);

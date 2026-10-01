@@ -5,13 +5,13 @@ import {
   IsString,
   Length,
   Matches,
-} from 'class-validator';
+} from "class-validator";
 
 export class CreateRoleDto {
   @IsString()
   @Length(2, 64)
   @Matches(/^[a-z][a-z0-9_]*$/, {
-    message: 'key must be lowercase letters, digits, and underscores',
+    message: "key must be lowercase letters, digits, and underscores",
   })
   key: string;
 

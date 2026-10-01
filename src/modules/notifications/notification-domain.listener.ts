@@ -1,12 +1,15 @@
-import { Injectable, Logger } from '@nestjs/common';
-import { OnEvent } from '@nestjs/event-emitter';
+import { Injectable, Logger } from "@nestjs/common";
+import { OnEvent } from "@nestjs/event-emitter";
 import {
   NotificationDomainEvent,
   NOTIFICATION_EVENT,
-} from './notification-events';
-import { NotificationAudienceService } from './notification-audience.service';
-import { NotificationsService } from './notifications.service';
-import { NotificationKind, NotificationSeverity } from './entities/notification.entity';
+} from "./notification-events";
+import { NotificationAudienceService } from "./notification-audience.service";
+import { NotificationsService } from "./notifications.service";
+import {
+  NotificationKind,
+  NotificationSeverity,
+} from "./entities/notification.entity";
 
 @Injectable()
 export class NotificationDomainListener {

@@ -16,7 +16,7 @@ let Ministry = class Ministry {
 };
 exports.Ministry = Ministry;
 __decorate([
-    (0, typeorm_1.PrimaryGeneratedColumn)('uuid'),
+    (0, typeorm_1.PrimaryGeneratedColumn)("uuid"),
     __metadata("design:type", String)
 ], Ministry.prototype, "id", void 0);
 __decorate([
@@ -24,19 +24,19 @@ __decorate([
     __metadata("design:type", String)
 ], Ministry.prototype, "name", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'text', nullable: true }),
+    (0, typeorm_1.Column)({ type: "text", nullable: true }),
     __metadata("design:type", Object)
 ], Ministry.prototype, "about", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'varchar', nullable: true }),
+    (0, typeorm_1.Column)({ type: "varchar", nullable: true }),
     __metadata("design:type", Object)
 ], Ministry.prototype, "schedule", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'uuid', nullable: true }),
+    (0, typeorm_1.Column)({ type: "uuid", nullable: true }),
     __metadata("design:type", Object)
 ], Ministry.prototype, "leader_id", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'varchar', length: 16, nullable: true }),
+    (0, typeorm_1.Column)({ type: "varchar", length: 16, nullable: true }),
     __metadata("design:type", Object)
 ], Ministry.prototype, "leader_type", void 0);
 __decorate([
@@ -52,5 +52,5 @@ __decorate([
     __metadata("design:type", Array)
 ], Ministry.prototype, "ministry_members", void 0);
 exports.Ministry = Ministry = __decorate([
-    (0, typeorm_1.Entity)('ministries')
+    (0, typeorm_1.Entity)("ministries")
 ], Ministry);

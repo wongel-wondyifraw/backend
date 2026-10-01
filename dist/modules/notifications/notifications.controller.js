@@ -46,23 +46,23 @@ let NotificationsController = class NotificationsController {
 exports.NotificationsController = NotificationsController;
 __decorate([
     (0, common_1.Get)(),
-    (0, permissions_decorator_1.RequiresPermissions)('notifications.read'),
+    (0, permissions_decorator_1.RequiresPermissions)("notifications.read"),
     __param(0, (0, common_1.Req)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", void 0)
 ], NotificationsController.prototype, "list", null);
 __decorate([
-    (0, common_1.Get)('preferences'),
-    (0, permissions_decorator_1.RequiresPermissions)('notifications.update'),
+    (0, common_1.Get)("preferences"),
+    (0, permissions_decorator_1.RequiresPermissions)("notifications.update"),
     __param(0, (0, common_1.Req)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", void 0)
 ], NotificationsController.prototype, "getPreferences", null);
 __decorate([
-    (0, common_1.Patch)('preferences'),
-    (0, permissions_decorator_1.RequiresPermissions)('notifications.update'),
+    (0, common_1.Patch)("preferences"),
+    (0, permissions_decorator_1.RequiresPermissions)("notifications.update"),
     __param(0, (0, common_1.Req)()),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
@@ -70,40 +70,40 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], NotificationsController.prototype, "updatePreferences", null);
 __decorate([
-    (0, common_1.Patch)('read-all'),
-    (0, permissions_decorator_1.RequiresPermissions)('notifications.read'),
+    (0, common_1.Patch)("read-all"),
+    (0, permissions_decorator_1.RequiresPermissions)("notifications.read"),
     __param(0, (0, common_1.Req)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", void 0)
 ], NotificationsController.prototype, "markAllRead", null);
 __decorate([
-    (0, common_1.Patch)(':id/read'),
-    (0, permissions_decorator_1.RequiresPermissions)('notifications.read'),
+    (0, common_1.Patch)(":id/read"),
+    (0, permissions_decorator_1.RequiresPermissions)("notifications.read"),
     __param(0, (0, common_1.Req)()),
-    __param(1, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
+    __param(1, (0, common_1.Param)("id", common_1.ParseUUIDPipe)),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object, String]),
     __metadata("design:returntype", void 0)
 ], NotificationsController.prototype, "markRead", null);
 __decorate([
-    (0, common_1.Patch)(':id/dismiss'),
-    (0, permissions_decorator_1.RequiresPermissions)('notifications.read'),
+    (0, common_1.Patch)(":id/dismiss"),
+    (0, permissions_decorator_1.RequiresPermissions)("notifications.read"),
     __param(0, (0, common_1.Req)()),
-    __param(1, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
+    __param(1, (0, common_1.Param)("id", common_1.ParseUUIDPipe)),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object, String]),
     __metadata("design:returntype", void 0)
 ], NotificationsController.prototype, "dismiss", null);
 __decorate([
-    (0, common_1.Sse)('stream'),
-    (0, permissions_decorator_1.RequiresPermissions)('notifications.read'),
+    (0, common_1.Sse)("stream"),
+    (0, permissions_decorator_1.RequiresPermissions)("notifications.read"),
     __param(0, (0, common_1.Req)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", rxjs_1.Observable)
 ], NotificationsController.prototype, "stream", null);
 exports.NotificationsController = NotificationsController = __decorate([
-    (0, common_1.Controller)('notifications'),
+    (0, common_1.Controller)("notifications"),
     __metadata("design:paramtypes", [notifications_service_1.NotificationsService])
 ], NotificationsController);

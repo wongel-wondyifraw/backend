@@ -17,11 +17,11 @@ let PlanMinister = class PlanMinister {
 };
 exports.PlanMinister = PlanMinister;
 __decorate([
-    (0, typeorm_1.PrimaryColumn)('uuid'),
+    (0, typeorm_1.PrimaryColumn)("uuid"),
     __metadata("design:type", String)
 ], PlanMinister.prototype, "plan_id", void 0);
 __decorate([
-    (0, typeorm_1.PrimaryColumn)('uuid'),
+    (0, typeorm_1.PrimaryColumn)("uuid"),
     __metadata("design:type", String)
 ], PlanMinister.prototype, "minister_id", void 0);
 __decorate([
@@ -29,15 +29,15 @@ __decorate([
     __metadata("design:type", Date)
 ], PlanMinister.prototype, "assigned_at", void 0);
 __decorate([
-    (0, typeorm_1.ManyToOne)(() => plan_entity_1.Plan, (plan) => plan.plan_ministers, { onDelete: 'CASCADE' }),
-    (0, typeorm_1.JoinColumn)({ name: 'plan_id' }),
+    (0, typeorm_1.ManyToOne)(() => plan_entity_1.Plan, (plan) => plan.plan_ministers, { onDelete: "CASCADE" }),
+    (0, typeorm_1.JoinColumn)({ name: "plan_id" }),
     __metadata("design:type", plan_entity_1.Plan)
 ], PlanMinister.prototype, "plan", void 0);
 __decorate([
-    (0, typeorm_1.ManyToOne)(() => minister_entity_1.Minister, { onDelete: 'CASCADE' }),
-    (0, typeorm_1.JoinColumn)({ name: 'minister_id' }),
+    (0, typeorm_1.ManyToOne)(() => minister_entity_1.Minister, { onDelete: "CASCADE" }),
+    (0, typeorm_1.JoinColumn)({ name: "minister_id" }),
     __metadata("design:type", minister_entity_1.Minister)
 ], PlanMinister.prototype, "minister", void 0);
 exports.PlanMinister = PlanMinister = __decorate([
-    (0, typeorm_1.Entity)('plan_ministers')
+    (0, typeorm_1.Entity)("plan_ministers")
 ], PlanMinister);

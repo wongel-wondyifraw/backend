@@ -58,36 +58,36 @@ let AuthService = class AuthService {
     parseFullName(fullName) {
         const parts = fullName.trim().split(/\s+/).filter(Boolean);
         if (parts.length === 0) {
-            return { first_name: 'User', middle_name: '', last_name: 'User' };
+            return { first_name: "User", middle_name: "", last_name: "User" };
         }
         if (parts.length === 1) {
-            return { first_name: parts[0], middle_name: '', last_name: parts[0] };
+            return { first_name: parts[0], middle_name: "", last_name: parts[0] };
         }
         return {
             first_name: parts[0],
-            middle_name: parts.slice(1, -1).join(' '),
+            middle_name: parts.slice(1, -1).join(" "),
             last_name: parts[parts.length - 1],
         };
     }
     async register(registerDto) {
-        const allowPublicRegister = this.config.get('ALLOW_PUBLIC_REGISTER') === 'true';
+        const allowPublicRegister = this.config.get("ALLOW_PUBLIC_REGISTER") === "true";
         if (!allowPublicRegister) {
-            throw new common_1.ForbiddenException('Registration is disabled');
+            throw new common_1.ForbiddenException("Registration is disabled");
         }
         const email = registerDto.email.trim().toLowerCase();
         const existingUser = await this.usersService.findOneByEmail(email);
         if (existingUser) {
-            throw new common_1.ConflictException('Email already exists');
+            throw new common_1.ConflictException("Email already exists");
         }
         const newUser = await this.usersService.create({
             ...this.parseFullName(registerDto.fullName),
             email,
             password: registerDto.password,
-            role: 'staff',
+            role: "staff",
             is_active: true,
         });
         return {
-            message: 'User registered successfully',
+            message: "User registered successfully",
             user: newUser,
         };
     }
@@ -95,14 +95,14 @@ let AuthService = class AuthService {
         const email = loginDto.email.trim().toLowerCase();
         const user = await this.usersService.findOneByEmail(email);
         if (!user) {
-            throw new common_1.UnauthorizedException('Invalid credentials');
+            throw new common_1.UnauthorizedException("Invalid credentials");
         }
         if (!user.is_active) {
-            throw new common_1.UnauthorizedException('Account is inactive');
+            throw new common_1.UnauthorizedException("Account is inactive");
         }
         const isPasswordValid = await bcrypt.compare(loginDto.password, user.password_hash);
         if (!isPasswordValid) {
-            throw new common_1.UnauthorizedException('Invalid credentials');
+            throw new common_1.UnauthorizedException("Invalid credentials");
         }
         const payload = { sub: user.id, email: user.email };
         return {

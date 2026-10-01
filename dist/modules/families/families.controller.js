@@ -29,11 +29,11 @@ let FamiliesController = class FamiliesController {
         return this.familiesService.getStats();
     }
     async findByMember(memberId) {
-        const family = await this.familiesService.findByPerson(memberId, 'member');
+        const family = await this.familiesService.findByPerson(memberId, "member");
         return { family };
     }
     async findByPerson(personId, type) {
-        const personType = type === 'minister' ? 'minister' : 'member';
+        const personType = type === "minister" ? "minister" : "member";
         const family = await this.familiesService.findByPerson(personId, personType);
         return { family };
     }
@@ -64,32 +64,32 @@ let FamiliesController = class FamiliesController {
 };
 exports.FamiliesController = FamiliesController;
 __decorate([
-    (0, common_1.Get)('stats'),
-    (0, permissions_decorator_1.RequiresPermissions)('families.read'),
+    (0, common_1.Get)("stats"),
+    (0, permissions_decorator_1.RequiresPermissions)("families.read"),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", void 0)
 ], FamiliesController.prototype, "getStats", null);
 __decorate([
-    (0, common_1.Get)('by-member/:memberId'),
-    (0, permissions_decorator_1.RequiresPermissions)('families.read'),
-    __param(0, (0, common_1.Param)('memberId', common_1.ParseUUIDPipe)),
+    (0, common_1.Get)("by-member/:memberId"),
+    (0, permissions_decorator_1.RequiresPermissions)("families.read"),
+    __param(0, (0, common_1.Param)("memberId", common_1.ParseUUIDPipe)),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], FamiliesController.prototype, "findByMember", null);
 __decorate([
-    (0, common_1.Get)('by-person/:personId'),
-    (0, permissions_decorator_1.RequiresPermissions)('families.read'),
-    __param(0, (0, common_1.Param)('personId', common_1.ParseUUIDPipe)),
-    __param(1, (0, common_1.Query)('type')),
+    (0, common_1.Get)("by-person/:personId"),
+    (0, permissions_decorator_1.RequiresPermissions)("families.read"),
+    __param(0, (0, common_1.Param)("personId", common_1.ParseUUIDPipe)),
+    __param(1, (0, common_1.Query)("type")),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String, String]),
     __metadata("design:returntype", Promise)
 ], FamiliesController.prototype, "findByPerson", null);
 __decorate([
     (0, common_1.Post)(),
-    (0, permissions_decorator_1.RequiresPermissions)('families.create'),
+    (0, permissions_decorator_1.RequiresPermissions)("families.create"),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [create_family_dto_1.CreateFamilyDto]),
@@ -97,66 +97,66 @@ __decorate([
 ], FamiliesController.prototype, "create", null);
 __decorate([
     (0, common_1.Get)(),
-    (0, permissions_decorator_1.RequiresPermissions)('families.read'),
+    (0, permissions_decorator_1.RequiresPermissions)("families.read"),
     __param(0, (0, common_1.Query)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [pagination_query_dto_1.PaginationQueryDto]),
     __metadata("design:returntype", void 0)
 ], FamiliesController.prototype, "findAll", null);
 __decorate([
-    (0, common_1.Get)(':id'),
-    (0, permissions_decorator_1.RequiresPermissions)('families.read'),
-    __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
+    (0, common_1.Get)(":id"),
+    (0, permissions_decorator_1.RequiresPermissions)("families.read"),
+    __param(0, (0, common_1.Param)("id", common_1.ParseUUIDPipe)),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", void 0)
 ], FamiliesController.prototype, "findOne", null);
 __decorate([
-    (0, common_1.Patch)(':id'),
-    (0, permissions_decorator_1.RequiresPermissions)('families.update'),
-    __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
+    (0, common_1.Patch)(":id"),
+    (0, permissions_decorator_1.RequiresPermissions)("families.update"),
+    __param(0, (0, common_1.Param)("id", common_1.ParseUUIDPipe)),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String, update_family_dto_1.UpdateFamilyDto]),
     __metadata("design:returntype", void 0)
 ], FamiliesController.prototype, "update", null);
 __decorate([
-    (0, common_1.Delete)(':id'),
-    (0, permissions_decorator_1.RequiresPermissions)('families.delete'),
-    __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
+    (0, common_1.Delete)(":id"),
+    (0, permissions_decorator_1.RequiresPermissions)("families.delete"),
+    __param(0, (0, common_1.Param)("id", common_1.ParseUUIDPipe)),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", void 0)
 ], FamiliesController.prototype, "remove", null);
 __decorate([
-    (0, common_1.Post)(':id/children'),
-    (0, permissions_decorator_1.RequiresPermissions)('families.update'),
-    __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
+    (0, common_1.Post)(":id/children"),
+    (0, permissions_decorator_1.RequiresPermissions)("families.update"),
+    __param(0, (0, common_1.Param)("id", common_1.ParseUUIDPipe)),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String, create_family_child_dto_1.CreateFamilyChildDto]),
     __metadata("design:returntype", void 0)
 ], FamiliesController.prototype, "addChild", null);
 __decorate([
-    (0, common_1.Patch)(':id/children/:childId'),
-    (0, permissions_decorator_1.RequiresPermissions)('families.update'),
-    __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
-    __param(1, (0, common_1.Param)('childId', common_1.ParseUUIDPipe)),
+    (0, common_1.Patch)(":id/children/:childId"),
+    (0, permissions_decorator_1.RequiresPermissions)("families.update"),
+    __param(0, (0, common_1.Param)("id", common_1.ParseUUIDPipe)),
+    __param(1, (0, common_1.Param)("childId", common_1.ParseUUIDPipe)),
     __param(2, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String, String, update_family_child_dto_1.UpdateFamilyChildDto]),
     __metadata("design:returntype", void 0)
 ], FamiliesController.prototype, "updateChild", null);
 __decorate([
-    (0, common_1.Delete)(':id/children/:childId'),
-    (0, permissions_decorator_1.RequiresPermissions)('families.update'),
-    __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
-    __param(1, (0, common_1.Param)('childId', common_1.ParseUUIDPipe)),
+    (0, common_1.Delete)(":id/children/:childId"),
+    (0, permissions_decorator_1.RequiresPermissions)("families.update"),
+    __param(0, (0, common_1.Param)("id", common_1.ParseUUIDPipe)),
+    __param(1, (0, common_1.Param)("childId", common_1.ParseUUIDPipe)),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String, String]),
     __metadata("design:returntype", void 0)
 ], FamiliesController.prototype, "removeChild", null);
 exports.FamiliesController = FamiliesController = __decorate([
-    (0, common_1.Controller)('families'),
+    (0, common_1.Controller)("families"),
     __metadata("design:paramtypes", [families_service_1.FamiliesService])
 ], FamiliesController);

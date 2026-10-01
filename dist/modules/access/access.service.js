@@ -31,7 +31,7 @@ let AccessService = class AccessService {
     async listRoles() {
         return this.roles.find({
             relations: { permissions: true },
-            order: { name: 'ASC' },
+            order: { name: "ASC" },
         });
     }
     async findRole(id) {
@@ -96,7 +96,7 @@ let AccessService = class AccessService {
     async removeRole(id) {
         const role = await this.findRole(id);
         if (role.is_system) {
-            throw new common_1.BadRequestException('System roles cannot be deleted');
+            throw new common_1.BadRequestException("System roles cannot be deleted");
         }
         const userCount = await this.users.count({ where: { role_id: role.id } });
         if (userCount > 0) {
@@ -108,13 +108,13 @@ let AccessService = class AccessService {
         if (slugs.length === 0)
             return [];
         const found = await this.permissions
-            .createQueryBuilder('p')
-            .where('p.slug IN (:...slugs)', { slugs })
+            .createQueryBuilder("p")
+            .where("p.slug IN (:...slugs)", { slugs })
             .getMany();
         if (found.length !== slugs.length) {
             const foundSet = new Set(found.map((p) => p.slug));
             const missing = slugs.filter((s) => !foundSet.has(s));
-            throw new common_1.NotFoundException(`Unknown permission slug(s): ${missing.join(', ')}`);
+            throw new common_1.NotFoundException(`Unknown permission slug(s): ${missing.join(", ")}`);
         }
         return found;
     }

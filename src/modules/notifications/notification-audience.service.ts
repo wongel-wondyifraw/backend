@@ -1,7 +1,7 @@
-import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { In, Repository } from 'typeorm';
-import { User } from '../users/entities/user.entity';
+import { Injectable } from "@nestjs/common";
+import { InjectRepository } from "@nestjs/typeorm";
+import { In, Repository } from "typeorm";
+import { User } from "../users/entities/user.entity";
 
 @Injectable()
 export class NotificationAudienceService {
@@ -15,9 +15,11 @@ export class NotificationAudienceService {
     includeAdmins?: boolean;
     excludeUserId?: string;
   }): Promise<User[]> {
-    const roleKeys = new Set<string>(options.targetRoles ?? ['admin', 'minister']);
+    const roleKeys = new Set<string>(
+      options.targetRoles ?? ["admin", "minister"],
+    );
     if (options.includeAdmins !== false) {
-      roleKeys.add('admin');
+      roleKeys.add("admin");
     }
 
     const users = await this.users.find({

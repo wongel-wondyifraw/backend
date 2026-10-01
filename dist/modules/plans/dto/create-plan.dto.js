@@ -12,14 +12,14 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.CreatePlanDto = exports.PLAN_STATUSES = exports.PLAN_TYPES = void 0;
 const class_validator_1 = require("class-validator");
 exports.PLAN_TYPES = [
-    'program',
-    'crusade',
-    'general_assembly',
-    'training',
-    'fasting_day',
-    'gospel_campaign',
+    "program",
+    "crusade",
+    "general_assembly",
+    "training",
+    "fasting_day",
+    "gospel_campaign",
 ];
-exports.PLAN_STATUSES = ['planned', 'completed', 'cancelled'];
+exports.PLAN_STATUSES = ["planned", "completed", "cancelled"];
 /** HH:mm or HH:mm:ss */
 const TIME_PATTERN = /^([01]\d|2[0-3]):[0-5]\d(:[0-5]\d)?$/;
 class CreatePlanDto {
@@ -41,13 +41,13 @@ __decorate([
 __decorate([
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
-    (0, class_validator_1.Matches)(TIME_PATTERN, { message: 'start_time must be HH:mm or HH:mm:ss' }),
+    (0, class_validator_1.Matches)(TIME_PATTERN, { message: "start_time must be HH:mm or HH:mm:ss" }),
     __metadata("design:type", Object)
 ], CreatePlanDto.prototype, "start_time", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
-    (0, class_validator_1.Matches)(TIME_PATTERN, { message: 'end_time must be HH:mm or HH:mm:ss' }),
+    (0, class_validator_1.Matches)(TIME_PATTERN, { message: "end_time must be HH:mm or HH:mm:ss" }),
     __metadata("design:type", Object)
 ], CreatePlanDto.prototype, "end_time", void 0);
 __decorate([
@@ -69,6 +69,6 @@ __decorate([
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsArray)(),
     (0, class_validator_1.ArrayUnique)(),
-    (0, class_validator_1.IsUUID)('4', { each: true }),
+    (0, class_validator_1.IsUUID)("4", { each: true }),
     __metadata("design:type", Array)
 ], CreatePlanDto.prototype, "minister_ids", void 0);

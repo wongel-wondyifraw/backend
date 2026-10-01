@@ -3,7 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.toUserResponse = toUserResponse;
 function toUserResponse(user, includePermissions = false) {
     var _a, _b, _c, _d;
-    const roleKey = (_c = (_b = (_a = user.roleEntity) === null || _a === void 0 ? void 0 : _a.key) !== null && _b !== void 0 ? _b : user.role) !== null && _c !== void 0 ? _c : 'staff';
+    const roleKey = (_c = (_b = (_a = user.roleEntity) === null || _a === void 0 ? void 0 : _a.key) !== null && _b !== void 0 ? _b : user.role) !== null && _c !== void 0 ? _c : "staff";
     const dto = {
         id: user.id,
         email: user.email,

@@ -17,11 +17,11 @@ let BibleStudyMember = class BibleStudyMember {
 };
 exports.BibleStudyMember = BibleStudyMember;
 __decorate([
-    (0, typeorm_1.PrimaryColumn)('uuid'),
+    (0, typeorm_1.PrimaryColumn)("uuid"),
     __metadata("design:type", String)
 ], BibleStudyMember.prototype, "bible_study_id", void 0);
 __decorate([
-    (0, typeorm_1.PrimaryColumn)('uuid'),
+    (0, typeorm_1.PrimaryColumn)("uuid"),
     __metadata("design:type", String)
 ], BibleStudyMember.prototype, "member_id", void 0);
 __decorate([
@@ -29,15 +29,17 @@ __decorate([
     __metadata("design:type", Date)
 ], BibleStudyMember.prototype, "joined_at", void 0);
 __decorate([
-    (0, typeorm_1.ManyToOne)(() => bible_study_entity_1.BibleStudy, (study) => study.bible_study_members, { onDelete: 'CASCADE' }),
-    (0, typeorm_1.JoinColumn)({ name: 'bible_study_id' }),
+    (0, typeorm_1.ManyToOne)(() => bible_study_entity_1.BibleStudy, (study) => study.bible_study_members, {
+        onDelete: "CASCADE",
+    }),
+    (0, typeorm_1.JoinColumn)({ name: "bible_study_id" }),
     __metadata("design:type", bible_study_entity_1.BibleStudy)
 ], BibleStudyMember.prototype, "bible_study", void 0);
 __decorate([
-    (0, typeorm_1.ManyToOne)(() => member_entity_1.Member, { onDelete: 'CASCADE' }),
-    (0, typeorm_1.JoinColumn)({ name: 'member_id' }),
+    (0, typeorm_1.ManyToOne)(() => member_entity_1.Member, { onDelete: "CASCADE" }),
+    (0, typeorm_1.JoinColumn)({ name: "member_id" }),
     __metadata("design:type", member_entity_1.Member)
 ], BibleStudyMember.prototype, "member", void 0);
 exports.BibleStudyMember = BibleStudyMember = __decorate([
-    (0, typeorm_1.Entity)('bible_study_members')
+    (0, typeorm_1.Entity)("bible_study_members")
 ], BibleStudyMember);

@@ -24,7 +24,7 @@ let JwtStrategy = class JwtStrategy extends (0, passport_1.PassportStrategy)(pas
                 (req) => {
                     var _a;
                     const token = (_a = req === null || req === void 0 ? void 0 : req.query) === null || _a === void 0 ? void 0 : _a.token;
-                    if (typeof token === 'string' && token.length > 0) {
+                    if (typeof token === "string" && token.length > 0) {
                         return token;
                     }
                     return null;

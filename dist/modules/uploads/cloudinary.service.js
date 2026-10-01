@@ -54,14 +54,14 @@ let CloudinaryService = CloudinaryService_1 = class CloudinaryService {
     constructor(config) {
         this.config = config;
         this.logger = new common_1.Logger(CloudinaryService_1.name);
-        this.cloudRequested = this.config.get('CLOUD_STORAGE') === 'true';
-        const cloudName = this.config.get('CLOUDINARY_CLOUD_NAME');
-        const apiKey = this.config.get('CLOUDINARY_API_KEY');
-        const apiSecret = this.config.get('CLOUDINARY_API_SECRET');
+        this.cloudRequested = this.config.get("CLOUD_STORAGE") === "true";
+        const cloudName = this.config.get("CLOUDINARY_CLOUD_NAME");
+        const apiKey = this.config.get("CLOUDINARY_API_KEY");
+        const apiSecret = this.config.get("CLOUDINARY_API_SECRET");
         const hasCredentials = Boolean(cloudName && apiKey && apiSecret);
         this.enabled = this.cloudRequested && hasCredentials;
         if (this.cloudRequested && !hasCredentials) {
-            this.logger.error('CLOUD_STORAGE=true but CLOUDINARY_* credentials are missing');
+            this.logger.error("CLOUD_STORAGE=true but CLOUDINARY_* credentials are missing");
         }
         if (this.enabled) {
             cloudinary_1.v2.config({
@@ -70,23 +70,23 @@ let CloudinaryService = CloudinaryService_1 = class CloudinaryService {
                 api_secret: apiSecret,
                 secure: true,
             });
-            this.logger.log('Cloud storage enabled (Cloudinary)');
+            this.logger.log("Cloud storage enabled (Cloudinary)");
         }
         else if (!this.cloudRequested) {
-            this.logger.log('Cloud storage disabled — using local uploads/');
+            this.logger.log("Cloud storage disabled — using local uploads/");
         }
     }
     isEnabled() {
         return this.enabled;
     }
-    async uploadImage(file, folder = 'cms/images') {
+    async uploadImage(file, folder = "cms/images") {
         this.assertCloudReady();
         if (this.enabled) {
             return this.uploadImageToCloudinary(file, folder);
         }
         return this.uploadImageLocally(file);
     }
-    async uploadDocument(file, folder = 'cms/documents') {
+    async uploadDocument(file, folder = "cms/documents") {
         this.assertCloudReady();
         if (this.enabled) {
             return this.uploadDocumentToCloudinary(file, folder);
@@ -95,7 +95,7 @@ let CloudinaryService = CloudinaryService_1 = class CloudinaryService {
     }
     assertCloudReady() {
         if (this.cloudRequested && !this.enabled) {
-            throw new common_1.ServiceUnavailableException('CLOUD_STORAGE=true but Cloudinary credentials are not configured');
+            throw new common_1.ServiceUnavailableException("CLOUD_STORAGE=true but Cloudinary credentials are not configured");
         }
     }
     async uploadImageToCloudinary(file, folder) {
@@ -103,22 +103,22 @@ let CloudinaryService = CloudinaryService_1 = class CloudinaryService {
         // No local transform — Cloudinary handles resize/webp via eager transforms.
         const result = await this.uploadBuffer(file, {
             folder,
-            resource_type: 'image',
+            resource_type: "image",
             eager: [
                 {
                     width: 800,
                     height: 800,
-                    crop: 'limit',
+                    crop: "limit",
                     quality: 78,
-                    fetch_format: 'webp',
+                    fetch_format: "webp",
                 },
                 {
                     width: 320,
                     height: 320,
-                    crop: 'fill',
-                    gravity: 'auto',
+                    crop: "fill",
+                    gravity: "auto",
                     quality: 72,
-                    fetch_format: 'webp',
+                    fetch_format: "webp",
                 },
             ],
             // Async eager avoids holding the upload connection while variants build
@@ -127,9 +127,9 @@ let CloudinaryService = CloudinaryService_1 = class CloudinaryService {
                 {
                     width: 1920,
                     height: 1920,
-                    crop: 'limit',
+                    crop: "limit",
                     quality: 82,
-                    fetch_format: 'webp',
+                    fetch_format: "webp",
                 },
             ],
         });
@@ -146,9 +146,9 @@ let CloudinaryService = CloudinaryService_1 = class CloudinaryService {
         };
     }
     async uploadDocumentToCloudinary(file, folder) {
-        const isImage = file.mimetype.startsWith('image/');
-        const isVideo = file.mimetype.startsWith('video/');
-        const resourceType = isVideo ? 'video' : isImage ? 'image' : 'raw';
+        const isImage = file.mimetype.startsWith("image/");
+        const isVideo = file.mimetype.startsWith("video/");
+        const resourceType = isVideo ? "video" : isImage ? "image" : "raw";
         const result = await this.uploadBuffer(file, {
             folder,
             resource_type: resourceType,
@@ -166,7 +166,7 @@ let CloudinaryService = CloudinaryService_1 = class CloudinaryService {
         return new Promise((resolve, reject) => {
             const stream = cloudinary_1.v2.uploader.upload_stream(options, (error, result) => {
                 if (error || !result) {
-                    reject(error !== null && error !== void 0 ? error : new Error('Cloudinary upload returned empty result'));
+                    reject(error !== null && error !== void 0 ? error : new Error("Cloudinary upload returned empty result"));
                     return;
                 }
                 resolve(result);
@@ -179,7 +179,7 @@ let CloudinaryService = CloudinaryService_1 = class CloudinaryService {
         const dest = (0, path_1.join)((0, multer_config_1.getImagesUploadDir)(), filename);
         (0, fs_1.writeFileSync)(dest, this.getBuffer(file));
         // Dynamic import — Sharp never loads when CLOUD_STORAGE=true
-        const { processUploadedImage } = await Promise.resolve().then(() => __importStar(require('./image-processor')));
+        const { processUploadedImage } = await Promise.resolve().then(() => __importStar(require("./image-processor")));
         return processUploadedImage(dest, filename);
     }
     uploadDocumentLocally(file) {
@@ -206,7 +206,7 @@ let CloudinaryService = CloudinaryService_1 = class CloudinaryService {
             }
             return buf;
         }
-        throw new Error('Uploaded file has no buffer or path');
+        throw new Error("Uploaded file has no buffer or path");
     }
 };
 exports.CloudinaryService = CloudinaryService;

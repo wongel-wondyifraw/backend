@@ -15,19 +15,19 @@ let NotificationPreference = class NotificationPreference {
 };
 exports.NotificationPreference = NotificationPreference;
 __decorate([
-    (0, typeorm_1.PrimaryGeneratedColumn)('uuid'),
+    (0, typeorm_1.PrimaryGeneratedColumn)("uuid"),
     __metadata("design:type", String)
 ], NotificationPreference.prototype, "id", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'uuid' }),
+    (0, typeorm_1.Column)({ type: "uuid" }),
     __metadata("design:type", String)
 ], NotificationPreference.prototype, "user_id", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'boolean', default: true }),
+    (0, typeorm_1.Column)({ type: "boolean", default: true }),
     __metadata("design:type", Boolean)
 ], NotificationPreference.prototype, "enabled", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'jsonb', default: () => "'{}'" }),
+    (0, typeorm_1.Column)({ type: "jsonb", default: () => "'{}'" }),
     __metadata("design:type", Object)
 ], NotificationPreference.prototype, "kinds", void 0);
 __decorate([
@@ -39,6 +39,6 @@ __decorate([
     __metadata("design:type", Date)
 ], NotificationPreference.prototype, "updated_at", void 0);
 exports.NotificationPreference = NotificationPreference = __decorate([
-    (0, typeorm_1.Entity)('notification_preferences'),
-    (0, typeorm_1.Index)(['user_id'], { unique: true })
+    (0, typeorm_1.Entity)("notification_preferences"),
+    (0, typeorm_1.Index)(["user_id"], { unique: true })
 ], NotificationPreference);

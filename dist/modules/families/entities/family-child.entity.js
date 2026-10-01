@@ -16,16 +16,16 @@ let FamilyChild = class FamilyChild {
 };
 exports.FamilyChild = FamilyChild;
 __decorate([
-    (0, typeorm_1.PrimaryGeneratedColumn)('uuid'),
+    (0, typeorm_1.PrimaryGeneratedColumn)("uuid"),
     __metadata("design:type", String)
 ], FamilyChild.prototype, "id", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'uuid' }),
+    (0, typeorm_1.Column)({ type: "uuid" }),
     __metadata("design:type", String)
 ], FamilyChild.prototype, "family_id", void 0);
 __decorate([
-    (0, typeorm_1.ManyToOne)(() => family_entity_1.Family, (family) => family.children, { onDelete: 'CASCADE' }),
-    (0, typeorm_1.JoinColumn)({ name: 'family_id' }),
+    (0, typeorm_1.ManyToOne)(() => family_entity_1.Family, (family) => family.children, { onDelete: "CASCADE" }),
+    (0, typeorm_1.JoinColumn)({ name: "family_id" }),
     __metadata("design:type", family_entity_1.Family)
 ], FamilyChild.prototype, "family", void 0);
 __decorate([
@@ -33,11 +33,11 @@ __decorate([
     __metadata("design:type", String)
 ], FamilyChild.prototype, "name", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'int', nullable: true }),
+    (0, typeorm_1.Column)({ type: "int", nullable: true }),
     __metadata("design:type", Object)
 ], FamilyChild.prototype, "age", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'date', nullable: true }),
+    (0, typeorm_1.Column)({ type: "date", nullable: true }),
     __metadata("design:type", Object)
 ], FamilyChild.prototype, "date_of_birth", void 0);
 __decorate([
@@ -49,5 +49,5 @@ __decorate([
     __metadata("design:type", Date)
 ], FamilyChild.prototype, "updated_at", void 0);
 exports.FamilyChild = FamilyChild = __decorate([
-    (0, typeorm_1.Entity)('family_children')
+    (0, typeorm_1.Entity)("family_children")
 ], FamilyChild);

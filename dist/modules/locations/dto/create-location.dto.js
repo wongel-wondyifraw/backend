@@ -21,7 +21,7 @@ __decorate([
 ], CreateLocationDto.prototype, "name", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsEnum)(['active', 'inactive']),
+    (0, class_validator_1.IsEnum)(["active", "inactive"]),
     __metadata("design:type", String)
 ], CreateLocationDto.prototype, "status", void 0);
 __decorate([

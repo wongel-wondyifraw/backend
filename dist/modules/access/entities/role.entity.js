@@ -17,32 +17,32 @@ let Role = class Role {
 };
 exports.Role = Role;
 __decorate([
-    (0, typeorm_1.PrimaryGeneratedColumn)('uuid'),
+    (0, typeorm_1.PrimaryGeneratedColumn)("uuid"),
     __metadata("design:type", String)
 ], Role.prototype, "id", void 0);
 __decorate([
     (0, typeorm_1.Index)({ unique: true }),
-    (0, typeorm_1.Column)({ type: 'varchar', length: 64 }),
+    (0, typeorm_1.Column)({ type: "varchar", length: 64 }),
     __metadata("design:type", String)
 ], Role.prototype, "key", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'varchar', length: 128 }),
+    (0, typeorm_1.Column)({ type: "varchar", length: 128 }),
     __metadata("design:type", String)
 ], Role.prototype, "name", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'varchar', length: 512, nullable: true }),
+    (0, typeorm_1.Column)({ type: "varchar", length: 512, nullable: true }),
     __metadata("design:type", Object)
 ], Role.prototype, "description", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'boolean', default: false }),
+    (0, typeorm_1.Column)({ type: "boolean", default: false }),
     __metadata("design:type", Boolean)
 ], Role.prototype, "is_system", void 0);
 __decorate([
     (0, typeorm_1.ManyToMany)(() => permission_entity_1.Permission, (permission) => permission.roles),
     (0, typeorm_1.JoinTable)({
-        name: 'role_permissions',
-        joinColumn: { name: 'role_id', referencedColumnName: 'id' },
-        inverseJoinColumn: { name: 'permission_id', referencedColumnName: 'id' },
+        name: "role_permissions",
+        joinColumn: { name: "role_id", referencedColumnName: "id" },
+        inverseJoinColumn: { name: "permission_id", referencedColumnName: "id" },
     }),
     __metadata("design:type", Array)
 ], Role.prototype, "permissions", void 0);
@@ -59,5 +59,5 @@ __decorate([
     __metadata("design:type", Date)
 ], Role.prototype, "updated_at", void 0);
 exports.Role = Role = __decorate([
-    (0, typeorm_1.Entity)('roles')
+    (0, typeorm_1.Entity)("roles")
 ], Role);

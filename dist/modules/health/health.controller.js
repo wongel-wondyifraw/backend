@@ -16,7 +16,7 @@ const public_decorator_1 = require("../../common/decorators/public.decorator");
 let HealthController = class HealthController {
     check() {
         return {
-            status: 'ok',
+            status: "ok",
             timestamp: new Date().toISOString(),
             uptime: process.uptime(),
             memory: process.memoryUsage(),
@@ -27,12 +27,12 @@ exports.HealthController = HealthController;
 __decorate([
     (0, public_decorator_1.Public)(),
     (0, common_1.Get)(),
-    (0, swagger_1.ApiOperation)({ summary: 'Check API health' }),
+    (0, swagger_1.ApiOperation)({ summary: "Check API health" }),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", void 0)
 ], HealthController.prototype, "check", null);
 exports.HealthController = HealthController = __decorate([
-    (0, swagger_1.ApiTags)('Health'),
-    (0, common_1.Controller)('health')
+    (0, swagger_1.ApiTags)("Health"),
+    (0, common_1.Controller)("health")
 ], HealthController);

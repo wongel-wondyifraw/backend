@@ -1,4 +1,10 @@
-import { IsString, IsNotEmpty, IsOptional, IsUUID, IsEnum } from 'class-validator';
+import {
+  IsString,
+  IsNotEmpty,
+  IsOptional,
+  IsUUID,
+  IsEnum,
+} from "class-validator";
 
 export class CreateLocationDto {
   @IsString()
@@ -6,7 +12,7 @@ export class CreateLocationDto {
   name: string;
 
   @IsOptional()
-  @IsEnum(['active', 'inactive'])
+  @IsEnum(["active", "inactive"])
   status?: string;
 
   @IsOptional()

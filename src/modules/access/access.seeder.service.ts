@@ -1,17 +1,17 @@
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import permissionCatalogJson from './permissionCatalog.json';
-import systemRolesJson from './systemRoles.json';
-import { Permission } from './entities/permission.entity';
-import { Role } from './entities/role.entity';
-import { User } from '../users/entities/user.entity';
+import { Injectable, Logger, OnModuleInit } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
+import { InjectRepository } from "@nestjs/typeorm";
+import { Repository } from "typeorm";
+import permissionCatalogJson from "./permissionCatalog.json";
+import systemRolesJson from "./systemRoles.json";
+import { Permission } from "./entities/permission.entity";
+import { Role } from "./entities/role.entity";
+import { User } from "../users/entities/user.entity";
 import {
   PermissionCatalogEntry,
   SYSTEM_ROLE_ADMIN_KEY,
   SystemRoleDefinition,
-} from './access.types';
+} from "./access.types";
 
 const catalog = permissionCatalogJson as PermissionCatalogEntry[];
 const systemRoleDefs = systemRolesJson as SystemRoleDefinition[];
@@ -81,7 +81,7 @@ export class AccessSeederService implements OnModuleInit {
   }
 
   private async upsertSystemRoles(allPermissions: Permission[]): Promise<void> {
-    const reseed = this.config.get<string>('RBAC_RESEED_SYSTEM') === 'true';
+    const reseed = this.config.get<string>("RBAC_RESEED_SYSTEM") === "true";
     const slugToPermission = new Map(allPermissions.map((p) => [p.slug, p]));
     const allSlugs = allPermissions.map((p) => p.slug);
 
@@ -101,19 +101,22 @@ export class AccessSeederService implements OnModuleInit {
           permissions: [],
         });
         role = await this.roles.save(role);
-      } else if (role.name !== def.name || role.description !== (def.description ?? null)) {
+      } else if (
+        role.name !== def.name ||
+        role.description !== (def.description ?? null)
+      ) {
         role.name = def.name;
         role.description = def.description ?? null;
         await this.roles.save(role);
       }
 
       const desiredSlugs =
-        def.permissionSlugs === '*'
+        def.permissionSlugs === "*"
           ? allSlugs
           : def.permissionSlugs.filter((s) => slugToPermission.has(s));
 
       const currentSlugs = new Set((role.permissions ?? []).map((p) => p.slug));
-      const isWildcard = def.permissionSlugs === '*';
+      const isWildcard = def.permissionSlugs === "*";
       const wildcardMissingPerms =
         isWildcard && desiredSlugs.some((s) => !currentSlugs.has(s));
       const hasNoPermissions = currentSlugs.size === 0;
@@ -141,14 +144,14 @@ export class AccessSeederService implements OnModuleInit {
   }
 
   async findAllPermissions(): Promise<Permission[]> {
-    return this.permissions.find({ order: { category: 'ASC', slug: 'ASC' } });
+    return this.permissions.find({ order: { category: "ASC", slug: "ASC" } });
   }
 
   async backfillUserRoleIds(): Promise<void> {
     const users = await this.users.find();
     for (const user of users) {
       if (user.role_id) continue;
-      const key = user.role ?? 'staff';
+      const key = user.role ?? "staff";
       const role = await this.findRoleByKey(key);
       if (!role) continue;
       await this.users.update(user.id, { role_id: role.id, role: role.key });

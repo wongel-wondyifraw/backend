@@ -3,10 +3,10 @@ import {
   ExecutionContext,
   ForbiddenException,
   Injectable,
-} from '@nestjs/common';
-import { Reflector } from '@nestjs/core';
-import { PERMISSIONS_KEY } from '../decorators/permissions.decorator';
-import { User } from '../../modules/users/entities/user.entity';
+} from "@nestjs/common";
+import { Reflector } from "@nestjs/core";
+import { PERMISSIONS_KEY } from "../decorators/permissions.decorator";
+import { User } from "../../modules/users/entities/user.entity";
 
 @Injectable()
 export class PermissionsGuard implements CanActivate {
@@ -21,7 +21,7 @@ export class PermissionsGuard implements CanActivate {
 
     const request = context.switchToHttp().getRequest<{ user?: User }>();
     const user = request.user;
-    if (!user) throw new ForbiddenException('Not authenticated');
+    if (!user) throw new ForbiddenException("Not authenticated");
 
     const granted = new Set(
       (user.roleEntity?.permissions ?? []).map((p) => p.slug),
@@ -29,7 +29,7 @@ export class PermissionsGuard implements CanActivate {
     const allowed = required.some((slug) => granted.has(slug));
     if (!allowed) {
       throw new ForbiddenException(
-        `Missing permission(s): ${required.join(' or ')}`,
+        `Missing permission(s): ${required.join(" or ")}`,
       );
     }
     return true;

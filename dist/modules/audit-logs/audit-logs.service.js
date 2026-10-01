@@ -34,7 +34,7 @@ let AuditLogsService = class AuditLogsService {
     async findByEntity(entity_type, entity_id) {
         return this.auditLogsRepo.find({
             where: { entity_type, entity_id },
-            order: { created_at: 'DESC' },
+            order: { created_at: "DESC" },
         });
     }
 };

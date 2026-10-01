@@ -3,16 +3,16 @@ import {
   ConflictException,
   Injectable,
   NotFoundException,
-} from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { Role } from './entities/role.entity';
-import { Permission } from './entities/permission.entity';
-import { User } from '../users/entities/user.entity';
-import { AccessSeederService } from './access.seeder.service';
-import { CreateRoleDto } from './dto/create-role.dto';
-import { UpdateRoleDto } from './dto/update-role.dto';
-import { SYSTEM_ROLE_ADMIN_KEY } from './access.types';
+} from "@nestjs/common";
+import { InjectRepository } from "@nestjs/typeorm";
+import { Repository } from "typeorm";
+import { Role } from "./entities/role.entity";
+import { Permission } from "./entities/permission.entity";
+import { User } from "../users/entities/user.entity";
+import { AccessSeederService } from "./access.seeder.service";
+import { CreateRoleDto } from "./dto/create-role.dto";
+import { UpdateRoleDto } from "./dto/update-role.dto";
+import { SYSTEM_ROLE_ADMIN_KEY } from "./access.types";
 
 @Injectable()
 export class AccessService {
@@ -29,7 +29,7 @@ export class AccessService {
   async listRoles() {
     return this.roles.find({
       relations: { permissions: true },
-      order: { name: 'ASC' },
+      order: { name: "ASC" },
     });
   }
 
@@ -82,13 +82,16 @@ export class AccessService {
     const role = await this.findRole(id);
 
     if (dto.name !== undefined) role.name = dto.name;
-    if (dto.description !== undefined) role.description = dto.description ?? null;
+    if (dto.description !== undefined)
+      role.description = dto.description ?? null;
 
     if (dto.permissionSlugs !== undefined) {
       if (role.key === SYSTEM_ROLE_ADMIN_KEY) {
         role.permissions = await this.seeder.findAllPermissions();
       } else {
-        role.permissions = await this.resolvePermissionSlugs(dto.permissionSlugs);
+        role.permissions = await this.resolvePermissionSlugs(
+          dto.permissionSlugs,
+        );
       }
     }
 
@@ -98,7 +101,7 @@ export class AccessService {
   async removeRole(id: string): Promise<void> {
     const role = await this.findRole(id);
     if (role.is_system) {
-      throw new BadRequestException('System roles cannot be deleted');
+      throw new BadRequestException("System roles cannot be deleted");
     }
     const userCount = await this.users.count({ where: { role_id: role.id } });
     if (userCount > 0) {
@@ -112,14 +115,14 @@ export class AccessService {
   private async resolvePermissionSlugs(slugs: string[]): Promise<Permission[]> {
     if (slugs.length === 0) return [];
     const found = await this.permissions
-      .createQueryBuilder('p')
-      .where('p.slug IN (:...slugs)', { slugs })
+      .createQueryBuilder("p")
+      .where("p.slug IN (:...slugs)", { slugs })
       .getMany();
     if (found.length !== slugs.length) {
       const foundSet = new Set(found.map((p) => p.slug));
       const missing = slugs.filter((s) => !foundSet.has(s));
       throw new NotFoundException(
-        `Unknown permission slug(s): ${missing.join(', ')}`,
+        `Unknown permission slug(s): ${missing.join(", ")}`,
       );
     }
     return found;

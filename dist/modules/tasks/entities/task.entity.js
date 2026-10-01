@@ -19,67 +19,67 @@ let Task = class Task {
 };
 exports.Task = Task;
 __decorate([
-    (0, typeorm_1.PrimaryGeneratedColumn)('uuid'),
+    (0, typeorm_1.PrimaryGeneratedColumn)("uuid"),
     __metadata("design:type", String)
 ], Task.prototype, "id", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'uuid' }),
+    (0, typeorm_1.Column)({ type: "uuid" }),
     __metadata("design:type", String)
 ], Task.prototype, "definition_id", void 0);
 __decorate([
-    (0, typeorm_1.ManyToOne)(() => task_definition_entity_1.TaskDefinition, (def) => def.tasks, { onDelete: 'RESTRICT' }),
-    (0, typeorm_1.JoinColumn)({ name: 'definition_id' }),
+    (0, typeorm_1.ManyToOne)(() => task_definition_entity_1.TaskDefinition, (def) => def.tasks, { onDelete: "RESTRICT" }),
+    (0, typeorm_1.JoinColumn)({ name: "definition_id" }),
     __metadata("design:type", task_definition_entity_1.TaskDefinition)
 ], Task.prototype, "definition", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'uuid' }),
+    (0, typeorm_1.Column)({ type: "uuid" }),
     __metadata("design:type", String)
 ], Task.prototype, "minister_id", void 0);
 __decorate([
-    (0, typeorm_1.ManyToOne)(() => minister_entity_1.Minister, { onDelete: 'CASCADE' }),
-    (0, typeorm_1.JoinColumn)({ name: 'minister_id' }),
+    (0, typeorm_1.ManyToOne)(() => minister_entity_1.Minister, { onDelete: "CASCADE" }),
+    (0, typeorm_1.JoinColumn)({ name: "minister_id" }),
     __metadata("design:type", minister_entity_1.Minister)
 ], Task.prototype, "minister", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'uuid', nullable: true }),
+    (0, typeorm_1.Column)({ type: "uuid", nullable: true }),
     __metadata("design:type", Object)
 ], Task.prototype, "assigned_by_user_id", void 0);
 __decorate([
-    (0, typeorm_1.ManyToOne)(() => user_entity_1.User, { nullable: true, onDelete: 'SET NULL' }),
-    (0, typeorm_1.JoinColumn)({ name: 'assigned_by_user_id' }),
+    (0, typeorm_1.ManyToOne)(() => user_entity_1.User, { nullable: true, onDelete: "SET NULL" }),
+    (0, typeorm_1.JoinColumn)({ name: "assigned_by_user_id" }),
     __metadata("design:type", Object)
 ], Task.prototype, "assigned_by", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'uuid', nullable: true }),
+    (0, typeorm_1.Column)({ type: "uuid", nullable: true }),
     __metadata("design:type", Object)
 ], Task.prototype, "target_member_id", void 0);
 __decorate([
-    (0, typeorm_1.ManyToOne)(() => member_entity_1.Member, { nullable: true, onDelete: 'SET NULL' }),
-    (0, typeorm_1.JoinColumn)({ name: 'target_member_id' }),
+    (0, typeorm_1.ManyToOne)(() => member_entity_1.Member, { nullable: true, onDelete: "SET NULL" }),
+    (0, typeorm_1.JoinColumn)({ name: "target_member_id" }),
     __metadata("design:type", Object)
 ], Task.prototype, "target_member", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'date' }),
+    (0, typeorm_1.Column)({ type: "date" }),
     __metadata("design:type", String)
 ], Task.prototype, "start_date", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'date' }),
+    (0, typeorm_1.Column)({ type: "date" }),
     __metadata("design:type", String)
 ], Task.prototype, "end_date", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'varchar', length: 32, default: 'pending' }),
+    (0, typeorm_1.Column)({ type: "varchar", length: 32, default: "pending" }),
     __metadata("design:type", String)
 ], Task.prototype, "status", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'text', nullable: true }),
+    (0, typeorm_1.Column)({ type: "text", nullable: true }),
     __metadata("design:type", Object)
 ], Task.prototype, "notes", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'simple-array', nullable: true }),
+    (0, typeorm_1.Column)({ type: "simple-array", nullable: true }),
     __metadata("design:type", Object)
 ], Task.prototype, "visitation_methods", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'timestamptz', nullable: true }),
+    (0, typeorm_1.Column)({ type: "timestamptz", nullable: true }),
     __metadata("design:type", Object)
 ], Task.prototype, "completed_at", void 0);
 __decorate([
@@ -91,5 +91,5 @@ __decorate([
     __metadata("design:type", Date)
 ], Task.prototype, "updated_at", void 0);
 exports.Task = Task = __decorate([
-    (0, typeorm_1.Entity)('tasks')
+    (0, typeorm_1.Entity)("tasks")
 ], Task);

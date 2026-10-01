@@ -17,12 +17,10 @@ const common_1 = require("@nestjs/common");
 const typeorm_1 = require("@nestjs/typeorm");
 const typeorm_2 = require("typeorm");
 const page_content_entity_1 = require("./entities/page-content.entity");
-const community_project_entity_1 = require("./entities/community-project.entity");
 const PAGE_CACHE_TTL_MS = 60000;
 let WebsiteService = class WebsiteService {
-    constructor(pageContentRepo, communityProjectRepo) {
+    constructor(pageContentRepo) {
         this.pageContentRepo = pageContentRepo;
-        this.communityProjectRepo = communityProjectRepo;
         this.pageCache = new Map();
     }
     async getPageContent(slug) {
@@ -30,7 +28,9 @@ let WebsiteService = class WebsiteService {
         if (cached && cached.expiresAt > Date.now()) {
             return cached.value;
         }
-        const page = await this.pageContentRepo.findOne({ where: { page_slug: slug } });
+        const page = await this.pageContentRepo.findOne({
+            where: { page_slug: slug },
+        });
         const value = page
             ? {
                 page_slug: page.page_slug,
@@ -38,20 +38,25 @@ let WebsiteService = class WebsiteService {
                 created_at: page.created_at,
                 updated_at: page.updated_at,
             }
-            : { page_slug: slug, content: slug === 'landing' ? {} : '' };
-        this.pageCache.set(slug, { value, expiresAt: Date.now() + PAGE_CACHE_TTL_MS });
+            : { page_slug: slug, content: slug === "landing" ? {} : "" };
+        this.pageCache.set(slug, {
+            value,
+            expiresAt: Date.now() + PAGE_CACHE_TTL_MS,
+        });
         return value;
     }
     async updatePageContent(slug, body) {
         let payload = body;
         if (body &&
-            typeof body === 'object' &&
+            typeof body === "object" &&
             !Array.isArray(body) &&
-            Object.prototype.hasOwnProperty.call(body, 'content') &&
-            Object.keys(body).every((k) => k === 'content')) {
+            Object.prototype.hasOwnProperty.call(body, "content") &&
+            Object.keys(body).every((k) => k === "content")) {
             payload = body.content;
         }
-        let page = await this.pageContentRepo.findOne({ where: { page_slug: slug } });
+        let page = await this.pageContentRepo.findOne({
+            where: { page_slug: slug },
+        });
         if (!page) {
             page = this.pageContentRepo.create({ page_slug: slug, content: payload });
         }
@@ -62,37 +67,10 @@ let WebsiteService = class WebsiteService {
         this.pageCache.delete(slug);
         return saved;
     }
-    async getProjects(status) {
-        if (status) {
-            return this.communityProjectRepo.find({ where: { status }, order: { created_at: 'DESC' } });
-        }
-        return this.communityProjectRepo.find({ order: { created_at: 'DESC' } });
-    }
-    async getProject(id) {
-        const project = await this.communityProjectRepo.findOne({ where: { id } });
-        if (!project)
-            throw new common_1.NotFoundException('Project not found');
-        return project;
-    }
-    async createProject(data) {
-        const project = this.communityProjectRepo.create(data);
-        return this.communityProjectRepo.save(project);
-    }
-    async updateProject(id, data) {
-        await this.communityProjectRepo.update(id, data);
-        return this.getProject(id);
-    }
-    async deleteProject(id) {
-        const result = await this.communityProjectRepo.delete(id);
-        if (result.affected === 0)
-            throw new common_1.NotFoundException('Project not found');
-    }
 };
 exports.WebsiteService = WebsiteService;
 exports.WebsiteService = WebsiteService = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, typeorm_1.InjectRepository)(page_content_entity_1.PageContent)),
-    __param(1, (0, typeorm_1.InjectRepository)(community_project_entity_1.CommunityProject)),
-    __metadata("design:paramtypes", [typeorm_2.Repository,
-        typeorm_2.Repository])
+    __metadata("design:paramtypes", [typeorm_2.Repository])
 ], WebsiteService);

@@ -1,4 +1,10 @@
-import { IsIn, IsNotEmpty, IsOptional, IsString, IsUUID } from 'class-validator';
+import {
+  IsIn,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  IsUUID,
+} from "class-validator";
 
 export class CreateFamilyDto {
   @IsOptional()
@@ -6,19 +12,19 @@ export class CreateFamilyDto {
   husband_id?: string;
 
   @IsOptional()
-  @IsIn(['member', 'minister'])
-  husband_type?: 'member' | 'minister';
+  @IsIn(["member", "minister"])
+  husband_type?: "member" | "minister";
 
   @IsOptional()
   @IsUUID()
   wife_id?: string;
 
   @IsOptional()
-  @IsIn(['member', 'minister'])
-  wife_type?: 'member' | 'minister';
+  @IsIn(["member", "minister"])
+  wife_type?: "member" | "minister";
 
   @IsOptional()
-  @IsIn(['registered', 'pending', 'external', 'none'])
+  @IsIn(["registered", "pending", "external", "none"])
   spouse_status?: string;
 
   @IsOptional()

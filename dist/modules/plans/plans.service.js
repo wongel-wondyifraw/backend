@@ -33,10 +33,10 @@ let PlansService = class PlansService {
             return;
         const found = await this.ministersRepository.find({
             where: { id: (0, typeorm_2.In)(ids) },
-            select: ['id'],
+            select: ["id"],
         });
         if (found.length !== ids.length) {
-            throw new common_1.BadRequestException('One or more ministers were not found');
+            throw new common_1.BadRequestException("One or more ministers were not found");
         }
     }
     async replaceMinisters(planId, ministerIds) {
@@ -51,7 +51,7 @@ let PlansService = class PlansService {
         const ministerIds = (_a = dto.minister_ids) !== null && _a !== void 0 ? _a : [];
         await this.assertMinistersExist(ministerIds);
         if (dto.start_time && dto.end_time && dto.end_time < dto.start_time) {
-            throw new common_1.BadRequestException('end_time must be after start_time');
+            throw new common_1.BadRequestException("end_time must be after start_time");
         }
         const plan = this.plansRepository.create({
             title: dto.title.trim(),
@@ -61,7 +61,7 @@ let PlansService = class PlansService {
             end_time: dto.end_time || null,
             location: ((_b = dto.location) === null || _b === void 0 ? void 0 : _b.trim()) || null,
             notes: ((_c = dto.notes) === null || _c === void 0 ? void 0 : _c.trim()) || null,
-            status: dto.status || 'planned',
+            status: dto.status || "planned",
         });
         const saved = await this.plansRepository.save(plan);
         await this.replaceMinisters(saved.id, ministerIds);
@@ -69,27 +69,27 @@ let PlansService = class PlansService {
     }
     async findAllPaginated(page = 1, limit = 20, search, filters) {
         const qb = this.plansRepository
-            .createQueryBuilder('plan')
-            .leftJoinAndSelect('plan.plan_ministers', 'pm')
-            .leftJoinAndSelect('pm.minister', 'minister');
+            .createQueryBuilder("plan")
+            .leftJoinAndSelect("plan.plan_ministers", "pm")
+            .leftJoinAndSelect("pm.minister", "minister");
         if (search === null || search === void 0 ? void 0 : search.trim()) {
             const pattern = `%${search.trim().toLowerCase()}%`;
-            qb.andWhere('(LOWER(plan.title) LIKE :pattern OR LOWER(COALESCE(plan.location, \'\')) LIKE :pattern OR LOWER(COALESCE(plan.notes, \'\')) LIKE :pattern)', { pattern });
+            qb.andWhere("(LOWER(plan.title) LIKE :pattern OR LOWER(COALESCE(plan.location, '')) LIKE :pattern OR LOWER(COALESCE(plan.notes, '')) LIKE :pattern)", { pattern });
         }
         if (filters === null || filters === void 0 ? void 0 : filters.type) {
-            qb.andWhere('plan.type = :type', { type: filters.type });
+            qb.andWhere("plan.type = :type", { type: filters.type });
         }
         if (filters === null || filters === void 0 ? void 0 : filters.status) {
-            qb.andWhere('plan.status = :status', { status: filters.status });
+            qb.andWhere("plan.status = :status", { status: filters.status });
         }
         if (filters === null || filters === void 0 ? void 0 : filters.from) {
-            qb.andWhere('plan.plan_date >= :from', { from: filters.from });
+            qb.andWhere("plan.plan_date >= :from", { from: filters.from });
         }
         if (filters === null || filters === void 0 ? void 0 : filters.to) {
-            qb.andWhere('plan.plan_date <= :to', { to: filters.to });
+            qb.andWhere("plan.plan_date <= :to", { to: filters.to });
         }
-        qb.orderBy('plan.plan_date', 'ASC')
-            .addOrderBy('plan.start_time', 'ASC', 'NULLS LAST')
+        qb.orderBy("plan.plan_date", "ASC")
+            .addOrderBy("plan.start_time", "ASC", "NULLS LAST")
             .skip((page - 1) * limit)
             .take(limit);
         const [data, total] = await qb.getManyAndCount();
@@ -107,7 +107,7 @@ let PlansService = class PlansService {
             relations: this.relations,
         });
         if (!plan)
-            throw new common_1.NotFoundException('Plan not found');
+            throw new common_1.NotFoundException("Plan not found");
         return plan;
     }
     async update(id, dto) {
@@ -132,7 +132,7 @@ let PlansService = class PlansService {
         const start = dto.start_time !== undefined ? plan.start_time : plan.start_time;
         const end = dto.end_time !== undefined ? plan.end_time : plan.end_time;
         if (start && end && end < start) {
-            throw new common_1.BadRequestException('end_time must be after start_time');
+            throw new common_1.BadRequestException("end_time must be after start_time");
         }
         await this.plansRepository.save(plan);
         if (dto.minister_ids !== undefined) {
@@ -144,7 +144,7 @@ let PlansService = class PlansService {
     async remove(id) {
         const plan = await this.plansRepository.findOne({ where: { id } });
         if (!plan)
-            throw new common_1.NotFoundException('Plan not found');
+            throw new common_1.NotFoundException("Plan not found");
         await this.plansRepository.delete(id);
     }
 };

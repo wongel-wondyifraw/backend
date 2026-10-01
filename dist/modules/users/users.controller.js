@@ -30,7 +30,7 @@ let UsersController = class UsersController {
         this.usersService = usersService;
         this.logger = logger;
         this.cloudinary = cloudinary;
-        this.logger.setContext('UsersController');
+        this.logger.setContext("UsersController");
     }
     async findAll() {
         return this.usersService.findAll();
@@ -59,7 +59,7 @@ let UsersController = class UsersController {
                 avatarUrl = processed.url;
             }
             catch (err) {
-                this.logger.error({ err }, 'Error processing avatar during creation');
+                this.logger.error({ err }, "Error processing avatar during creation");
             }
         }
         return this.usersService.create({
@@ -75,12 +75,12 @@ let UsersController = class UsersController {
     async uploadAvatar(id, file) {
         try {
             if (!file) {
-                throw new common_1.NotFoundException('File not found');
+                throw new common_1.NotFoundException("File not found");
             }
             const processed = await this.cloudinary.uploadImage(file, `cms/avatars/${id}`);
             await this.usersService.updateAvatar(id, processed.url);
             return {
-                message: 'Avatar uploaded successfully',
+                message: "Avatar uploaded successfully",
                 avatar_url: processed.url,
             };
         }
@@ -96,7 +96,7 @@ let UsersController = class UsersController {
                     }
                     : null,
                 errorMessage: err.message,
-            }, 'Failed to upload avatar');
+            }, "Failed to upload avatar");
             throw error;
         }
     }
@@ -104,21 +104,21 @@ let UsersController = class UsersController {
 exports.UsersController = UsersController;
 __decorate([
     (0, common_1.Get)(),
-    (0, permissions_decorator_1.RequiresPermissions)('users.read'),
+    (0, permissions_decorator_1.RequiresPermissions)("users.read"),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "findAll", null);
 __decorate([
-    (0, common_1.Get)('profile'),
+    (0, common_1.Get)("profile"),
     __param(0, (0, common_1.Request)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "getProfile", null);
 __decorate([
-    (0, common_1.Patch)('profile'),
-    (0, permissions_decorator_1.RequiresPermissions)('settings.update'),
+    (0, common_1.Patch)("profile"),
+    (0, permissions_decorator_1.RequiresPermissions)("settings.update"),
     __param(0, (0, common_1.Request)()),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
@@ -126,8 +126,8 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "updateProfile", null);
 __decorate([
-    (0, common_1.Patch)('change-password'),
-    (0, permissions_decorator_1.RequiresPermissions)('settings.update'),
+    (0, common_1.Patch)("change-password"),
+    (0, permissions_decorator_1.RequiresPermissions)("settings.update"),
     __param(0, (0, common_1.Request)()),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
@@ -135,17 +135,17 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "changePassword", null);
 __decorate([
-    (0, common_1.Get)(':id'),
-    (0, permissions_decorator_1.RequiresPermissions)('users.read'),
-    __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
+    (0, common_1.Get)(":id"),
+    (0, permissions_decorator_1.RequiresPermissions)("users.read"),
+    __param(0, (0, common_1.Param)("id", common_1.ParseUUIDPipe)),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "findOne", null);
 __decorate([
-    (0, common_1.Patch)(':id'),
-    (0, permissions_decorator_1.RequiresPermissions)('users.manage'),
-    __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
+    (0, common_1.Patch)(":id"),
+    (0, permissions_decorator_1.RequiresPermissions)("users.manage"),
+    __param(0, (0, common_1.Param)("id", common_1.ParseUUIDPipe)),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String, update_user_dto_1.UpdateUserDto]),
@@ -153,8 +153,8 @@ __decorate([
 ], UsersController.prototype, "update", null);
 __decorate([
     (0, common_1.Post)(),
-    (0, permissions_decorator_1.RequiresPermissions)('users.manage'),
-    (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)('avatar', {
+    (0, permissions_decorator_1.RequiresPermissions)("users.manage"),
+    (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)("avatar", {
         storage: (0, multer_config_1.createImageMemoryStorage)(),
         fileFilter: multer_config_1.imageFileFilter,
         limits: multer_config_1.imageUploadLimits,
@@ -166,29 +166,29 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "create", null);
 __decorate([
-    (0, common_1.Delete)(':id'),
-    (0, permissions_decorator_1.RequiresPermissions)('users.manage'),
-    __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
+    (0, common_1.Delete)(":id"),
+    (0, permissions_decorator_1.RequiresPermissions)("users.manage"),
+    __param(0, (0, common_1.Param)("id", common_1.ParseUUIDPipe)),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "remove", null);
 __decorate([
-    (0, common_1.Post)(':id/upload-avatar'),
-    (0, permissions_decorator_1.RequiresPermissions)('settings.update', 'users.manage'),
-    (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)('file', {
+    (0, common_1.Post)(":id/upload-avatar"),
+    (0, permissions_decorator_1.RequiresPermissions)("settings.update", "users.manage"),
+    (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)("file", {
         storage: (0, multer_config_1.createImageMemoryStorage)(),
         fileFilter: multer_config_1.imageFileFilter,
         limits: multer_config_1.imageUploadLimits,
     })),
-    __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
+    __param(0, (0, common_1.Param)("id", common_1.ParseUUIDPipe)),
     __param(1, (0, common_1.UploadedFile)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String, Object]),
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "uploadAvatar", null);
 exports.UsersController = UsersController = __decorate([
-    (0, common_1.Controller)('users'),
+    (0, common_1.Controller)("users"),
     __metadata("design:paramtypes", [users_service_1.UsersService,
         nestjs_pino_1.PinoLogger,
         cloudinary_service_1.CloudinaryService])

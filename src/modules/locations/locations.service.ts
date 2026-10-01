@@ -1,9 +1,9 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, ILike } from 'typeorm';
-import { Location } from './entities/location.entity';
-import { CreateLocationDto } from './dto/create-location.dto';
-import { UpdateLocationDto } from './dto/update-location.dto';
+import { Injectable, NotFoundException } from "@nestjs/common";
+import { InjectRepository } from "@nestjs/typeorm";
+import { Repository, ILike } from "typeorm";
+import { Location } from "./entities/location.entity";
+import { CreateLocationDto } from "./dto/create-location.dto";
+import { UpdateLocationDto } from "./dto/update-location.dto";
 
 @Injectable()
 export class LocationsService {
@@ -14,14 +14,17 @@ export class LocationsService {
 
   async findAll(status?: string): Promise<Location[]> {
     if (status) {
-      return this.locationRepo.find({ where: { status }, order: { name: 'ASC' } });
+      return this.locationRepo.find({
+        where: { status },
+        order: { name: "ASC" },
+      });
     }
-    return this.locationRepo.find({ order: { name: 'ASC' } });
+    return this.locationRepo.find({ order: { name: "ASC" } });
   }
 
   async findOne(id: string): Promise<Location> {
     const location = await this.locationRepo.findOne({ where: { id } });
-    if (!location) throw new NotFoundException('Location not found');
+    if (!location) throw new NotFoundException("Location not found");
     return location;
   }
 
@@ -46,7 +49,7 @@ export class LocationsService {
 
   async update(id: string, dto: UpdateLocationDto): Promise<Location> {
     const location = await this.findOne(id);
-    
+
     if (dto.name) {
       location.name = dto.name.trim();
     }

@@ -37,11 +37,11 @@ __decorate([
 ], MemberListQueryDto.prototype, "joined_to", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsIn)(['created_at', 'joined_date', 'visit_count']),
+    (0, class_validator_1.IsIn)(["created_at", "joined_date", "visit_count"]),
     __metadata("design:type", String)
 ], MemberListQueryDto.prototype, "sort_by", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsIn)(['ASC', 'DESC', 'asc', 'desc']),
+    (0, class_validator_1.IsIn)(["ASC", "DESC", "asc", "desc"]),
     __metadata("design:type", String)
 ], MemberListQueryDto.prototype, "sort_order", void 0);

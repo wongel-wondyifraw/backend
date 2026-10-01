@@ -36,18 +36,18 @@ __decorate([
     __metadata("design:type", String)
 ], CreateBibleStudyDto.prototype, "location", void 0);
 __decorate([
-    (0, class_validator_1.IsIn)(['book', 'study_material']),
+    (0, class_validator_1.IsIn)(["book", "study_material"]),
     __metadata("design:type", String)
 ], CreateBibleStudyDto.prototype, "content_type", void 0);
 __decorate([
-    (0, class_validator_1.ValidateIf)((o) => o.content_type === 'book'),
+    (0, class_validator_1.ValidateIf)((o) => o.content_type === "book"),
     (0, class_validator_1.IsString)(),
-    (0, class_validator_1.IsNotEmpty)({ message: 'Bible book is required when content type is Book' }),
-    (0, class_validator_1.IsIn)([...bible_books_1.BIBLE_BOOKS], { message: 'Invalid Bible book' }),
+    (0, class_validator_1.IsNotEmpty)({ message: "Bible book is required when content type is Book" }),
+    (0, class_validator_1.IsIn)([...bible_books_1.BIBLE_BOOKS], { message: "Invalid Bible book" }),
     __metadata("design:type", String)
 ], CreateBibleStudyDto.prototype, "bible_book", void 0);
 __decorate([
-    (0, class_validator_1.ValidateIf)((o) => o.content_type === 'study_material'),
+    (0, class_validator_1.ValidateIf)((o) => o.content_type === "study_material"),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
@@ -59,7 +59,7 @@ __decorate([
 ], CreateBibleStudyDto.prototype, "leader_id", void 0);
 __decorate([
     (0, class_validator_1.ValidateIf)((o) => !!o.leader_id),
-    (0, class_validator_1.IsIn)(['member', 'minister']),
+    (0, class_validator_1.IsIn)(["member", "minister"]),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", Object)
 ], CreateBibleStudyDto.prototype, "leader_type", void 0);

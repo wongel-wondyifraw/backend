@@ -26,14 +26,16 @@ let LeaderResolverService = class LeaderResolverService {
     async resolve(leaderId, leaderType) {
         if (!leaderId)
             return null;
-        if (leaderType === 'minister') {
+        if (leaderType === "minister") {
             return this.fromMinister(await this.ministersRepository.findOne({ where: { id: leaderId } }));
         }
-        if (leaderType === 'member') {
+        if (leaderType === "member") {
             return this.fromMember(await this.membersRepository.findOne({ where: { id: leaderId } }));
         }
         // Legacy rows without leader_type: try member, then minister
-        const member = await this.membersRepository.findOne({ where: { id: leaderId } });
+        const member = await this.membersRepository.findOne({
+            where: { id: leaderId },
+        });
         if (member)
             return this.fromMember(member);
         return this.fromMinister(await this.ministersRepository.findOne({ where: { id: leaderId } }));
@@ -47,18 +49,30 @@ let LeaderResolverService = class LeaderResolverService {
         for (const item of items) {
             if (!item.leader_id)
                 continue;
-            if (item.leader_type === 'minister')
+            if (item.leader_type === "minister")
                 ministerIds.add(item.leader_id);
-            else if (item.leader_type === 'member')
+            else if (item.leader_type === "member")
                 memberIds.add(item.leader_id);
             else
                 unknownIds.add(item.leader_id);
         }
         const [members, ministers, unknownMembers, unknownMinisters] = await Promise.all([
-            memberIds.size ? this.membersRepository.find({ where: { id: (0, typeorm_2.In)([...memberIds]) } }) : Promise.resolve([]),
-            ministerIds.size ? this.ministersRepository.find({ where: { id: (0, typeorm_2.In)([...ministerIds]) } }) : Promise.resolve([]),
-            unknownIds.size ? this.membersRepository.find({ where: { id: (0, typeorm_2.In)([...unknownIds]) } }) : Promise.resolve([]),
-            unknownIds.size ? this.ministersRepository.find({ where: { id: (0, typeorm_2.In)([...unknownIds]) } }) : Promise.resolve([]),
+            memberIds.size
+                ? this.membersRepository.find({ where: { id: (0, typeorm_2.In)([...memberIds]) } })
+                : Promise.resolve([]),
+            ministerIds.size
+                ? this.ministersRepository.find({
+                    where: { id: (0, typeorm_2.In)([...ministerIds]) },
+                })
+                : Promise.resolve([]),
+            unknownIds.size
+                ? this.membersRepository.find({ where: { id: (0, typeorm_2.In)([...unknownIds]) } })
+                : Promise.resolve([]),
+            unknownIds.size
+                ? this.ministersRepository.find({
+                    where: { id: (0, typeorm_2.In)([...unknownIds]) },
+                })
+                : Promise.resolve([]),
         ]);
         const byKey = new Map();
         for (const m of members)
@@ -75,7 +89,7 @@ let LeaderResolverService = class LeaderResolverService {
             var _a, _b;
             if (!item.leader_id)
                 return { ...item, leader: null };
-            if (item.leader_type === 'minister' || item.leader_type === 'member') {
+            if (item.leader_type === "minister" || item.leader_type === "member") {
                 return {
                     ...item,
                     leader: (_a = byKey.get(`${item.leader_type}:${item.leader_id}`)) !== null && _a !== void 0 ? _a : null,
@@ -97,7 +111,7 @@ let LeaderResolverService = class LeaderResolverService {
             last_name: member.last_name,
             email: member.email,
             phone: member.phone,
-            type: 'member',
+            type: "member",
         };
     }
     fromMinister(minister) {
@@ -111,7 +125,7 @@ let LeaderResolverService = class LeaderResolverService {
             email: minister.email,
             phone: minister.phone,
             title: minister.title,
-            type: 'minister',
+            type: "minister",
         };
     }
 };

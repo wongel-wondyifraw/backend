@@ -12,14 +12,17 @@ const typeorm_1 = require("@nestjs/typeorm");
 const website_service_1 = require("./website.service");
 const website_controller_1 = require("./website.controller");
 const page_content_entity_1 = require("./entities/page-content.entity");
-const community_project_entity_1 = require("./entities/community-project.entity");
+const contact_request_entity_1 = require("./entities/contact-request.entity");
+const contact_requests_service_1 = require("./contact-requests.service");
+const contact_requests_controller_1 = require("./contact-requests.controller");
 let WebsiteModule = class WebsiteModule {
 };
 exports.WebsiteModule = WebsiteModule;
 exports.WebsiteModule = WebsiteModule = __decorate([
     (0, common_1.Module)({
-        imports: [typeorm_1.TypeOrmModule.forFeature([page_content_entity_1.PageContent, community_project_entity_1.CommunityProject])],
-        controllers: [website_controller_1.WebsiteController],
-        providers: [website_service_1.WebsiteService],
+        imports: [typeorm_1.TypeOrmModule.forFeature([page_content_entity_1.PageContent, contact_request_entity_1.ContactRequest])],
+        controllers: [website_controller_1.WebsiteController, contact_requests_controller_1.ContactRequestsController],
+        providers: [website_service_1.WebsiteService, contact_requests_service_1.ContactRequestsService],
+        exports: [website_service_1.WebsiteService, contact_requests_service_1.ContactRequestsService],
     })
 ], WebsiteModule);

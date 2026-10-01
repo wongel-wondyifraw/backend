@@ -6,12 +6,12 @@ import {
   UpdateDateColumn,
   ManyToOne,
   JoinColumn,
-} from 'typeorm';
-import { Role } from '../../access/entities/role.entity';
+} from "typeorm";
+import { Role } from "../../access/entities/role.entity";
 
-@Entity('users')
+@Entity("users")
 export class User {
-  @PrimaryGeneratedColumn('uuid')
+  @PrimaryGeneratedColumn("uuid")
   id: string;
 
   @Column()
@@ -37,7 +37,7 @@ export class User {
   role_id: string;
 
   @ManyToOne(() => Role, (role) => role.users, { eager: false })
-  @JoinColumn({ name: 'role_id' })
+  @JoinColumn({ name: "role_id" })
   roleEntity: Role;
 
   @Column({ unique: true })

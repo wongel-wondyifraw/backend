@@ -1,5 +1,5 @@
-import { IsDateString, IsIn, IsOptional, IsString } from 'class-validator';
-import { PaginationQueryDto } from '../../../common/dto/pagination-query.dto';
+import { IsDateString, IsIn, IsOptional, IsString } from "class-validator";
+import { PaginationQueryDto } from "../../../common/dto/pagination-query.dto";
 
 export class MemberListQueryDto extends PaginationQueryDto {
   @IsOptional()
@@ -19,10 +19,10 @@ export class MemberListQueryDto extends PaginationQueryDto {
   joined_to?: string;
 
   @IsOptional()
-  @IsIn(['created_at', 'joined_date', 'visit_count'])
-  sort_by?: 'created_at' | 'joined_date' | 'visit_count';
+  @IsIn(["created_at", "joined_date", "visit_count"])
+  sort_by?: "created_at" | "joined_date" | "visit_count";
 
   @IsOptional()
-  @IsIn(['ASC', 'DESC', 'asc', 'desc'])
-  sort_order?: 'ASC' | 'DESC' | 'asc' | 'desc';
+  @IsIn(["ASC", "DESC", "asc", "desc"])
+  sort_order?: "ASC" | "DESC" | "asc" | "desc";
 }

@@ -1,4 +1,4 @@
-export const SYSTEM_ROLE_ADMIN_KEY = 'admin';
+export const SYSTEM_ROLE_ADMIN_KEY = "admin";
 
 export interface PermissionCatalogEntry {
   slug: string;
@@ -11,5 +11,5 @@ export interface SystemRoleDefinition {
   key: string;
   name: string;
   description?: string;
-  permissionSlugs: string[] | '*';
+  permissionSlugs: string[] | "*";
 }

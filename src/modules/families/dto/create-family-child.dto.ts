@@ -1,5 +1,12 @@
-import { Type } from 'class-transformer';
-import { IsInt, IsNotEmpty, IsString, Max, Min, IsOptional } from 'class-validator';
+import { Type } from "class-transformer";
+import {
+  IsInt,
+  IsNotEmpty,
+  IsString,
+  Max,
+  Min,
+  IsOptional,
+} from "class-validator";
 
 export class CreateFamilyChildDto {
   @IsString()

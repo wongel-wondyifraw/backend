@@ -15,11 +15,11 @@ let PageContent = class PageContent {
 };
 exports.PageContent = PageContent;
 __decorate([
-    (0, typeorm_1.PrimaryColumn)('varchar'),
+    (0, typeorm_1.PrimaryColumn)("varchar"),
     __metadata("design:type", String)
 ], PageContent.prototype, "page_slug", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'jsonb' }),
+    (0, typeorm_1.Column)({ type: "jsonb" }),
     __metadata("design:type", Object)
 ], PageContent.prototype, "content", void 0);
 __decorate([
@@ -31,5 +31,5 @@ __decorate([
     __metadata("design:type", Date)
 ], PageContent.prototype, "updated_at", void 0);
 exports.PageContent = PageContent = __decorate([
-    (0, typeorm_1.Entity)('page_contents')
+    (0, typeorm_1.Entity)("page_contents")
 ], PageContent);

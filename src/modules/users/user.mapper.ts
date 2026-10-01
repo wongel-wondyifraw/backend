@@ -1,5 +1,5 @@
-import { User } from './entities/user.entity';
-import { Permission } from '../access/entities/permission.entity';
+import { User } from "./entities/user.entity";
+import { Permission } from "../access/entities/permission.entity";
 
 export interface UserPermissionDto {
   slug: string;
@@ -22,8 +22,11 @@ export interface UserResponseDto {
   permissions?: UserPermissionDto[];
 }
 
-export function toUserResponse(user: User, includePermissions = false): UserResponseDto {
-  const roleKey = user.roleEntity?.key ?? user.role ?? 'staff';
+export function toUserResponse(
+  user: User,
+  includePermissions = false,
+): UserResponseDto {
+  const roleKey = user.roleEntity?.key ?? user.role ?? "staff";
   const dto: UserResponseDto = {
     id: user.id,
     email: user.email,
