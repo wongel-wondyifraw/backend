@@ -1,11 +1,11 @@
 import {
   Entity,
   Column,
-  PrimaryGeneratedColumn,
   CreateDateColumn,
   UpdateDateColumn,
   Index,
 } from "typeorm";
+import { UuidPrimary } from "../../../common/entities/uuid-primary";
 
 export type ContactRequestCategory =
   "prayer" | "cell" | "baptism" | "counseling" | "chms" | "general";
@@ -15,9 +15,7 @@ export type ContactRequestStatus =
 
 @Entity("contact_requests")
 @Index(["status", "created_at"])
-export class ContactRequest {
-  @PrimaryGeneratedColumn("uuid")
-  id: string;
+export class ContactRequest extends UuidPrimary {
 
   @Column({ type: "varchar", length: 200 })
   full_name: string;

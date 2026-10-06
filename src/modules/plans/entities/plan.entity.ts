@@ -1,11 +1,11 @@
 import {
   Entity,
   Column,
-  PrimaryGeneratedColumn,
   CreateDateColumn,
   UpdateDateColumn,
   OneToMany,
 } from "typeorm";
+import { UuidPrimary } from "../../../common/entities/uuid-primary";
 import { PlanMinister } from "./plan-minister.entity";
 
 export type PlanType =
@@ -19,9 +19,7 @@ export type PlanType =
 export type PlanStatus = "planned" | "completed" | "cancelled";
 
 @Entity("plans")
-export class Plan {
-  @PrimaryGeneratedColumn("uuid")
-  id: string;
+export class Plan extends UuidPrimary {
 
   @Column()
   title: string;

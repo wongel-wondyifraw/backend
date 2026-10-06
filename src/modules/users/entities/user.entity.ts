@@ -1,18 +1,16 @@
 import {
   Entity,
   Column,
-  PrimaryGeneratedColumn,
   CreateDateColumn,
   UpdateDateColumn,
   ManyToOne,
   JoinColumn,
 } from "typeorm";
+import { UuidPrimary } from "../../../common/entities/uuid-primary";
 import { Role } from "../../access/entities/role.entity";
 
 @Entity("users")
-export class User {
-  @PrimaryGeneratedColumn("uuid")
-  id: string;
+export class User extends UuidPrimary {
 
   @Column()
   first_name: string;

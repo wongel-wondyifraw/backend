@@ -1,18 +1,16 @@
 import {
   Entity,
   Column,
-  PrimaryGeneratedColumn,
   CreateDateColumn,
   UpdateDateColumn,
   ManyToOne,
   JoinColumn,
 } from "typeorm";
+import { UuidPrimary } from "../../../common/entities/uuid-primary";
 import { Family } from "./family.entity";
 
 @Entity("family_children")
-export class FamilyChild {
-  @PrimaryGeneratedColumn("uuid")
-  id: string;
+export class FamilyChild extends UuidPrimary {
 
   @Column({ type: "uuid" })
   family_id: string;

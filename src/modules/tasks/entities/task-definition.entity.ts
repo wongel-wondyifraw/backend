@@ -1,17 +1,15 @@
 import {
   Entity,
   Column,
-  PrimaryGeneratedColumn,
   CreateDateColumn,
   UpdateDateColumn,
   OneToMany,
 } from "typeorm";
+import { UuidPrimary } from "../../../common/entities/uuid-primary";
 import { Task } from "./task.entity";
 
 @Entity("task_definitions")
-export class TaskDefinition {
-  @PrimaryGeneratedColumn("uuid")
-  id: string;
+export class TaskDefinition extends UuidPrimary {
 
   @Column()
   name: string;

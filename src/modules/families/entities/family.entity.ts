@@ -1,20 +1,18 @@
 import {
   Entity,
   Column,
-  PrimaryGeneratedColumn,
   CreateDateColumn,
   UpdateDateColumn,
   OneToMany,
   Index,
 } from "typeorm";
+import { UuidPrimary } from "../../../common/entities/uuid-primary";
 import { FamilyChild } from "./family-child.entity";
 
 @Entity("families")
 @Index("IDX_families_husband_id", ["husband_id"])
 @Index("IDX_families_wife_id", ["wife_id"])
-export class Family {
-  @PrimaryGeneratedColumn("uuid")
-  id: string;
+export class Family extends UuidPrimary {
 
   @Column({ type: "varchar", nullable: true })
   name: string | null;

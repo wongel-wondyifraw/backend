@@ -1,12 +1,12 @@
 import {
   Entity,
   Column,
-  PrimaryGeneratedColumn,
   CreateDateColumn,
   UpdateDateColumn,
   OneToMany,
   Index,
 } from "typeorm";
+import { UuidPrimary } from "../../../common/entities/uuid-primary";
 import { HomeGroupMember } from "./home-group-member.entity";
 import type {
   LeaderSummary,
@@ -15,9 +15,7 @@ import type {
 
 @Entity("home_groups")
 @Index("IDX_home_groups_leader_id", ["leader_id"])
-export class HomeGroup {
-  @PrimaryGeneratedColumn("uuid")
-  id: string;
+export class HomeGroup extends UuidPrimary {
 
   @Column()
   name: string;

@@ -4,15 +4,13 @@ import {
   Entity,
   Index,
   ManyToMany,
-  PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from "typeorm";
+import { UuidPrimary } from "../../../common/entities/uuid-primary";
 import { Role } from "./role.entity";
 
 @Entity("permissions")
-export class Permission {
-  @PrimaryGeneratedColumn("uuid")
-  id: string;
+export class Permission extends UuidPrimary {
 
   @Index({ unique: true })
   @Column({ type: "varchar", length: 128 })

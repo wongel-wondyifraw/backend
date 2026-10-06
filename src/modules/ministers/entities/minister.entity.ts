@@ -1,18 +1,16 @@
 import {
   Entity,
   Column,
-  PrimaryGeneratedColumn,
   CreateDateColumn,
   UpdateDateColumn,
   OneToOne,
   JoinColumn,
 } from "typeorm";
+import { UuidPrimary } from "../../../common/entities/uuid-primary";
 import { User } from "../../users/entities/user.entity";
 
 @Entity("ministers")
-export class Minister {
-  @PrimaryGeneratedColumn("uuid")
-  id: string;
+export class Minister extends UuidPrimary {
 
   @Column({ unique: true })
   user_id: string;

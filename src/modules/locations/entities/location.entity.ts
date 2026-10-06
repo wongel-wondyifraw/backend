@@ -1,15 +1,8 @@
-import {
-  Entity,
-  Column,
-  PrimaryGeneratedColumn,
-  CreateDateColumn,
-  UpdateDateColumn,
-} from "typeorm";
+import { Entity, Column, CreateDateColumn, UpdateDateColumn } from "typeorm";
+import { UuidPrimary } from "../../../common/entities/uuid-primary";
 
 @Entity("locations")
-export class Location {
-  @PrimaryGeneratedColumn("uuid")
-  id: string;
+export class Location extends UuidPrimary {
 
   @Column({ unique: true })
   name: string;

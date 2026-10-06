@@ -1,12 +1,12 @@
 import {
   Entity,
   Column,
-  PrimaryGeneratedColumn,
   CreateDateColumn,
   UpdateDateColumn,
   ManyToOne,
   JoinColumn,
 } from "typeorm";
+import { UuidPrimary } from "../../../common/entities/uuid-primary";
 import { TaskDefinition } from "./task-definition.entity";
 import { Minister } from "../../ministers/entities/minister.entity";
 import { Member } from "../../members/entities/member.entity";
@@ -15,9 +15,7 @@ import { User } from "../../users/entities/user.entity";
 export type TaskStatus = "pending" | "completed" | "cancelled";
 
 @Entity("tasks")
-export class Task {
-  @PrimaryGeneratedColumn("uuid")
-  id: string;
+export class Task extends UuidPrimary {
 
   @Column({ type: "uuid" })
   definition_id: string;

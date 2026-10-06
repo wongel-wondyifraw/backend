@@ -1,12 +1,12 @@
 import {
   Entity,
   Column,
-  PrimaryGeneratedColumn,
   CreateDateColumn,
   UpdateDateColumn,
   OneToMany,
   Index,
 } from "typeorm";
+import { UuidPrimary } from "../../../common/entities/uuid-primary";
 import { BibleStudyMember } from "./bible-study-member.entity";
 import type {
   LeaderSummary,
@@ -17,9 +17,7 @@ export type BibleStudyContentType = "book" | "study_material";
 
 @Entity("bible_studies")
 @Index("IDX_bible_studies_leader_id", ["leader_id"])
-export class BibleStudy {
-  @PrimaryGeneratedColumn("uuid")
-  id: string;
+export class BibleStudy extends UuidPrimary {
 
   @Column()
   name: string;

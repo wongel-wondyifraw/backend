@@ -3,15 +3,13 @@ import {
   CreateDateColumn,
   Entity,
   Index,
-  PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from "typeorm";
+import { UuidPrimary } from "../../../common/entities/uuid-primary";
 
 @Entity("notification_preferences")
 @Index(["user_id"], { unique: true })
-export class NotificationPreference {
-  @PrimaryGeneratedColumn("uuid")
-  id: string;
+export class NotificationPreference extends UuidPrimary {
 
   @Column({ type: "uuid" })
   user_id: string;

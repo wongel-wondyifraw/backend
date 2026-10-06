@@ -154,8 +154,8 @@ and proxy or alias `/uploads` to Node (or the folder). Sharp is optional; if it
 is missing, originals are kept.
 
 Production: set `DB_SYNCHRONIZE=false` after the schema exists and use
-`npm run migration:run`. TypeORM uses `pgcrypto` (`gen_random_uuid()`) for UUID
-columns.
+`npm run migration:run`. UUID primary keys are generated in Node (`randomUUID()`),
+so Postgres does not need `uuid-ossp` or `uuid_generate_v4()`.
 
 ## Testing
 

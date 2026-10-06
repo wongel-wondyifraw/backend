@@ -1,10 +1,5 @@
-import {
-  Column,
-  CreateDateColumn,
-  Entity,
-  Index,
-  PrimaryGeneratedColumn,
-} from "typeorm";
+import { Column, CreateDateColumn, Entity, Index } from "typeorm";
+import { UuidPrimary } from "../../../common/entities/uuid-primary";
 
 export enum NotificationKind {
   MEMBER = "member",
@@ -25,9 +20,7 @@ export enum NotificationSeverity {
 @Index(["user_id", "created_at"])
 @Index(["user_id", "read_at"])
 @Index(["user_id", "dismissed_at"])
-export class Notification {
-  @PrimaryGeneratedColumn("uuid")
-  id: string;
+export class Notification extends UuidPrimary {
 
   @Column({ type: "uuid" })
   user_id: string;

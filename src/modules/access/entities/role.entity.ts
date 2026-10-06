@@ -6,16 +6,14 @@ import {
   JoinTable,
   ManyToMany,
   OneToMany,
-  PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from "typeorm";
+import { UuidPrimary } from "../../../common/entities/uuid-primary";
 import { Permission } from "./permission.entity";
 import { User } from "../../users/entities/user.entity";
 
 @Entity("roles")
-export class Role {
-  @PrimaryGeneratedColumn("uuid")
-  id: string;
+export class Role extends UuidPrimary {
 
   @Index({ unique: true })
   @Column({ type: "varchar", length: 64 })

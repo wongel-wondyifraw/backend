@@ -1,14 +1,8 @@
-import {
-  Entity,
-  Column,
-  PrimaryGeneratedColumn,
-  CreateDateColumn,
-} from "typeorm";
+import { Entity, Column, CreateDateColumn } from "typeorm";
+import { UuidPrimary } from "../../../common/entities/uuid-primary";
 
 @Entity("audit_logs")
-export class AuditLog {
-  @PrimaryGeneratedColumn("uuid")
-  id: string;
+export class AuditLog extends UuidPrimary {
 
   @Column()
   action: string;

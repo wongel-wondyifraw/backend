@@ -1,12 +1,12 @@
 import {
   Entity,
   Column,
-  PrimaryGeneratedColumn,
   CreateDateColumn,
   UpdateDateColumn,
   OneToMany,
   Index,
 } from "typeorm";
+import { UuidPrimary } from "../../../common/entities/uuid-primary";
 import { MinistryMember } from "./ministry-member.entity";
 import type {
   LeaderSummary,
@@ -15,9 +15,7 @@ import type {
 
 @Entity("ministries")
 @Index("IDX_ministries_leader_id", ["leader_id"])
-export class Ministry {
-  @PrimaryGeneratedColumn("uuid")
-  id: string;
+export class Ministry extends UuidPrimary {
 
   @Column()
   name: string;
