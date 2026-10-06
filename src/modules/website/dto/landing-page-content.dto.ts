@@ -1,5 +1,6 @@
 import { Type } from "class-transformer";
 import {
+  Allow,
   IsArray,
   IsBoolean,
   IsOptional,
@@ -77,8 +78,9 @@ export class LandingSectionDto {
   @IsString()
   verse_text?: string;
 
+  /** Keep card arrays as stored JSON (title, text, icon, image_url, …). */
   @IsOptional()
-  @IsArray()
+  @Allow()
   items?: unknown[];
 
   @IsOptional()
@@ -143,6 +145,11 @@ export class LandingPageContentDto {
   @IsOptional()
   @ValidateNested()
   @Type(() => LandingSectionDto)
+  stats?: LandingSectionDto;
+
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => LandingSectionDto)
   about?: LandingSectionDto;
 
   @IsOptional()
@@ -178,6 +185,7 @@ export class LandingPageContentDto {
 
 export const LANDING_CONTENT_KEYS = [
   "hero",
+  "stats",
   "about",
   "vision",
   "ministries",

@@ -4,7 +4,7 @@ import {
   ConflictException,
   ForbiddenException,
 } from "@nestjs/common";
-import { JwtService } from "@nestjs/jwt";
+import { JwtService, type JwtSignOptions } from "@nestjs/jwt";
 import { ConfigService } from "@nestjs/config";
 import * as bcrypt from "bcrypt";
 import { UsersService } from "../users/users.service";
@@ -84,9 +84,14 @@ export class AuthService {
     }
 
     const payload = { sub: user.id, email: user.email };
+    const sessionTtl = (this.config.get<string>("JWT_EXPIRES_IN") ??
+      "24h") as JwtSignOptions["expiresIn"];
+    const expiresIn: JwtSignOptions["expiresIn"] = loginDto.remember_me
+      ? "30d"
+      : sessionTtl;
 
     return {
-      access_token: await this.jwtService.signAsync(payload),
+      access_token: await this.jwtService.signAsync(payload, { expiresIn }),
       user: toUserResponse(user, true),
     };
   }

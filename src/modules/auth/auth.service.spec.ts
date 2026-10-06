@@ -142,12 +142,37 @@ describe("AuthService", () => {
         password: "secret1",
       });
 
-      expect(jwtService.signAsync).toHaveBeenCalledWith({
-        sub: "user-1",
-        email: "test@example.com",
-      });
+      expect(jwtService.signAsync).toHaveBeenCalledWith(
+        {
+          sub: "user-1",
+          email: "test@example.com",
+        },
+        { expiresIn: "24h" },
+      );
       expect(result.access_token).toBe("signed-token");
       expect(result.user.email).toBe("test@example.com");
+    });
+
+    it("issues a 30-day token when remember_me is true", async () => {
+      usersService.findOneByEmail.mockResolvedValue({
+        ...mockUser,
+        roleEntity: { key: "staff", permissions: [] },
+      } as never);
+      (bcrypt.compare as jest.Mock).mockResolvedValue(true);
+
+      await service.login({
+        email: "test@example.com",
+        password: "secret1",
+        remember_me: true,
+      });
+
+      expect(jwtService.signAsync).toHaveBeenCalledWith(
+        {
+          sub: "user-1",
+          email: "test@example.com",
+        },
+        { expiresIn: "30d" },
+      );
     });
   });
 });

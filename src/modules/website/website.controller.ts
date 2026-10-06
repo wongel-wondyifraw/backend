@@ -106,6 +106,26 @@ export class WebsiteController {
       );
     }
 
-    return instanceToPlain(dto) as Record<string, unknown>;
+    const plain = instanceToPlain(dto) as Record<string, unknown>;
+    // class-transformer whitelist can drop nested card fields (text, icon).
+    // Restore item arrays from the request so vision/program cards persist.
+    for (const key of LANDING_CONTENT_KEYS) {
+      const incoming = raw[key];
+      const outgoing = plain[key];
+      if (
+        incoming &&
+        typeof incoming === "object" &&
+        !Array.isArray(incoming) &&
+        Array.isArray((incoming as { items?: unknown }).items) &&
+        outgoing &&
+        typeof outgoing === "object" &&
+        !Array.isArray(outgoing)
+      ) {
+        (outgoing as { items: unknown }).items = (
+          incoming as { items: unknown }
+        ).items;
+      }
+    }
+    return plain;
   }
 }
