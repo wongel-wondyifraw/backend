@@ -22,18 +22,18 @@ import { ChangePasswordDto } from "./dto/change-password.dto";
 import { UpdateUserDto } from "./dto/update-user.dto";
 import { RequiresPermissions } from "../../common/decorators/permissions.decorator";
 import {
-  createImageMemoryStorage,
+  createAvatarImageDiskStorage,
   imageFileFilter,
   imageUploadLimits,
 } from "../../common/config/multer.config";
-import { CloudinaryService } from "../uploads/cloudinary.service";
+import { LocalStorageService } from "../uploads/local-storage.service";
 
 @Controller("users")
 export class UsersController {
   constructor(
     private readonly usersService: UsersService,
     private readonly logger: PinoLogger,
-    private readonly cloudinary: CloudinaryService,
+    private readonly storage: LocalStorageService,
   ) {
     this.logger.setContext("UsersController");
   }
@@ -86,7 +86,7 @@ export class UsersController {
   @RequiresPermissions("users.manage")
   @UseInterceptors(
     FileInterceptor("avatar", {
-      storage: createImageMemoryStorage(),
+      storage: createAvatarImageDiskStorage(),
       fileFilter: imageFileFilter,
       limits: imageUploadLimits,
     }),
@@ -100,10 +100,7 @@ export class UsersController {
 
     if (file) {
       try {
-        const processed = await this.cloudinary.uploadImage(
-          file,
-          `cms/avatars/${userId}`,
-        );
+        const processed = await this.storage.uploadImage(file);
         avatarUrl = processed.url;
       } catch (err) {
         this.logger.error({ err }, "Error processing avatar during creation");
@@ -128,7 +125,7 @@ export class UsersController {
   @RequiresPermissions("settings.update", "users.manage")
   @UseInterceptors(
     FileInterceptor("file", {
-      storage: createImageMemoryStorage(),
+      storage: createAvatarImageDiskStorage(),
       fileFilter: imageFileFilter,
       limits: imageUploadLimits,
     }),
@@ -141,10 +138,7 @@ export class UsersController {
       if (!file) {
         throw new NotFoundException("File not found");
       }
-      const processed = await this.cloudinary.uploadImage(
-        file,
-        `cms/avatars/${id}`,
-      );
+      const processed = await this.storage.uploadImage(file);
       await this.usersService.updateAvatar(id, processed.url);
       return {
         message: "Avatar uploaded successfully",

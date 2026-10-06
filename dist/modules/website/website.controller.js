@@ -20,6 +20,22 @@ const website_service_1 = require("./website.service");
 const public_decorator_1 = require("../../common/decorators/public.decorator");
 const permissions_decorator_1 = require("../../common/decorators/permissions.decorator");
 const landing_page_content_dto_1 = require("./dto/landing-page-content.dto");
+function flattenValidationErrors(errors, prefix = "") {
+    var _a;
+    const out = [];
+    for (const error of errors) {
+        const path = prefix ? `${prefix}.${error.property}` : error.property;
+        if (error.constraints) {
+            for (const message of Object.values(error.constraints)) {
+                out.push(`${path}: ${message}`);
+            }
+        }
+        if ((_a = error.children) === null || _a === void 0 ? void 0 : _a.length) {
+            out.push(...flattenValidationErrors(error.children, path));
+        }
+    }
+    return out;
+}
 let WebsiteController = class WebsiteController {
     constructor(websiteService) {
         this.websiteService = websiteService;
@@ -37,31 +53,40 @@ let WebsiteController = class WebsiteController {
             payload = body.content;
         }
         if (slug === "landing") {
-            await this.assertLandingContent(payload);
+            payload = await this.sanitizeLandingContent(payload);
         }
         return this.websiteService.updatePageContent(slug, payload);
     }
-    async assertLandingContent(payload) {
+    /**
+     * Landing CMS JSON often carries legacy nested keys from older seeds.
+     * Whitelist/strip unknowns instead of failing with a opaque 400, and
+     * persist the cleaned shape so the next save stays clean.
+     */
+    async sanitizeLandingContent(payload) {
         if (!payload || typeof payload !== "object" || Array.isArray(payload)) {
             throw new common_1.BadRequestException("Landing content must be an object");
         }
-        const keys = Object.keys(payload);
-        const allowed = new Set(landing_page_content_dto_1.LANDING_CONTENT_KEYS);
-        const unknown = keys.filter((k) => !allowed.has(k));
-        if (unknown.length) {
-            throw new common_1.BadRequestException(`Unknown landing content keys: ${unknown.join(", ")}`);
+        const raw = payload;
+        const pruned = {};
+        for (const key of landing_page_content_dto_1.LANDING_CONTENT_KEYS) {
+            if (Object.prototype.hasOwnProperty.call(raw, key)) {
+                pruned[key] = raw[key];
+            }
         }
-        const dto = (0, class_transformer_1.plainToInstance)(landing_page_content_dto_1.LandingPageContentDto, payload, {
+        const dto = (0, class_transformer_1.plainToInstance)(landing_page_content_dto_1.LandingPageContentDto, pruned, {
             enableImplicitConversion: true,
+            exposeUnsetFields: false,
         });
+        // Strip unknown nested fields; only fail on real type errors.
         const errors = await (0, class_validator_1.validate)(dto, {
             whitelist: true,
-            forbidNonWhitelisted: true,
+            forbidNonWhitelisted: false,
         });
         if (errors.length) {
-            const messages = errors.flatMap((e) => Object.values(e.constraints || {}));
+            const messages = flattenValidationErrors(errors);
             throw new common_1.BadRequestException(messages.length ? messages.join("; ") : "Invalid landing content");
         }
+        return (0, class_transformer_1.instanceToPlain)(dto);
     }
 };
 exports.WebsiteController = WebsiteController;

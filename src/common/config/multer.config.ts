@@ -1,7 +1,7 @@
 import { join, extname } from "path";
 import * as fs from "fs";
 import { randomUUID } from "crypto";
-import { diskStorage, memoryStorage } from "multer";
+import { diskStorage } from "multer";
 
 export const IMAGE_UPLOAD_MAX_BYTES = 5 * 1024 * 1024;
 
@@ -14,8 +14,13 @@ const ALLOWED_MIME_TYPES = new Set([
 
 const ALLOWED_EXTENSION = /\.(jpe?g|png|gif|webp)$/i;
 
+export function getUploadsRoot(): string {
+  const fromEnv = process.env.UPLOADS_DIR?.trim();
+  return fromEnv || join(process.cwd(), "uploads");
+}
+
 export function getImagesUploadDir(): string {
-  const dir = join(process.cwd(), "uploads", "images");
+  const dir = join(getUploadsRoot(), "images");
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir, { recursive: true });
   }
@@ -57,20 +62,16 @@ export function createImageDiskStorage(
   });
 }
 
-/** Prefer memory storage so files can go straight to Cloudinary without disk I/O. */
-export function createImageMemoryStorage() {
-  return memoryStorage();
+export function createDefaultImageDiskStorage() {
+  return createImageDiskStorage((_req, file, cb) => {
+    cb(null, uploadImageFilename(file.originalname));
+  });
 }
 
-export function createDocumentMemoryStorage() {
-  return memoryStorage();
-}
-
-export function avatarFilenameForUserId(
-  userId: string,
-  originalname: string,
-): string {
-  return `${userId}${extname(originalname)}`;
+export function createAvatarImageDiskStorage() {
+  return createImageDiskStorage((_req, file, cb) => {
+    cb(null, `avatar-${randomUUID()}${extname(file.originalname)}`);
+  });
 }
 
 export function uploadImageFilename(originalname: string): string {
@@ -94,7 +95,7 @@ const ALLOWED_DOCUMENT_MIME_TYPES = new Set([
 const ALLOWED_DOCUMENT_EXTENSION = /\.(pdf|docx?|txt|jpe?g|png|mp4|webm|mov)$/i;
 
 export function getDocumentsUploadDir(): string {
-  const dir = join(process.cwd(), "uploads", "documents");
+  const dir = join(getUploadsRoot(), "documents");
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir, { recursive: true });
   }
@@ -141,6 +142,17 @@ export function createDocumentDiskStorage(
   });
 }
 
+export function createDefaultDocumentDiskStorage() {
+  return createDocumentDiskStorage((_req, file, cb) => {
+    cb(null, uploadDocumentFilename(file.originalname));
+  });
+}
+
 export function uploadDocumentFilename(originalname: string): string {
   return `doc-${randomUUID()}${extname(originalname)}`;
+}
+
+export function ensureUploadDirs(): void {
+  getImagesUploadDir();
+  getDocumentsUploadDir();
 }

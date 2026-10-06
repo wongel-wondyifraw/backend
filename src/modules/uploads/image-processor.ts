@@ -1,3 +1,4 @@
+import { Logger } from "@nestjs/common";
 import { join } from "path";
 import * as fs from "fs";
 import { getImagesUploadDir } from "../../common/config/multer.config";
@@ -5,9 +6,11 @@ import type { ImageVariants, ProcessedImage } from "./image-types";
 
 export type { ImageVariants, ProcessedImage } from "./image-types";
 
+const logger = new Logger("ImageProcessor");
+
 /**
- * Local-only image optimize (Sharp). Loaded dynamically so Cloudinary
- * deployments never pull Sharp into memory at boot.
+ * Resize and convert uploaded images to WebP. Sharp is optional; if it
+ * fails or is not installed, the original file is kept.
  */
 export async function processUploadedImage(
   filePath: string,
@@ -70,7 +73,10 @@ export async function processUploadedImage(
       height: meta.height,
       variants,
     };
-  } catch {
+  } catch (err) {
+    logger.warn(
+      `Sharp processing failed for ${filename}; keeping original. ${err}`,
+    );
     return {
       url: `uploads/images/${filename}`,
       variants: {},

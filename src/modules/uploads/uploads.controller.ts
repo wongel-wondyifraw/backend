@@ -9,18 +9,18 @@ import { FileInterceptor } from "@nestjs/platform-express";
 import { Throttle } from "@nestjs/throttler";
 import { RequiresPermissions } from "../../common/decorators/permissions.decorator";
 import {
-  createDocumentMemoryStorage,
-  createImageMemoryStorage,
+  createDefaultDocumentDiskStorage,
+  createDefaultImageDiskStorage,
   documentFileFilter,
   documentUploadLimits,
   imageFileFilter,
   imageUploadLimits,
 } from "../../common/config/multer.config";
-import { CloudinaryService } from "./cloudinary.service";
+import { LocalStorageService } from "./local-storage.service";
 
 @Controller("uploads")
 export class UploadsController {
-  constructor(private readonly cloudinary: CloudinaryService) {}
+  constructor(private readonly storage: LocalStorageService) {}
 
   @Post("image")
   @Throttle({ default: { limit: 10, ttl: 60_000 } })
@@ -32,7 +32,7 @@ export class UploadsController {
   )
   @UseInterceptors(
     FileInterceptor("file", {
-      storage: createImageMemoryStorage(),
+      storage: createDefaultImageDiskStorage(),
       fileFilter: imageFileFilter,
       limits: imageUploadLimits,
     }),
@@ -42,7 +42,7 @@ export class UploadsController {
       throw new BadRequestException("File not found");
     }
 
-    const processed = await this.cloudinary.uploadImage(file, "cms/images");
+    const processed = await this.storage.uploadImage(file);
 
     return {
       message: "File uploaded successfully",
@@ -63,7 +63,7 @@ export class UploadsController {
   )
   @UseInterceptors(
     FileInterceptor("file", {
-      storage: createDocumentMemoryStorage(),
+      storage: createDefaultDocumentDiskStorage(),
       fileFilter: documentFileFilter,
       limits: documentUploadLimits,
     }),
@@ -73,10 +73,7 @@ export class UploadsController {
       throw new BadRequestException("File not found");
     }
 
-    const uploaded = await this.cloudinary.uploadDocument(
-      file,
-      "cms/documents",
-    );
+    const uploaded = this.storage.uploadDocument(file);
 
     return {
       message: "Document uploaded successfully",

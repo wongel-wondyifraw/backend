@@ -3,12 +3,15 @@ import { NestFactory } from "@nestjs/core";
 import { VersioningType, ValidationPipe } from "@nestjs/common";
 import { NestExpressApplication } from "@nestjs/platform-express";
 import { Logger } from "nestjs-pino";
-import { join } from "path";
 import helmet from "helmet";
 import { ConfigService } from "@nestjs/config";
 import { SwaggerModule, DocumentBuilder } from "@nestjs/swagger";
 import { AppModule } from "./app.module";
 import { HttpExceptionFilter } from "./common/filters/http-exception.filter";
+import {
+  ensureUploadDirs,
+  getUploadsRoot,
+} from "./common/config/multer.config";
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
@@ -26,6 +29,19 @@ async function bootstrap() {
     .map((value) => value.trim())
     .filter(Boolean);
   const allowedOrigins = new Set([frontendUrl, ...frontendUrls]);
+
+  const isAllowedOrigin = (origin: string): boolean => {
+    if (allowedOrigins.has(origin)) return true;
+    const isDevLocalhost =
+      process.env.NODE_ENV !== "production" &&
+      /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin);
+    try {
+      if (/\.vercel\.app$/.test(new URL(origin).hostname)) return true;
+    } catch {
+      /* keep false */
+    }
+    return isDevLocalhost;
+  };
 
   // 1. Logging: Use Pino instead of default console
   const logger = app.get(Logger);
@@ -49,17 +65,7 @@ async function bootstrap() {
         return;
       }
 
-      const isDevLocalhost =
-        process.env.NODE_ENV !== "production" &&
-        /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin);
-      let isVercelPreview = false;
-      try {
-        isVercelPreview = /\.vercel\.app$/.test(new URL(origin).hostname);
-      } catch {
-        /* keep false */
-      }
-
-      if (isDevLocalhost || isVercelPreview || allowedOrigins.has(origin)) {
+      if (isAllowedOrigin(origin)) {
         callback(null, true);
         return;
       }
@@ -69,12 +75,19 @@ async function bootstrap() {
     credentials: true,
   });
 
-  // 3. Static Assets: Serve from project root (use process.cwd() for reliable pathing)
-  app.useStaticAssets(join(process.cwd(), "uploads"), {
+  // 3. Static Assets: local uploads/ (override with UPLOADS_DIR)
+  ensureUploadDirs();
+  app.useStaticAssets(getUploadsRoot(), {
     prefix: "/uploads",
     setHeaders: (res) => {
       res.set("Cross-Origin-Resource-Policy", "cross-origin");
-      res.set("Access-Control-Allow-Origin", frontendUrl);
+      res.set("Cache-Control", "public, max-age=31536000, immutable");
+      const origin = res.req?.headers?.origin;
+      if (typeof origin === "string" && isAllowedOrigin(origin)) {
+        res.set("Access-Control-Allow-Origin", origin);
+      } else {
+        res.set("Access-Control-Allow-Origin", frontendUrl);
+      }
     },
   });
 

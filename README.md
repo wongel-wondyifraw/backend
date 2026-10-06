@@ -143,15 +143,19 @@ System roles are seeded on startup:
 - CORS restricted to configured frontend URL
 - Avatar uploads limited to JPEG/PNG/GIF/WebP (max 5 MB)
 
-## Media storage (Cloudinary)
+## Media storage (local disk)
 
-- `CLOUD_STORAGE=false` (default) — files go under `uploads/` and are processed with Sharp.
-- `CLOUD_STORAGE=true` — uploads go to Cloudinary; the `secure_url` is stored in the DB.
-  Also set `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, and `CLOUDINARY_API_SECRET`.
+Images land in `uploads/images/` and documents in `uploads/documents/` under the
+backend working directory (or `UPLOADS_DIR` if set). The API serves them at
+`/uploads/...`. Stored DB paths look like `uploads/images/upload-<uuid>.webp`.
 
-**Render / 512MB hosts:** set `CLOUD_STORAGE=true` and all three `CLOUDINARY_*` vars.
-Sharp is optional and only loaded for local storage — leaving `CLOUD_STORAGE=false` on
-Render will OOM. Also set `DB_SYNCHRONIZE=false` in production.
+On cPanel, create those directories, set `UPLOADS_DIR` if `cwd` is unreliable,
+and proxy or alias `/uploads` to Node (or the folder). Sharp is optional; if it
+is missing, originals are kept.
+
+Production: set `DB_SYNCHRONIZE=false` after the schema exists and use
+`npm run migration:run`. TypeORM uses `pgcrypto` (`gen_random_uuid()`) for UUID
+columns.
 
 ## Testing
 
