@@ -41,7 +41,6 @@ exports.default = new typeorm_1.DataSource({
             database: process.env.DB_NAME || "Shepherd_one",
         }),
     ssl: sslEnabled ? { rejectUnauthorized: false } : false,
-    uuidExtension: "uuid-ossp",
     entities: [
         user_entity_1.User,
         member_entity_1.Member,

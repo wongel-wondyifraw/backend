@@ -124,7 +124,6 @@ exports.AppModule = AppModule = __decorate([
                                 database: config.get("DB_NAME"),
                             }),
                         ssl: sslEnabled ? { rejectUnauthorized: false } : false,
-                        uuidExtension: "uuid-ossp",
                         autoLoadEntities: true,
                         synchronize: config.get("DB_SYNCHRONIZE") === "true",
                     };

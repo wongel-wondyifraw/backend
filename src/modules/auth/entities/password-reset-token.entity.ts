@@ -1,6 +1,5 @@
 import {
   Entity,
-  PrimaryGeneratedColumn,
   Column,
   CreateDateColumn,
   ManyToOne,
@@ -8,11 +7,10 @@ import {
   Index,
 } from "typeorm";
 import { User } from "../../users/entities/user.entity";
+import { UuidPrimary } from "../../../common/entities/uuid-primary";
 
 @Entity("password_reset_tokens")
-export class PasswordResetToken {
-  @PrimaryGeneratedColumn("uuid")
-  id: string;
+export class PasswordResetToken extends UuidPrimary {
 
   @Index()
   @Column()

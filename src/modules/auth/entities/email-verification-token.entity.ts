@@ -1,6 +1,5 @@
 import {
   Entity,
-  PrimaryGeneratedColumn,
   Column,
   CreateDateColumn,
   ManyToOne,
@@ -8,11 +7,10 @@ import {
   Index,
 } from "typeorm";
 import { User } from "../../users/entities/user.entity";
+import { UuidPrimary } from "../../../common/entities/uuid-primary";
 
 @Entity("email_verification_tokens")
-export class EmailVerificationToken {
-  @PrimaryGeneratedColumn("uuid")
-  id: string;
+export class EmailVerificationToken extends UuidPrimary {
 
   @Index()
   @Column()
