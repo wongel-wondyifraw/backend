@@ -42,7 +42,7 @@ export default new DataSource({
         database: process.env.DB_NAME || "Shepherd_one",
       }),
   ssl: sslEnabled ? { rejectUnauthorized: false } : false,
-  uuidExtension: "pgcrypto",
+  uuidExtension: "uuid-ossp",
   entities: [
     User,
     Member,
