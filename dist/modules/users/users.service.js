@@ -408,11 +408,11 @@ let UsersService = class UsersService {
         const tokenPlain = (0, crypto_1.randomBytes)(32).toString("hex");
         const tokenHash = await bcrypt.hash(tokenPlain, 10);
         const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days
-        await this.passwordResetTokenRepository.save({
+        await this.passwordResetTokenRepository.save(this.passwordResetTokenRepository.create({
             user_id: user.id,
             token_hash: tokenHash,
             expires_at: expiresAt,
-        });
+        }));
         await this.auditLogsService.logAction("user.invited", "user", id, actingUser.id || null, {});
         console.log(`[DEV] Invite link: http://localhost:3000/accept-invite?token=${tokenPlain}&email=${encodeURIComponent(user.email)}`);
         return { message: "Invitation sent successfully" };

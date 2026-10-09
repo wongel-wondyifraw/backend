@@ -113,11 +113,11 @@ let AuthService = class AuthService {
         const tokenPlain = crypto.randomBytes(32).toString("hex");
         const tokenHash = await bcrypt.hash(tokenPlain, 10);
         const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
-        await this.emailVerificationTokenRepository.save({
+        await this.emailVerificationTokenRepository.save(this.emailVerificationTokenRepository.create({
             user_id: userId,
             token_hash: tokenHash,
             expires_at: expiresAt,
-        });
+        }));
         // TODO: Send real email
         console.log(`[DEV] Email verification link: http://localhost:3000/verify-email?token=${tokenPlain}&email=${encodeURIComponent(email)}`);
     }
@@ -178,11 +178,11 @@ let AuthService = class AuthService {
         else {
             refreshTokenExpiresAt.setDate(refreshTokenExpiresAt.getDate() + 7);
         }
-        await this.refreshTokenRepository.save({
+        await this.refreshTokenRepository.save(this.refreshTokenRepository.create({
             user_id: user.id,
             token_hash: refreshTokenHash,
             expires_at: refreshTokenExpiresAt,
-        });
+        }));
         return {
             access_token: accessToken,
             refresh_token: refreshTokenPlain,
@@ -372,11 +372,11 @@ let AuthService = class AuthService {
         const tokenPlain = crypto.randomBytes(32).toString("hex");
         const tokenHash = await bcrypt.hash(tokenPlain, 10);
         const expiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
-        await this.passwordResetTokenRepository.save({
+        await this.passwordResetTokenRepository.save(this.passwordResetTokenRepository.create({
             user_id: user.id,
             token_hash: tokenHash,
             expires_at: expiresAt,
-        });
+        }));
         await this.auditLogsService.logAction("user.password_reset_requested", "user", user.id, user.id);
         // TODO: Send email with tokenPlain
         // For now, we will just print it to the console in development

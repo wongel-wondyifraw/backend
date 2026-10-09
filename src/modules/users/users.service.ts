@@ -610,11 +610,13 @@ export class UsersService {
     const tokenHash = await bcrypt.hash(tokenPlain, 10);
     const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days
 
-    await this.passwordResetTokenRepository.save({
-      user_id: user.id,
-      token_hash: tokenHash,
-      expires_at: expiresAt,
-    });
+    await this.passwordResetTokenRepository.save(
+      this.passwordResetTokenRepository.create({
+        user_id: user.id,
+        token_hash: tokenHash,
+        expires_at: expiresAt,
+      })
+    );
 
     await this.auditLogsService.logAction(
       "user.invited",

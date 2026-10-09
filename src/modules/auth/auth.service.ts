@@ -92,11 +92,13 @@ export class AuthService {
     const tokenHash = await bcrypt.hash(tokenPlain, 10);
     const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
 
-    await this.emailVerificationTokenRepository.save({
-      user_id: userId,
-      token_hash: tokenHash,
-      expires_at: expiresAt,
-    });
+    await this.emailVerificationTokenRepository.save(
+      this.emailVerificationTokenRepository.create({
+        user_id: userId,
+        token_hash: tokenHash,
+        expires_at: expiresAt,
+      })
+    );
 
     // TODO: Send real email
     console.log(
@@ -182,11 +184,13 @@ export class AuthService {
       refreshTokenExpiresAt.setDate(refreshTokenExpiresAt.getDate() + 7);
     }
 
-    await this.refreshTokenRepository.save({
-      user_id: user.id,
-      token_hash: refreshTokenHash,
-      expires_at: refreshTokenExpiresAt,
-    });
+    await this.refreshTokenRepository.save(
+      this.refreshTokenRepository.create({
+        user_id: user.id,
+        token_hash: refreshTokenHash,
+        expires_at: refreshTokenExpiresAt,
+      })
+    );
 
     return {
       access_token: accessToken,
@@ -470,11 +474,13 @@ export class AuthService {
     const tokenHash = await bcrypt.hash(tokenPlain, 10);
     const expiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
 
-    await this.passwordResetTokenRepository.save({
-      user_id: user.id,
-      token_hash: tokenHash,
-      expires_at: expiresAt,
-    });
+    await this.passwordResetTokenRepository.save(
+      this.passwordResetTokenRepository.create({
+        user_id: user.id,
+        token_hash: tokenHash,
+        expires_at: expiresAt,
+      })
+    );
 
     await this.auditLogsService.logAction(
       "user.password_reset_requested",
