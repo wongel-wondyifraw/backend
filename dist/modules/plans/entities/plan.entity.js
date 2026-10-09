@@ -11,14 +11,11 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Plan = void 0;
 const typeorm_1 = require("typeorm");
+const uuid_primary_1 = require("../../../common/entities/uuid-primary");
 const plan_minister_entity_1 = require("./plan-minister.entity");
-let Plan = class Plan {
+let Plan = class Plan extends uuid_primary_1.UuidPrimary {
 };
 exports.Plan = Plan;
-__decorate([
-    (0, typeorm_1.PrimaryGeneratedColumn)("uuid"),
-    __metadata("design:type", String)
-], Plan.prototype, "id", void 0);
 __decorate([
     (0, typeorm_1.Column)(),
     __metadata("design:type", String)

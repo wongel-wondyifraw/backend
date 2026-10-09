@@ -47,7 +47,9 @@ let HttpExceptionFilter = class HttpExceptionFilter {
             (typeof request.headers["x-request-id"] === "string"
                 ? request.headers["x-request-id"]
                 : "unknown");
-        const errorCode = typeof exceptionResponse === "object" ? exceptionResponse.code : undefined;
+        const errorCode = typeof exceptionResponse === "object"
+            ? exceptionResponse.code
+            : undefined;
         const errorDetails = {
             method: request.method,
             url: request.url,

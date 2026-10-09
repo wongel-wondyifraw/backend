@@ -10,7 +10,6 @@ import { Task } from "./task.entity";
 
 @Entity("task_definitions")
 export class TaskDefinition extends UuidPrimary {
-
   @Column()
   name: string;
 

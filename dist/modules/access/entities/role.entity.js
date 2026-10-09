@@ -11,15 +11,12 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Role = void 0;
 const typeorm_1 = require("typeorm");
+const uuid_primary_1 = require("../../../common/entities/uuid-primary");
 const permission_entity_1 = require("./permission.entity");
 const user_entity_1 = require("../../users/entities/user.entity");
-let Role = class Role {
+let Role = class Role extends uuid_primary_1.UuidPrimary {
 };
 exports.Role = Role;
-__decorate([
-    (0, typeorm_1.PrimaryGeneratedColumn)("uuid"),
-    __metadata("design:type", String)
-], Role.prototype, "id", void 0);
 __decorate([
     (0, typeorm_1.Index)({ unique: true }),
     (0, typeorm_1.Column)({ type: "varchar", length: 64 }),

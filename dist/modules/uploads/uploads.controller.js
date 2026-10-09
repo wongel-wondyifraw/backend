@@ -18,16 +18,16 @@ const platform_express_1 = require("@nestjs/platform-express");
 const throttler_1 = require("@nestjs/throttler");
 const permissions_decorator_1 = require("../../common/decorators/permissions.decorator");
 const multer_config_1 = require("../../common/config/multer.config");
-const cloudinary_service_1 = require("./cloudinary.service");
+const local_storage_service_1 = require("./local-storage.service");
 let UploadsController = class UploadsController {
-    constructor(cloudinary) {
-        this.cloudinary = cloudinary;
+    constructor(storage) {
+        this.storage = storage;
     }
     async uploadImage(file) {
         if (!file) {
             throw new common_1.BadRequestException("File not found");
         }
-        const processed = await this.cloudinary.uploadImage(file, "cms/images");
+        const processed = await this.storage.uploadImage(file);
         return {
             message: "File uploaded successfully",
             url: processed.url,
@@ -40,7 +40,7 @@ let UploadsController = class UploadsController {
         if (!file) {
             throw new common_1.BadRequestException("File not found");
         }
-        const uploaded = await this.cloudinary.uploadDocument(file, "cms/documents");
+        const uploaded = this.storage.uploadDocument(file);
         return {
             message: "Document uploaded successfully",
             url: uploaded.url,
@@ -54,7 +54,7 @@ __decorate([
     (0, throttler_1.Throttle)({ default: { limit: 10, ttl: 60000 } }),
     (0, permissions_decorator_1.RequiresPermissions)("uploads.create", "website.manage", "members.update", "members.create"),
     (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)("file", {
-        storage: (0, multer_config_1.createImageMemoryStorage)(),
+        storage: (0, multer_config_1.createDefaultImageDiskStorage)(),
         fileFilter: multer_config_1.imageFileFilter,
         limits: multer_config_1.imageUploadLimits,
     })),
@@ -68,7 +68,7 @@ __decorate([
     (0, throttler_1.Throttle)({ default: { limit: 10, ttl: 60000 } }),
     (0, permissions_decorator_1.RequiresPermissions)("uploads.create", "website.manage", "members.update", "members.create"),
     (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)("file", {
-        storage: (0, multer_config_1.createDocumentMemoryStorage)(),
+        storage: (0, multer_config_1.createDefaultDocumentDiskStorage)(),
         fileFilter: multer_config_1.documentFileFilter,
         limits: multer_config_1.documentUploadLimits,
     })),
@@ -79,5 +79,5 @@ __decorate([
 ], UploadsController.prototype, "uploadDocument", null);
 exports.UploadsController = UploadsController = __decorate([
     (0, common_1.Controller)("uploads"),
-    __metadata("design:paramtypes", [cloudinary_service_1.CloudinaryService])
+    __metadata("design:paramtypes", [local_storage_service_1.LocalStorageService])
 ], UploadsController);

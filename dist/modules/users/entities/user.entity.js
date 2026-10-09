@@ -11,14 +11,11 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.User = void 0;
 const typeorm_1 = require("typeorm");
+const uuid_primary_1 = require("../../../common/entities/uuid-primary");
 const role_entity_1 = require("../../access/entities/role.entity");
-let User = class User {
+let User = class User extends uuid_primary_1.UuidPrimary {
 };
 exports.User = User;
-__decorate([
-    (0, typeorm_1.PrimaryGeneratedColumn)("uuid"),
-    __metadata("design:type", String)
-], User.prototype, "id", void 0);
 __decorate([
     (0, typeorm_1.Column)(),
     __metadata("design:type", String)
@@ -65,6 +62,38 @@ __decorate([
     __metadata("design:type", Boolean)
 ], User.prototype, "is_active", void 0);
 __decorate([
+    (0, typeorm_1.Column)({ type: "int", default: 0 }),
+    __metadata("design:type", Number)
+], User.prototype, "failed_login_attempts", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: "timestamptz", nullable: true }),
+    __metadata("design:type", Object)
+], User.prototype, "locked_until", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: "timestamptz", nullable: true }),
+    __metadata("design:type", Object)
+], User.prototype, "last_login_at", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: "timestamptz", nullable: true }),
+    __metadata("design:type", Object)
+], User.prototype, "email_verified_at", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: "timestamptz", nullable: true }),
+    __metadata("design:type", Object)
+], User.prototype, "password_changed_at", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: "varchar", default: "admin" }),
+    __metadata("design:type", String)
+], User.prototype, "created_via", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: "varchar", select: false, nullable: true }),
+    __metadata("design:type", Object)
+], User.prototype, "mfa_secret", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ default: false }),
+    __metadata("design:type", Boolean)
+], User.prototype, "mfa_enabled", void 0);
+__decorate([
     (0, typeorm_1.CreateDateColumn)(),
     __metadata("design:type", Date)
 ], User.prototype, "created_at", void 0);
@@ -72,6 +101,10 @@ __decorate([
     (0, typeorm_1.UpdateDateColumn)(),
     __metadata("design:type", Date)
 ], User.prototype, "updated_at", void 0);
+__decorate([
+    (0, typeorm_1.DeleteDateColumn)(),
+    __metadata("design:type", Object)
+], User.prototype, "deleted_at", void 0);
 exports.User = User = __decorate([
     (0, typeorm_1.Entity)("users")
 ], User);

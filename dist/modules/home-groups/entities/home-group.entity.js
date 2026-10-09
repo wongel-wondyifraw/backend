@@ -11,14 +11,11 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.HomeGroup = void 0;
 const typeorm_1 = require("typeorm");
+const uuid_primary_1 = require("../../../common/entities/uuid-primary");
 const home_group_member_entity_1 = require("./home-group-member.entity");
-let HomeGroup = class HomeGroup {
+let HomeGroup = class HomeGroup extends uuid_primary_1.UuidPrimary {
 };
 exports.HomeGroup = HomeGroup;
-__decorate([
-    (0, typeorm_1.PrimaryGeneratedColumn)("uuid"),
-    __metadata("design:type", String)
-], HomeGroup.prototype, "id", void 0);
 __decorate([
     (0, typeorm_1.Column)(),
     __metadata("design:type", String)

@@ -20,7 +20,6 @@ export type PlanStatus = "planned" | "completed" | "cancelled";
 
 @Entity("plans")
 export class Plan extends UuidPrimary {
-
   @Column()
   title: string;
 

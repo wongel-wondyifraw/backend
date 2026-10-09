@@ -64,7 +64,9 @@ export class HttpExceptionFilter implements ExceptionFilter {
         ? request.headers["x-request-id"]
         : "unknown");
     const errorCode =
-      typeof exceptionResponse === "object" ? exceptionResponse.code : undefined;
+      typeof exceptionResponse === "object"
+        ? exceptionResponse.code
+        : undefined;
 
     const errorDetails: Record<string, unknown> = {
       method: request.method,

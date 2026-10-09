@@ -11,14 +11,11 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.FamilyChild = void 0;
 const typeorm_1 = require("typeorm");
+const uuid_primary_1 = require("../../../common/entities/uuid-primary");
 const family_entity_1 = require("./family.entity");
-let FamilyChild = class FamilyChild {
+let FamilyChild = class FamilyChild extends uuid_primary_1.UuidPrimary {
 };
 exports.FamilyChild = FamilyChild;
-__decorate([
-    (0, typeorm_1.PrimaryGeneratedColumn)("uuid"),
-    __metadata("design:type", String)
-], FamilyChild.prototype, "id", void 0);
 __decorate([
     (0, typeorm_1.Column)({ type: "uuid" }),
     __metadata("design:type", String)

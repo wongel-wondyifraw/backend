@@ -12,6 +12,7 @@ import { Minister } from "./entities/minister.entity";
 import { CreateMinisterDto } from "./dto/create-minister.dto";
 import { UpdateMinisterDto } from "./dto/update-minister.dto";
 import { UsersService } from "../users/users.service";
+import { User } from "../users/entities/user.entity";
 import { PaginatedResult } from "../../common/interfaces/paginated-result.interface";
 import { NOTIFICATION_EVENT } from "../notifications/notification-events";
 
@@ -33,7 +34,10 @@ export class MinistersService {
     return Array.from(bytes, (b) => chars[b % chars.length]).join("");
   }
 
-  async create(dto: CreateMinisterDto): Promise<MinisterCreateResult> {
+  async create(
+    dto: CreateMinisterDto,
+    actingUser?: Partial<User>,
+  ): Promise<MinisterCreateResult> {
     const email = dto.email.trim().toLowerCase();
     if (!email) {
       throw new BadRequestException(
@@ -56,17 +60,21 @@ export class MinistersService {
     const temporaryPassword = this.generatePassword();
     const isActive = (dto.status ?? "active").toLowerCase() !== "inactive";
 
-    const user = await this.usersService.create({
-      first_name: dto.first_name,
-      middle_name: dto.middle_name ?? "",
-      last_name: dto.last_name,
-      email,
-      password: temporaryPassword,
-      role: "minister",
-      title: dto.title ?? undefined,
-      avatar_url: dto.image_url ?? undefined,
-      is_active: isActive,
-    });
+    const user = await this.usersService.create(
+      {
+        first_name: dto.first_name,
+        middle_name: dto.middle_name ?? "",
+        last_name: dto.last_name,
+        email,
+        password: temporaryPassword,
+        role: "minister",
+        title: dto.title ?? undefined,
+        avatar_url: dto.image_url ?? undefined,
+        is_active: isActive,
+        created_via: "minister_module",
+      },
+      actingUser,
+    );
 
     const minister = this.ministersRepository.create({
       ...dto,
@@ -137,7 +145,11 @@ export class MinistersService {
     return minister;
   }
 
-  async update(id: string, dto: UpdateMinisterDto): Promise<Minister> {
+  async update(
+    id: string,
+    dto: UpdateMinisterDto,
+    actingUser?: Partial<User>,
+  ): Promise<Minister> {
     const minister = await this.findOne(id);
     await this.ministersRepository.update(id, dto);
 
@@ -152,7 +164,7 @@ export class MinistersService {
     }
 
     if (Object.keys(userPatch).length > 0) {
-      await this.usersService.update(minister.user_id, userPatch);
+      await this.usersService.update(minister.user_id, userPatch, actingUser);
     }
 
     const updated = await this.findOne(id);
@@ -193,14 +205,14 @@ export class MinistersService {
     return { temporary_password: temporaryPassword };
   }
 
-  async remove(id: string): Promise<void> {
+  async remove(id: string, actingUser?: Partial<User>): Promise<void> {
     const minister = await this.findOne(id);
     const userId = minister.user_id;
     const name = `${minister.first_name} ${minister.last_name}`.trim();
 
     await this.ministersRepository.delete(id);
     try {
-      await this.usersService.remove(userId);
+      await this.usersService.remove(userId, actingUser);
     } catch {
       // User may already be gone
     }

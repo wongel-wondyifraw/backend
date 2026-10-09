@@ -12,6 +12,7 @@ const typeorm_1 = require("@nestjs/typeorm");
 const users_service_1 = require("./users.service");
 const users_controller_1 = require("./users.controller");
 const user_entity_1 = require("./entities/user.entity");
+const password_reset_token_entity_1 = require("../auth/entities/password-reset-token.entity");
 const access_module_1 = require("../access/access.module");
 const uploads_module_1 = require("../uploads/uploads.module");
 let UsersModule = class UsersModule {
@@ -20,7 +21,7 @@ exports.UsersModule = UsersModule;
 exports.UsersModule = UsersModule = __decorate([
     (0, common_1.Module)({
         imports: [
-            typeorm_1.TypeOrmModule.forFeature([user_entity_1.User]),
+            typeorm_1.TypeOrmModule.forFeature([user_entity_1.User, password_reset_token_entity_1.PasswordResetToken]),
             (0, common_1.forwardRef)(() => access_module_1.AccessModule),
             uploads_module_1.UploadsModule,
         ],

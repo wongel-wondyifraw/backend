@@ -17,7 +17,6 @@ import { Location } from "../../locations/entities/location.entity";
 @Index("IDX_members_joined_date", ["joined_date"])
 @Index("IDX_members_email", ["email"])
 export class Member extends UuidPrimary {
-
   @Column()
   first_name: string;
 

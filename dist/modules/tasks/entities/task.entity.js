@@ -11,17 +11,14 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Task = void 0;
 const typeorm_1 = require("typeorm");
+const uuid_primary_1 = require("../../../common/entities/uuid-primary");
 const task_definition_entity_1 = require("./task-definition.entity");
 const minister_entity_1 = require("../../ministers/entities/minister.entity");
 const member_entity_1 = require("../../members/entities/member.entity");
 const user_entity_1 = require("../../users/entities/user.entity");
-let Task = class Task {
+let Task = class Task extends uuid_primary_1.UuidPrimary {
 };
 exports.Task = Task;
-__decorate([
-    (0, typeorm_1.PrimaryGeneratedColumn)("uuid"),
-    __metadata("design:type", String)
-], Task.prototype, "id", void 0);
 __decorate([
     (0, typeorm_1.Column)({ type: "uuid" }),
     __metadata("design:type", String)

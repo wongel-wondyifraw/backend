@@ -16,7 +16,6 @@ export type TaskStatus = "pending" | "completed" | "cancelled";
 
 @Entity("tasks")
 export class Task extends UuidPrimary {
-
   @Column({ type: "uuid" })
   definition_id: string;
 

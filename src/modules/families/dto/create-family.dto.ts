@@ -1,9 +1,4 @@
-import {
-  IsIn,
-  IsOptional,
-  IsString,
-  IsUUID,
-} from "class-validator";
+import { IsIn, IsOptional, IsString, IsUUID } from "class-validator";
 
 export class CreateFamilyDto {
   @IsOptional()

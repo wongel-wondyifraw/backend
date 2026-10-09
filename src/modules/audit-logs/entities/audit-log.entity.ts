@@ -3,7 +3,6 @@ import { UuidPrimary } from "../../../common/entities/uuid-primary";
 
 @Entity("audit_logs")
 export class AuditLog extends UuidPrimary {
-
   @Column()
   action: string;
 

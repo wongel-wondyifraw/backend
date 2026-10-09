@@ -124,6 +124,7 @@ exports.AppModule = AppModule = __decorate([
                                 database: config.get("DB_NAME"),
                             }),
                         ssl: sslEnabled ? { rejectUnauthorized: false } : false,
+                        uuidExtension: "pgcrypto",
                         autoLoadEntities: true,
                         synchronize: config.get("DB_SYNCHRONIZE") === "true",
                     };

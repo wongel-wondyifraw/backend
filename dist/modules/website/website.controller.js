@@ -86,7 +86,23 @@ let WebsiteController = class WebsiteController {
             const messages = flattenValidationErrors(errors);
             throw new common_1.BadRequestException(messages.length ? messages.join("; ") : "Invalid landing content");
         }
-        return (0, class_transformer_1.instanceToPlain)(dto);
+        const plain = (0, class_transformer_1.instanceToPlain)(dto);
+        // class-transformer whitelist can drop nested card fields (text, icon).
+        // Restore item arrays from the request so vision/program cards persist.
+        for (const key of landing_page_content_dto_1.LANDING_CONTENT_KEYS) {
+            const incoming = raw[key];
+            const outgoing = plain[key];
+            if (incoming &&
+                typeof incoming === "object" &&
+                !Array.isArray(incoming) &&
+                Array.isArray(incoming.items) &&
+                outgoing &&
+                typeof outgoing === "object" &&
+                !Array.isArray(outgoing)) {
+                outgoing.items = incoming.items;
+            }
+        }
+        return plain;
     }
 };
 exports.WebsiteController = WebsiteController;

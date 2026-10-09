@@ -75,7 +75,7 @@ export async function processUploadedImage(
     };
   } catch (err) {
     logger.warn(
-      `Sharp processing failed for ${filename}; keeping original. ${err}`,
+      `Sharp processing failed for ${filename}; keeping original. ${String(err)}`,
     );
     return {
       url: `uploads/images/${filename}`,

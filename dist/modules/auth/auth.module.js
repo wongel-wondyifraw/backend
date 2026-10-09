@@ -15,6 +15,10 @@ const jwt_config_1 = require("../../common/config/jwt.config");
 const auth_service_1 = require("./auth.service");
 const auth_controller_1 = require("./auth.controller");
 const users_module_1 = require("../users/users.module");
+const typeorm_1 = require("@nestjs/typeorm");
+const refresh_token_entity_1 = require("./entities/refresh-token.entity");
+const password_reset_token_entity_1 = require("./entities/password-reset-token.entity");
+const email_verification_token_entity_1 = require("./entities/email-verification-token.entity");
 const jwt_strategy_1 = require("./strategies/jwt.strategy");
 let AuthModule = class AuthModule {
 };
@@ -24,6 +28,11 @@ exports.AuthModule = AuthModule = __decorate([
         imports: [
             users_module_1.UsersModule,
             passport_1.PassportModule,
+            typeorm_1.TypeOrmModule.forFeature([
+                refresh_token_entity_1.RefreshToken,
+                password_reset_token_entity_1.PasswordResetToken,
+                email_verification_token_entity_1.EmailVerificationToken,
+            ]),
             jwt_1.JwtModule.registerAsync({
                 imports: [config_1.ConfigModule],
                 inject: [config_1.ConfigService],
