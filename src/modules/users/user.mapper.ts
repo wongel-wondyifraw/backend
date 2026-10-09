@@ -20,6 +20,12 @@ export interface UserResponseDto {
   created_at?: Date;
   updated_at?: Date;
   permissions?: UserPermissionDto[];
+  failed_login_attempts?: number;
+  locked_until?: Date | null;
+  last_login_at?: Date | null;
+  created_via?: string;
+  email_verified_at?: Date | null;
+  mfa_enabled?: boolean;
 }
 
 export function toUserResponse(
@@ -39,6 +45,12 @@ export function toUserResponse(
     is_active: user.is_active,
     created_at: user.created_at,
     updated_at: user.updated_at,
+    failed_login_attempts: user.failed_login_attempts,
+    locked_until: user.locked_until,
+    last_login_at: user.last_login_at,
+    created_via: user.created_via,
+    email_verified_at: user.email_verified_at,
+    mfa_enabled: user.mfa_enabled,
   };
 
   if (includePermissions && user.roleEntity?.permissions) {

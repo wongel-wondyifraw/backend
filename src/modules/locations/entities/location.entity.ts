@@ -3,7 +3,6 @@ import { UuidPrimary } from "../../../common/entities/uuid-primary";
 
 @Entity("locations")
 export class Location extends UuidPrimary {
-
   @Column({ unique: true })
   name: string;
 

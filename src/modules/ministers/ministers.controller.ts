@@ -8,6 +8,7 @@ import {
   Param,
   ParseUUIDPipe,
   Query,
+  Request,
 } from "@nestjs/common";
 import { MinistersService } from "./ministers.service";
 import { CreateMinisterDto } from "./dto/create-minister.dto";
@@ -21,8 +22,11 @@ export class MinistersController {
 
   @Post()
   @RequiresPermissions("ministers.create")
-  create(@Body() dto: CreateMinisterDto) {
-    return this.ministersService.create(dto);
+  create(
+    @Request() req: { user: { id: string; role: string } },
+    @Body() dto: CreateMinisterDto,
+  ) {
+    return this.ministersService.create(dto, req.user);
   }
 
   @Get()
@@ -44,10 +48,11 @@ export class MinistersController {
   @Patch(":id")
   @RequiresPermissions("ministers.update")
   update(
+    @Request() req: { user: { id: string; role: string } },
     @Param("id", ParseUUIDPipe) id: string,
     @Body() dto: UpdateMinisterDto,
   ) {
-    return this.ministersService.update(id, dto);
+    return this.ministersService.update(id, dto, req.user);
   }
 
   @Post(":id/reset-password")
@@ -58,7 +63,10 @@ export class MinistersController {
 
   @Delete(":id")
   @RequiresPermissions("ministers.delete")
-  remove(@Param("id", ParseUUIDPipe) id: string) {
-    return this.ministersService.remove(id);
+  remove(
+    @Request() req: { user: { id: string; role: string } },
+    @Param("id", ParseUUIDPipe) id: string,
+  ) {
+    return this.ministersService.remove(id, req.user);
   }
 }

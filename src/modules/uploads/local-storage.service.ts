@@ -57,7 +57,9 @@ export class LocalStorageService {
     try {
       unlinkSync(path);
     } catch (err) {
-      this.logger.warn(`Failed to remove rejected upload at ${path}: ${err}`);
+      this.logger.warn(
+        `Failed to remove rejected upload at ${path}: ${String(err)}`,
+      );
     }
   }
 }

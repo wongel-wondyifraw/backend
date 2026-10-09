@@ -18,7 +18,6 @@ export type BibleStudyContentType = "book" | "study_material";
 @Entity("bible_studies")
 @Index("IDX_bible_studies_leader_id", ["leader_id"])
 export class BibleStudy extends UuidPrimary {
-
   @Column()
   name: string;
 

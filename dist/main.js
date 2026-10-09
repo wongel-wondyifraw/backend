@@ -7,12 +7,12 @@ require("reflect-metadata");
 const core_1 = require("@nestjs/core");
 const common_1 = require("@nestjs/common");
 const nestjs_pino_1 = require("nestjs-pino");
-const path_1 = require("path");
 const helmet_1 = __importDefault(require("helmet"));
 const config_1 = require("@nestjs/config");
 const swagger_1 = require("@nestjs/swagger");
 const app_module_1 = require("./app.module");
 const http_exception_filter_1 = require("./common/filters/http-exception.filter");
+const multer_config_1 = require("./common/config/multer.config");
 async function bootstrap() {
     const app = await core_1.NestFactory.create(app_module_1.AppModule, {
         bufferLogs: true,
@@ -25,6 +25,20 @@ async function bootstrap() {
         .map((value) => value.trim())
         .filter(Boolean);
     const allowedOrigins = new Set([frontendUrl, ...frontendUrls]);
+    const isAllowedOrigin = (origin) => {
+        if (allowedOrigins.has(origin))
+            return true;
+        const isDevLocalhost = process.env.NODE_ENV !== "production" &&
+            /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin);
+        try {
+            if (/\.vercel\.app$/.test(new URL(origin).hostname))
+                return true;
+        }
+        catch (_a) {
+            /* keep false */
+        }
+        return isDevLocalhost;
+    };
     // 1. Logging: Use Pino instead of default console
     const logger = app.get(nestjs_pino_1.Logger);
     app.useLogger(logger);
@@ -41,16 +55,7 @@ async function bootstrap() {
                 callback(null, true);
                 return;
             }
-            const isDevLocalhost = process.env.NODE_ENV !== "production" &&
-                /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin);
-            let isVercelPreview = false;
-            try {
-                isVercelPreview = /\.vercel\.app$/.test(new URL(origin).hostname);
-            }
-            catch (_a) {
-                /* keep false */
-            }
-            if (isDevLocalhost || isVercelPreview || allowedOrigins.has(origin)) {
+            if (isAllowedOrigin(origin)) {
                 callback(null, true);
                 return;
             }
@@ -58,12 +63,21 @@ async function bootstrap() {
         },
         credentials: true,
     });
-    // 3. Static Assets: Serve from project root (use process.cwd() for reliable pathing)
-    app.useStaticAssets((0, path_1.join)(process.cwd(), "uploads"), {
+    // 3. Static Assets: local uploads/ (override with UPLOADS_DIR)
+    (0, multer_config_1.ensureUploadDirs)();
+    app.useStaticAssets((0, multer_config_1.getUploadsRoot)(), {
         prefix: "/uploads",
         setHeaders: (res) => {
+            var _a, _b;
             res.set("Cross-Origin-Resource-Policy", "cross-origin");
-            res.set("Access-Control-Allow-Origin", frontendUrl);
+            res.set("Cache-Control", "public, max-age=31536000, immutable");
+            const origin = (_b = (_a = res.req) === null || _a === void 0 ? void 0 : _a.headers) === null || _b === void 0 ? void 0 : _b.origin;
+            if (typeof origin === "string" && isAllowedOrigin(origin)) {
+                res.set("Access-Control-Allow-Origin", origin);
+            }
+            else {
+                res.set("Access-Control-Allow-Origin", frontendUrl);
+            }
         },
     });
     // 4. Scalability: Enable API Versioning (e.g., /v1/users)

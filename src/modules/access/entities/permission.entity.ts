@@ -11,7 +11,6 @@ import { Role } from "./role.entity";
 
 @Entity("permissions")
 export class Permission extends UuidPrimary {
-
   @Index({ unique: true })
   @Column({ type: "varchar", length: 128 })
   slug: string;

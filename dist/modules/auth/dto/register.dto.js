@@ -11,6 +11,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.RegisterDto = void 0;
 const class_validator_1 = require("class-validator");
+const password_strength_validator_1 = require("../../../common/validators/password-strength.validator");
 class RegisterDto {
 }
 exports.RegisterDto = RegisterDto;
@@ -26,6 +27,6 @@ __decorate([
 ], RegisterDto.prototype, "email", void 0);
 __decorate([
     (0, class_validator_1.IsString)(),
-    (0, class_validator_1.MinLength)(6),
+    (0, password_strength_validator_1.IsStrongPassword)(),
     __metadata("design:type", String)
 ], RegisterDto.prototype, "password", void 0);

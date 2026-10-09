@@ -16,7 +16,6 @@ import type {
 @Entity("ministries")
 @Index("IDX_ministries_leader_id", ["leader_id"])
 export class Ministry extends UuidPrimary {
-
   @Column()
   name: string;
 

@@ -103,7 +103,7 @@ __decorate([
 ], LandingSectionDto.prototype, "verse_text", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.Allow)(),
     __metadata("design:type", Array)
 ], LandingSectionDto.prototype, "items", void 0);
 __decorate([
@@ -184,6 +184,12 @@ __decorate([
     (0, class_validator_1.ValidateNested)(),
     (0, class_transformer_1.Type)(() => LandingSectionDto),
     __metadata("design:type", LandingSectionDto)
+], LandingPageContentDto.prototype, "stats", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.ValidateNested)(),
+    (0, class_transformer_1.Type)(() => LandingSectionDto),
+    __metadata("design:type", LandingSectionDto)
 ], LandingPageContentDto.prototype, "about", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),
@@ -223,6 +229,7 @@ __decorate([
 ], LandingPageContentDto.prototype, "footer", void 0);
 exports.LANDING_CONTENT_KEYS = [
     "hero",
+    "stats",
     "about",
     "vision",
     "ministries",

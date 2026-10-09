@@ -14,7 +14,6 @@ import { User } from "../../users/entities/user.entity";
 
 @Entity("roles")
 export class Role extends UuidPrimary {
-
   @Index({ unique: true })
   @Column({ type: "varchar", length: 64 })
   key: string;

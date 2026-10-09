@@ -18,14 +18,17 @@
     "helmet": "^8.1.0",
     "multer": "^2.2.0",
     "nestjs-pino": "^4.6.1",
+    "otplib": "^12.0.1",
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",
     "pg": "^8.18.0",
     "pino-http": "^11.0.0",
     "prettier": "^3.9.9",
+    "qrcode": "^1.5.4",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.2",
-    "typeorm": "^0.3.28"
+    "typeorm": "^0.3.28",
+    "zxcvbn": "^4.4.2"
   },
   "scripts": {
     "build": "nest build",
@@ -50,6 +53,7 @@
     "@types/node": "^25.9.2",
     "@types/passport-jwt": "^4.0.1",
     "@types/sharp": "^0.31.1",
+    "@types/zxcvbn": "^4.4.5",
     "@typescript-eslint/eslint-plugin": "^8.71.0",
     "@typescript-eslint/parser": "^8.71.0",
     "dotenv": "^18.0.5",

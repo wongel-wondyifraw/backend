@@ -16,7 +16,6 @@ import type {
 @Entity("home_groups")
 @Index("IDX_home_groups_leader_id", ["leader_id"])
 export class HomeGroup extends UuidPrimary {
-
   @Column()
   name: string;
 

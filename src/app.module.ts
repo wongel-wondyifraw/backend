@@ -112,7 +112,6 @@ import { PermissionsGuard } from "./common/guards/permissions.guard";
                 database: config.get<string>("DB_NAME"),
               }),
           ssl: sslEnabled ? { rejectUnauthorized: false } : false,
-          uuidExtension: "pgcrypto",
           autoLoadEntities: true,
           synchronize: config.get<string>("DB_SYNCHRONIZE") === "true",
         };

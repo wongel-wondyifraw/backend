@@ -21,7 +21,6 @@ export enum NotificationSeverity {
 @Index(["user_id", "read_at"])
 @Index(["user_id", "dismissed_at"])
 export class Notification extends UuidPrimary {
-
   @Column({ type: "uuid" })
   user_id: string;
 

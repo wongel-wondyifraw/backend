@@ -11,6 +11,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Notification = exports.NotificationSeverity = exports.NotificationKind = void 0;
 const typeorm_1 = require("typeorm");
+const uuid_primary_1 = require("../../../common/entities/uuid-primary");
 var NotificationKind;
 (function (NotificationKind) {
     NotificationKind["MEMBER"] = "member";
@@ -26,13 +27,9 @@ var NotificationSeverity;
     NotificationSeverity["WARNING"] = "warning";
     NotificationSeverity["DANGER"] = "danger";
 })(NotificationSeverity || (exports.NotificationSeverity = NotificationSeverity = {}));
-let Notification = class Notification {
+let Notification = class Notification extends uuid_primary_1.UuidPrimary {
 };
 exports.Notification = Notification;
-__decorate([
-    (0, typeorm_1.PrimaryGeneratedColumn)("uuid"),
-    __metadata("design:type", String)
-], Notification.prototype, "id", void 0);
 __decorate([
     (0, typeorm_1.Column)({ type: "uuid" }),
     __metadata("design:type", String)

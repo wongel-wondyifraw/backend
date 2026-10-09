@@ -11,13 +11,10 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Location = void 0;
 const typeorm_1 = require("typeorm");
-let Location = class Location {
+const uuid_primary_1 = require("../../../common/entities/uuid-primary");
+let Location = class Location extends uuid_primary_1.UuidPrimary {
 };
 exports.Location = Location;
-__decorate([
-    (0, typeorm_1.PrimaryGeneratedColumn)("uuid"),
-    __metadata("design:type", String)
-], Location.prototype, "id", void 0);
 __decorate([
     (0, typeorm_1.Column)({ unique: true }),
     __metadata("design:type", String)

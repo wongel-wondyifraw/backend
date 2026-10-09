@@ -32,7 +32,7 @@ let MinistersService = class MinistersService {
         const bytes = (0, crypto_1.randomBytes)(length);
         return Array.from(bytes, (b) => chars[b % chars.length]).join("");
     }
-    async create(dto) {
+    async create(dto, actingUser) {
         var _a, _b, _c, _d, _e;
         const email = dto.email.trim().toLowerCase();
         if (!email) {
@@ -60,7 +60,8 @@ let MinistersService = class MinistersService {
             title: (_c = dto.title) !== null && _c !== void 0 ? _c : undefined,
             avatar_url: (_d = dto.image_url) !== null && _d !== void 0 ? _d : undefined,
             is_active: isActive,
-        });
+            created_via: "minister_module",
+        }, actingUser);
         const minister = this.ministersRepository.create({
             ...dto,
             email,
@@ -114,7 +115,7 @@ let MinistersService = class MinistersService {
         }
         return minister;
     }
-    async update(id, dto) {
+    async update(id, dto, actingUser) {
         const minister = await this.findOne(id);
         await this.ministersRepository.update(id, dto);
         const userPatch = {};
@@ -132,7 +133,7 @@ let MinistersService = class MinistersService {
             userPatch.is_active = dto.status.toLowerCase() !== "inactive";
         }
         if (Object.keys(userPatch).length > 0) {
-            await this.usersService.update(minister.user_id, userPatch);
+            await this.usersService.update(minister.user_id, userPatch, actingUser);
         }
         const updated = await this.findOne(id);
         const name = `${updated.first_name} ${updated.last_name}`.trim();
@@ -165,13 +166,13 @@ let MinistersService = class MinistersService {
         });
         return { temporary_password: temporaryPassword };
     }
-    async remove(id) {
+    async remove(id, actingUser) {
         const minister = await this.findOne(id);
         const userId = minister.user_id;
         const name = `${minister.first_name} ${minister.last_name}`.trim();
         await this.ministersRepository.delete(id);
         try {
-            await this.usersService.remove(userId);
+            await this.usersService.remove(userId, actingUser);
         }
         catch (_a) {
             // User may already be gone

@@ -16,6 +16,12 @@ function toUserResponse(user, includePermissions = false) {
         is_active: user.is_active,
         created_at: user.created_at,
         updated_at: user.updated_at,
+        failed_login_attempts: user.failed_login_attempts,
+        locked_until: user.locked_until,
+        last_login_at: user.last_login_at,
+        created_via: user.created_via,
+        email_verified_at: user.email_verified_at,
+        mfa_enabled: user.mfa_enabled,
     };
     if (includePermissions && ((_d = user.roleEntity) === null || _d === void 0 ? void 0 : _d.permissions)) {
         dto.permissions = user.roleEntity.permissions.map((p) => ({

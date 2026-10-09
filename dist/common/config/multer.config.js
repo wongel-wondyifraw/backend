@@ -34,17 +34,19 @@ var __importStar = (this && this.__importStar) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.documentUploadLimits = exports.DOCUMENT_UPLOAD_MAX_BYTES = exports.imageUploadLimits = exports.IMAGE_UPLOAD_MAX_BYTES = void 0;
+exports.getUploadsRoot = getUploadsRoot;
 exports.getImagesUploadDir = getImagesUploadDir;
 exports.imageFileFilter = imageFileFilter;
 exports.createImageDiskStorage = createImageDiskStorage;
-exports.createImageMemoryStorage = createImageMemoryStorage;
-exports.createDocumentMemoryStorage = createDocumentMemoryStorage;
-exports.avatarFilenameForUserId = avatarFilenameForUserId;
+exports.createDefaultImageDiskStorage = createDefaultImageDiskStorage;
+exports.createAvatarImageDiskStorage = createAvatarImageDiskStorage;
 exports.uploadImageFilename = uploadImageFilename;
 exports.getDocumentsUploadDir = getDocumentsUploadDir;
 exports.documentFileFilter = documentFileFilter;
 exports.createDocumentDiskStorage = createDocumentDiskStorage;
+exports.createDefaultDocumentDiskStorage = createDefaultDocumentDiskStorage;
 exports.uploadDocumentFilename = uploadDocumentFilename;
+exports.ensureUploadDirs = ensureUploadDirs;
 const path_1 = require("path");
 const fs = __importStar(require("fs"));
 const crypto_1 = require("crypto");
@@ -57,8 +59,13 @@ const ALLOWED_MIME_TYPES = new Set([
     "image/webp",
 ]);
 const ALLOWED_EXTENSION = /\.(jpe?g|png|gif|webp)$/i;
+function getUploadsRoot() {
+    var _a;
+    const fromEnv = (_a = process.env.UPLOADS_DIR) === null || _a === void 0 ? void 0 : _a.trim();
+    return fromEnv || (0, path_1.join)(process.cwd(), "uploads");
+}
 function getImagesUploadDir() {
-    const dir = (0, path_1.join)(process.cwd(), "uploads", "images");
+    const dir = (0, path_1.join)(getUploadsRoot(), "images");
     if (!fs.existsSync(dir)) {
         fs.mkdirSync(dir, { recursive: true });
     }
@@ -84,15 +91,15 @@ function createImageDiskStorage(filename) {
         filename,
     });
 }
-/** Prefer memory storage so files can go straight to Cloudinary without disk I/O. */
-function createImageMemoryStorage() {
-    return (0, multer_1.memoryStorage)();
+function createDefaultImageDiskStorage() {
+    return createImageDiskStorage((_req, file, cb) => {
+        cb(null, uploadImageFilename(file.originalname));
+    });
 }
-function createDocumentMemoryStorage() {
-    return (0, multer_1.memoryStorage)();
-}
-function avatarFilenameForUserId(userId, originalname) {
-    return `${userId}${(0, path_1.extname)(originalname)}`;
+function createAvatarImageDiskStorage() {
+    return createImageDiskStorage((_req, file, cb) => {
+        cb(null, `avatar-${(0, crypto_1.randomUUID)()}${(0, path_1.extname)(file.originalname)}`);
+    });
 }
 function uploadImageFilename(originalname) {
     return `upload-${(0, crypto_1.randomUUID)()}${(0, path_1.extname)(originalname)}`;
@@ -111,7 +118,7 @@ const ALLOWED_DOCUMENT_MIME_TYPES = new Set([
 ]);
 const ALLOWED_DOCUMENT_EXTENSION = /\.(pdf|docx?|txt|jpe?g|png|mp4|webm|mov)$/i;
 function getDocumentsUploadDir() {
-    const dir = (0, path_1.join)(process.cwd(), "uploads", "documents");
+    const dir = (0, path_1.join)(getUploadsRoot(), "documents");
     if (!fs.existsSync(dir)) {
         fs.mkdirSync(dir, { recursive: true });
     }
@@ -137,6 +144,15 @@ function createDocumentDiskStorage(filename) {
         filename,
     });
 }
+function createDefaultDocumentDiskStorage() {
+    return createDocumentDiskStorage((_req, file, cb) => {
+        cb(null, uploadDocumentFilename(file.originalname));
+    });
+}
 function uploadDocumentFilename(originalname) {
     return `doc-${(0, crypto_1.randomUUID)()}${(0, path_1.extname)(originalname)}`;
+}
+function ensureUploadDirs() {
+    getImagesUploadDir();
+    getDocumentsUploadDir();
 }

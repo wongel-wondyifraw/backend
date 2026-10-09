@@ -4,9 +4,9 @@ import {
   IsNotEmpty,
   IsOptional,
   IsString,
-  MinLength,
   ValidateIf,
 } from "class-validator";
+import { IsStrongPassword } from "../../../common/validators/password-strength.validator";
 
 export class CreateUserDto {
   @IsString()
@@ -27,7 +27,7 @@ export class CreateUserDto {
 
   @IsString()
   @IsNotEmpty()
-  @MinLength(6)
+  @IsStrongPassword()
   password_hash: string;
 
   @IsString()

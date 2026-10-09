@@ -11,13 +11,10 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.NotificationPreference = void 0;
 const typeorm_1 = require("typeorm");
-let NotificationPreference = class NotificationPreference {
+const uuid_primary_1 = require("../../../common/entities/uuid-primary");
+let NotificationPreference = class NotificationPreference extends uuid_primary_1.UuidPrimary {
 };
 exports.NotificationPreference = NotificationPreference;
-__decorate([
-    (0, typeorm_1.PrimaryGeneratedColumn)("uuid"),
-    __metadata("design:type", String)
-], NotificationPreference.prototype, "id", void 0);
 __decorate([
     (0, typeorm_1.Column)({ type: "uuid" }),
     __metadata("design:type", String)

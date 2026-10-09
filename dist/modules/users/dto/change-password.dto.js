@@ -11,6 +11,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ChangePasswordDto = void 0;
 const class_validator_1 = require("class-validator");
+const password_strength_validator_1 = require("../../../common/validators/password-strength.validator");
 class ChangePasswordDto {
 }
 exports.ChangePasswordDto = ChangePasswordDto;
@@ -22,6 +23,6 @@ __decorate([
 __decorate([
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsNotEmpty)(),
-    (0, class_validator_1.MinLength)(6, { message: "Password must be at least 6 characters long" }),
+    (0, password_strength_validator_1.IsStrongPassword)(),
     __metadata("design:type", String)
 ], ChangePasswordDto.prototype, "newPassword", void 0);

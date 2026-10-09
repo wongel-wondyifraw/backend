@@ -56,7 +56,6 @@ export class HttpExceptionFilter implements ExceptionFilter {
     }
 
     const is500 = status === HttpStatus.INTERNAL_SERVER_ERROR;
-    const isDev = process.env.NODE_ENV !== "production";
 
     const requestId =
       request.id ||
@@ -64,7 +63,9 @@ export class HttpExceptionFilter implements ExceptionFilter {
         ? request.headers["x-request-id"]
         : "unknown");
     const errorCode =
-      typeof exceptionResponse === "object" ? exceptionResponse.code : undefined;
+      typeof exceptionResponse === "object"
+        ? exceptionResponse.code
+        : undefined;
 
     const errorDetails: Record<string, unknown> = {
       method: request.method,
@@ -79,7 +80,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
       if (sanitizedBody) {
         errorDetails.body = sanitizedBody;
       }
-      if (isDev && exception instanceof Error) {
+      if (exception instanceof Error) {
         errorDetails.stack = exception.stack;
       }
     }

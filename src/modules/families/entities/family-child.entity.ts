@@ -11,7 +11,6 @@ import { Family } from "./family.entity";
 
 @Entity("family_children")
 export class FamilyChild extends UuidPrimary {
-
   @Column({ type: "uuid" })
   family_id: string;
 

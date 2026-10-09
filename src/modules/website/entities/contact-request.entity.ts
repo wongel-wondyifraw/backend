@@ -16,7 +16,6 @@ export type ContactRequestStatus =
 @Entity("contact_requests")
 @Index(["status", "created_at"])
 export class ContactRequest extends UuidPrimary {
-
   @Column({ type: "varchar", length: 200 })
   full_name: string;
 

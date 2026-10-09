@@ -42,12 +42,13 @@ let HttpExceptionFilter = class HttpExceptionFilter {
                 sanitizedBody.token = "***";
         }
         const is500 = status === common_1.HttpStatus.INTERNAL_SERVER_ERROR;
-        const isDev = process.env.NODE_ENV !== "production";
         const requestId = request.id ||
             (typeof request.headers["x-request-id"] === "string"
                 ? request.headers["x-request-id"]
                 : "unknown");
-        const errorCode = typeof exceptionResponse === "object" ? exceptionResponse.code : undefined;
+        const errorCode = typeof exceptionResponse === "object"
+            ? exceptionResponse.code
+            : undefined;
         const errorDetails = {
             method: request.method,
             url: request.url,
@@ -60,7 +61,7 @@ let HttpExceptionFilter = class HttpExceptionFilter {
             if (sanitizedBody) {
                 errorDetails.body = sanitizedBody;
             }
-            if (isDev && exception instanceof Error) {
+            if (exception instanceof Error) {
                 errorDetails.stack = exception.stack;
             }
         }
