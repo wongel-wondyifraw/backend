@@ -53,8 +53,11 @@ export class AuthController {
 
   @HttpCode(HttpStatus.OK)
   @Post("logout-all")
-  logoutAll(@Req() req: AuthenticatedRequest) {
-    return this.authService.logoutAll(req.user.id);
+  logoutAll(
+    @Req() req: AuthenticatedRequest,
+    @Body("refresh_token") refreshToken?: string,
+  ) {
+    return this.authService.logoutAll(req.user.id, refreshToken);
   }
 
   @Get("sessions")
