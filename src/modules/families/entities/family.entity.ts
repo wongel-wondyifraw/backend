@@ -43,7 +43,7 @@ export class Family extends UuidPrimary {
   @Column({ type: "text", nullable: true })
   notes: string | null;
 
-  @OneToMany(() => FamilyChild, (child) => child.family, { cascade: true })
+  @OneToMany(() => FamilyChild, (child) => child.family)
   children: FamilyChild[];
 
   @CreateDateColumn()
