@@ -233,12 +233,94 @@ export class FamiliesService {
       qb.andWhere("family.id != :excludeFamilyId", { excludeFamilyId });
     }
 
-    const conflict = await qb.getOne();
-    if (conflict) {
-      throw new BadRequestException(
-        "One or both selected people already belong to another family",
-      );
+    const potentialConflicts = await qb.getMany();
+    for (const fam of potentialConflicts) {
+      const isRegisteredCouple =
+        fam.spouse_status === "registered" &&
+        Boolean(fam.husband_id) &&
+        Boolean(fam.wife_id);
+      const isExternalMarriage =
+        fam.spouse_status === "external" &&
+        Boolean(fam.external_spouse_name?.trim());
+
+      if (isRegisteredCouple || isExternalMarriage) {
+        throw new BadRequestException(
+          "One or both selected people already belong to an active family with a spouse",
+        );
+      }
     }
+  }
+
+  private async mergePlaceholderFamily(
+    targetFamilyId: string,
+    personId: string | null | undefined,
+    personType: PersonType | null | undefined,
+    manager: EntityManager,
+  ) {
+    if (!personId) return;
+
+    const placeholder = await manager
+      .getRepository(Family)
+      .createQueryBuilder("family")
+      .leftJoinAndSelect("family.children", "children")
+      .where("family.id != :targetFamilyId", { targetFamilyId })
+      .andWhere(
+        `((family.husband_id = :pId AND family.husband_type = :pType) OR (family.wife_id = :pId AND family.wife_type = :pType))`,
+        { pId: personId, pType: personType || "member" },
+      )
+      .getOne();
+
+    if (!placeholder) return;
+
+    // Do not merge if placeholder has an active registered spouse or external spouse
+    const hasHusband = Boolean(placeholder.husband_id);
+    const hasWife = Boolean(placeholder.wife_id);
+    const isRegisteredCouple =
+      placeholder.spouse_status === "registered" && hasHusband && hasWife;
+    const isExternal =
+      placeholder.spouse_status === "external" &&
+      Boolean(placeholder.external_spouse_name?.trim());
+
+    if (isRegisteredCouple || isExternal) return;
+
+    // Load target family's existing children
+    const targetChildren = await manager.getRepository(FamilyChild).find({
+      where: { family_id: targetFamilyId },
+    });
+
+    const normalize = (s?: string | null) => (s || "").trim().toLowerCase();
+
+    for (const sourceChild of placeholder.children || []) {
+      const isDuplicate = targetChildren.some((tc) => {
+        const sameName = normalize(tc.name) === normalize(sourceChild.name);
+        const sameDob =
+          tc.date_of_birth && sourceChild.date_of_birth
+            ? new Date(tc.date_of_birth).getTime() ===
+              new Date(sourceChild.date_of_birth).getTime()
+            : false;
+        const sameAge =
+          tc.age !== null &&
+          tc.age !== undefined &&
+          sourceChild.age !== null &&
+          sourceChild.age !== undefined
+            ? tc.age === sourceChild.age
+            : false;
+        return sameName && (sameDob || sameAge);
+      });
+
+      if (!isDuplicate) {
+        // Transfer child to target family directly via update query to avoid relation cascades
+        await manager
+          .getRepository(FamilyChild)
+          .update(sourceChild.id, { family_id: targetFamilyId });
+      } else {
+        // Delete duplicate child record from placeholder
+        await manager.getRepository(FamilyChild).delete(sourceChild.id);
+      }
+    }
+
+    // Delete the placeholder family
+    await manager.getRepository(Family).delete(placeholder.id);
   }
 
   private async markMarriedIfSingle(
@@ -389,6 +471,23 @@ export class FamiliesService {
       });
       const saved = await queryRunner.manager.save(Family, family);
 
+      if (dto.husband_id) {
+        await this.mergePlaceholderFamily(
+          saved.id,
+          dto.husband_id,
+          dto.husband_type,
+          queryRunner.manager,
+        );
+      }
+      if (dto.wife_id) {
+        await this.mergePlaceholderFamily(
+          saved.id,
+          dto.wife_id,
+          dto.wife_type,
+          queryRunner.manager,
+        );
+      }
+
       if (spouseStatus === "registered") {
         await Promise.all([
           this.markMarriedIfSingle(
@@ -522,6 +621,24 @@ export class FamiliesService {
         family.husband_type = nextHusbandType || "member";
         family.wife_id = nextWifeId || null;
         family.wife_type = nextWifeType || "member";
+
+        if (nextHusbandId) {
+          await this.mergePlaceholderFamily(
+            family.id,
+            nextHusbandId,
+            nextHusbandType,
+            queryRunner.manager,
+          );
+        }
+        if (nextWifeId) {
+          await this.mergePlaceholderFamily(
+            family.id,
+            nextWifeId,
+            nextWifeType,
+            queryRunner.manager,
+          );
+        }
+
         if (nextStatus === "registered") {
           await Promise.all([
             this.markMarriedIfSingle(
@@ -552,6 +669,10 @@ export class FamiliesService {
       }
       if (dto.name !== undefined) family.name = dto.name?.trim() || null;
       if (dto.notes !== undefined) family.notes = dto.notes?.trim() || null;
+
+      delete (family as unknown as Record<string, unknown>).children;
+      delete (family as unknown as Record<string, unknown>).husband;
+      delete (family as unknown as Record<string, unknown>).wife;
 
       await queryRunner.manager.save(Family, family);
       await queryRunner.commitTransaction();

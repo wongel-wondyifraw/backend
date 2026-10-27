@@ -57,7 +57,7 @@ __decorate([
     __metadata("design:type", Object)
 ], Family.prototype, "notes", void 0);
 __decorate([
-    (0, typeorm_1.OneToMany)(() => family_child_entity_1.FamilyChild, (child) => child.family, { cascade: true }),
+    (0, typeorm_1.OneToMany)(() => family_child_entity_1.FamilyChild, (child) => child.family),
     __metadata("design:type", Array)
 ], Family.prototype, "children", void 0);
 __decorate([

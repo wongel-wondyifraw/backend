@@ -151,6 +151,7 @@ let FamiliesService = class FamiliesService {
         return families;
     }
     async ensureSpousesAvailable(husbandId, husbandType, wifeId, wifeType, excludeFamilyId) {
+        var _a;
         if (!husbandId && !wifeId)
             return;
         if (husbandId &&
@@ -171,10 +172,72 @@ let FamiliesService = class FamiliesService {
         if (excludeFamilyId) {
             qb.andWhere("family.id != :excludeFamilyId", { excludeFamilyId });
         }
-        const conflict = await qb.getOne();
-        if (conflict) {
-            throw new common_1.BadRequestException("One or both selected people already belong to another family");
+        const potentialConflicts = await qb.getMany();
+        for (const fam of potentialConflicts) {
+            const isRegisteredCouple = fam.spouse_status === "registered" &&
+                Boolean(fam.husband_id) &&
+                Boolean(fam.wife_id);
+            const isExternalMarriage = fam.spouse_status === "external" &&
+                Boolean((_a = fam.external_spouse_name) === null || _a === void 0 ? void 0 : _a.trim());
+            if (isRegisteredCouple || isExternalMarriage) {
+                throw new common_1.BadRequestException("One or both selected people already belong to an active family with a spouse");
+            }
         }
+    }
+    async mergePlaceholderFamily(targetFamilyId, personId, personType, manager) {
+        var _a;
+        if (!personId)
+            return;
+        const placeholder = await manager
+            .getRepository(family_entity_1.Family)
+            .createQueryBuilder("family")
+            .leftJoinAndSelect("family.children", "children")
+            .where("family.id != :targetFamilyId", { targetFamilyId })
+            .andWhere(`((family.husband_id = :pId AND family.husband_type = :pType) OR (family.wife_id = :pId AND family.wife_type = :pType))`, { pId: personId, pType: personType || "member" })
+            .getOne();
+        if (!placeholder)
+            return;
+        // Do not merge if placeholder has an active registered spouse or external spouse
+        const hasHusband = Boolean(placeholder.husband_id);
+        const hasWife = Boolean(placeholder.wife_id);
+        const isRegisteredCouple = placeholder.spouse_status === "registered" && hasHusband && hasWife;
+        const isExternal = placeholder.spouse_status === "external" &&
+            Boolean((_a = placeholder.external_spouse_name) === null || _a === void 0 ? void 0 : _a.trim());
+        if (isRegisteredCouple || isExternal)
+            return;
+        // Load target family's existing children
+        const targetChildren = await manager.getRepository(family_child_entity_1.FamilyChild).find({
+            where: { family_id: targetFamilyId },
+        });
+        const normalize = (s) => (s || "").trim().toLowerCase();
+        for (const sourceChild of placeholder.children || []) {
+            const isDuplicate = targetChildren.some((tc) => {
+                const sameName = normalize(tc.name) === normalize(sourceChild.name);
+                const sameDob = tc.date_of_birth && sourceChild.date_of_birth
+                    ? new Date(tc.date_of_birth).getTime() ===
+                        new Date(sourceChild.date_of_birth).getTime()
+                    : false;
+                const sameAge = tc.age !== null &&
+                    tc.age !== undefined &&
+                    sourceChild.age !== null &&
+                    sourceChild.age !== undefined
+                    ? tc.age === sourceChild.age
+                    : false;
+                return sameName && (sameDob || sameAge);
+            });
+            if (!isDuplicate) {
+                // Transfer child to target family directly via update query to avoid relation cascades
+                await manager
+                    .getRepository(family_child_entity_1.FamilyChild)
+                    .update(sourceChild.id, { family_id: targetFamilyId });
+            }
+            else {
+                // Delete duplicate child record from placeholder
+                await manager.getRepository(family_child_entity_1.FamilyChild).delete(sourceChild.id);
+            }
+        }
+        // Delete the placeholder family
+        await manager.getRepository(family_entity_1.Family).delete(placeholder.id);
     }
     async markMarriedIfSingle(id, type, manager) {
         if (!id)
@@ -292,6 +355,12 @@ let FamiliesService = class FamiliesService {
                 notes: ((_f = dto.notes) === null || _f === void 0 ? void 0 : _f.trim()) || null,
             });
             const saved = await queryRunner.manager.save(family_entity_1.Family, family);
+            if (dto.husband_id) {
+                await this.mergePlaceholderFamily(saved.id, dto.husband_id, dto.husband_type, queryRunner.manager);
+            }
+            if (dto.wife_id) {
+                await this.mergePlaceholderFamily(saved.id, dto.wife_id, dto.wife_type, queryRunner.manager);
+            }
             if (spouseStatus === "registered") {
                 await Promise.all([
                     this.markMarriedIfSingle(dto.husband_id, dto.husband_type, queryRunner.manager),
@@ -391,6 +460,12 @@ let FamiliesService = class FamiliesService {
                 family.husband_type = nextHusbandType || "member";
                 family.wife_id = nextWifeId || null;
                 family.wife_type = nextWifeType || "member";
+                if (nextHusbandId) {
+                    await this.mergePlaceholderFamily(family.id, nextHusbandId, nextHusbandType, queryRunner.manager);
+                }
+                if (nextWifeId) {
+                    await this.mergePlaceholderFamily(family.id, nextWifeId, nextWifeType, queryRunner.manager);
+                }
                 if (nextStatus === "registered") {
                     await Promise.all([
                         this.markMarriedIfSingle(nextHusbandId, nextHusbandType, queryRunner.manager),
@@ -415,6 +490,9 @@ let FamiliesService = class FamiliesService {
                 family.name = ((_f = dto.name) === null || _f === void 0 ? void 0 : _f.trim()) || null;
             if (dto.notes !== undefined)
                 family.notes = ((_g = dto.notes) === null || _g === void 0 ? void 0 : _g.trim()) || null;
+            delete family.children;
+            delete family.husband;
+            delete family.wife;
             await queryRunner.manager.save(family_entity_1.Family, family);
             await queryRunner.commitTransaction();
             return this.findOne(id);

@@ -36,8 +36,8 @@ let AuthController = class AuthController {
     logout(refreshToken) {
         return this.authService.logout(refreshToken);
     }
-    logoutAll(req) {
-        return this.authService.logoutAll(req.user.id);
+    logoutAll(req, refreshToken) {
+        return this.authService.logoutAll(req.user.id, refreshToken);
     }
     getSessions(req) {
         return this.authService.getSessions(req.user.id);
@@ -109,8 +109,9 @@ __decorate([
     (0, common_1.HttpCode)(common_1.HttpStatus.OK),
     (0, common_1.Post)("logout-all"),
     __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Body)("refresh_token")),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
+    __metadata("design:paramtypes", [Object, String]),
     __metadata("design:returntype", void 0)
 ], AuthController.prototype, "logoutAll", null);
 __decorate([

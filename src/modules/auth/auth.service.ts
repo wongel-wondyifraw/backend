@@ -425,13 +425,30 @@ export class AuthService {
     return { message: "Logged out successfully" };
   }
 
-  async logoutAll(userId: string) {
-    await this.refreshTokenRepository
+  async logoutAll(userId: string, excludeRefreshToken?: string) {
+    const qb = this.refreshTokenRepository
       .createQueryBuilder()
       .update(RefreshToken)
       .set({ revoked_at: new Date() })
-      .where("user_id = :userId AND revoked_at IS NULL", { userId })
-      .execute();
+      .where("user_id = :userId AND revoked_at IS NULL", { userId });
+
+    if (excludeRefreshToken) {
+      const allTokens = await this.refreshTokenRepository.find({
+        where: { user_id: userId, revoked_at: IsNull() },
+      });
+      let matchedTokenId: string | null = null;
+      for (const token of allTokens) {
+        if (await bcrypt.compare(excludeRefreshToken, token.token_hash)) {
+          matchedTokenId = token.id;
+          break;
+        }
+      }
+      if (matchedTokenId) {
+        qb.andWhere("id != :tokenId", { tokenId: matchedTokenId });
+      }
+    }
+
+    await qb.execute();
 
     return { message: "All sessions revoked" };
   }
