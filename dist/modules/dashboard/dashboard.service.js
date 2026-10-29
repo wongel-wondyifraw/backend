@@ -100,7 +100,7 @@ let DashboardService = DashboardService_1 = class DashboardService {
                 .createQueryBuilder("ministry")
                 .leftJoin("ministry.ministry_members", "mm")
                 .select("ministry.name", "name")
-                .addSelect("COUNT(mm.id)", "value")
+                .addSelect("COUNT(mm.member_id)", "value")
                 .groupBy("ministry.id")
                 .addGroupBy("ministry.name")
                 .orderBy("value", "DESC")

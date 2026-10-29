@@ -51,7 +51,7 @@ let ContactRequestsService = ContactRequestsService_1 = class ContactRequestsSer
                 severity: isConfidential ? "warning" : "info",
                 title,
                 message: `${saved.full_name} (${saved.phone}): "${snippet}"`,
-                href: "/settings",
+                href: "/dashboard?tab=requests",
                 targetRoles: isConfidential ? ["admin"] : ["admin", "minister"],
                 includeAdmins: true,
                 payload: {
@@ -67,23 +67,29 @@ let ContactRequestsService = ContactRequestsService_1 = class ContactRequestsSer
         }
         return saved;
     }
-    async findAll(status) {
+    async findAll(status, isAdmin = false) {
         const query = this.contactRepo.createQueryBuilder("cr");
         if (status) {
             query.where("cr.status = :status", { status });
         }
+        if (!isAdmin) {
+            query.andWhere("cr.is_confidential = false");
+        }
         query.orderBy("cr.created_at", "DESC");
         return query.getMany();
     }
-    async findOne(id) {
+    async findOne(id, isAdmin = false) {
         const found = await this.contactRepo.findOne({ where: { id } });
         if (!found) {
             throw new common_1.NotFoundException(`Contact request with id ${id} not found`);
         }
+        if (found.is_confidential && !isAdmin) {
+            throw new common_1.NotFoundException(`Contact request with id ${id} not found`);
+        }
         return found;
     }
-    async update(id, dto) {
-        const existing = await this.findOne(id);
+    async update(id, dto, isAdmin = false) {
+        const existing = await this.findOne(id, isAdmin);
         if (dto.status !== undefined)
             existing.status = dto.status;
         if (dto.assigned_to !== undefined)
@@ -98,7 +104,10 @@ let ContactRequestsService = ContactRequestsService_1 = class ContactRequestsSer
         return this.contactRepo.save(existing);
     }
     async delete(id) {
-        const found = await this.findOne(id);
+        const found = await this.contactRepo.findOne({ where: { id } });
+        if (!found) {
+            throw new common_1.NotFoundException(`Contact request with id ${id} not found`);
+        }
         await this.contactRepo.remove(found);
     }
 };

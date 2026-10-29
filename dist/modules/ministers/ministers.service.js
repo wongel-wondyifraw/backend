@@ -82,11 +82,16 @@ let MinistersService = class MinistersService {
         });
         return Object.assign(saved, { temporary_password: temporaryPassword });
     }
-    async findAllPaginated(page = 1, limit = 20, search) {
+    async findAllPaginated(page = 1, limit = 20, search, status) {
         const qb = this.ministersRepository.createQueryBuilder("minister");
         if (search === null || search === void 0 ? void 0 : search.trim()) {
             const pattern = `%${search.trim().toLowerCase()}%`;
             qb.where("LOWER(minister.first_name) LIKE :pattern OR LOWER(minister.last_name) LIKE :pattern OR LOWER(minister.email) LIKE :pattern OR minister.phone LIKE :pattern OR LOWER(minister.title) LIKE :pattern", { pattern });
+        }
+        if (status === null || status === void 0 ? void 0 : status.trim()) {
+            qb.andWhere("LOWER(minister.status) = :status", {
+                status: status.trim().toLowerCase(),
+            });
         }
         qb.orderBy("minister.created_at", "DESC");
         qb.skip((page - 1) * limit).take(limit);

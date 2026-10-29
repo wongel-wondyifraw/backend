@@ -27,7 +27,7 @@ let MinistersController = class MinistersController {
         return this.ministersService.create(dto, req.user);
     }
     findAll(query) {
-        return this.ministersService.findAllPaginated(query.page, query.limit, query.search);
+        return this.ministersService.findAllPaginated(query.page, query.limit, query.search, query.status);
     }
     findOne(id) {
         return this.ministersService.findOne(id);

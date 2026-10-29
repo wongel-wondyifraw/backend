@@ -24,6 +24,10 @@ let ContactRequestsController = class ContactRequestsController {
     constructor(contactRequestsService) {
         this.contactRequestsService = contactRequestsService;
     }
+    isUserAdmin(user) {
+        var _a;
+        return ((_a = user === null || user === void 0 ? void 0 : user.roleEntity) === null || _a === void 0 ? void 0 : _a.key) === "admin" || (user === null || user === void 0 ? void 0 : user.role) === "admin";
+    }
     /**
      * Public endpoint to submit prayer requests, ministry inquiries, or general messages.
      */
@@ -38,14 +42,17 @@ let ContactRequestsController = class ContactRequestsController {
     /**
      * Pastoral staff endpoint to view incoming requests.
      */
-    async list(status) {
-        return this.contactRequestsService.findAll(status);
+    async list(req, status) {
+        const isAdmin = this.isUserAdmin(req.user);
+        return this.contactRequestsService.findAll(status, isAdmin);
     }
-    async getOne(id) {
-        return this.contactRequestsService.findOne(id);
+    async getOne(req, id) {
+        const isAdmin = this.isUserAdmin(req.user);
+        return this.contactRequestsService.findOne(id, isAdmin);
     }
-    async update(id, dto) {
-        return this.contactRequestsService.update(id, dto);
+    async update(req, id, dto) {
+        const isAdmin = this.isUserAdmin(req.user);
+        return this.contactRequestsService.update(id, dto, isAdmin);
     }
     async delete(id) {
         await this.contactRequestsService.delete(id);
@@ -64,27 +71,30 @@ __decorate([
 ], ContactRequestsController.prototype, "submit", null);
 __decorate([
     (0, common_1.Get)(),
-    (0, permissions_decorator_1.RequiresPermissions)("website.manage"),
-    __param(0, (0, common_1.Query)("status")),
+    (0, permissions_decorator_1.RequiresPermissions)("website.manage", "dashboard.read"),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Query)("status")),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [Object, String]),
     __metadata("design:returntype", Promise)
 ], ContactRequestsController.prototype, "list", null);
 __decorate([
     (0, common_1.Get)(":id"),
-    (0, permissions_decorator_1.RequiresPermissions)("website.manage"),
-    __param(0, (0, common_1.Param)("id", common_1.ParseUUIDPipe)),
+    (0, permissions_decorator_1.RequiresPermissions)("website.manage", "dashboard.read"),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Param)("id", common_1.ParseUUIDPipe)),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [Object, String]),
     __metadata("design:returntype", Promise)
 ], ContactRequestsController.prototype, "getOne", null);
 __decorate([
     (0, common_1.Patch)(":id"),
-    (0, permissions_decorator_1.RequiresPermissions)("website.manage"),
-    __param(0, (0, common_1.Param)("id", common_1.ParseUUIDPipe)),
-    __param(1, (0, common_1.Body)()),
+    (0, permissions_decorator_1.RequiresPermissions)("website.manage", "dashboard.read"),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Param)("id", common_1.ParseUUIDPipe)),
+    __param(2, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, update_contact_request_dto_1.UpdateContactRequestDto]),
+    __metadata("design:paramtypes", [Object, String, update_contact_request_dto_1.UpdateContactRequestDto]),
     __metadata("design:returntype", Promise)
 ], ContactRequestsController.prototype, "update", null);
 __decorate([

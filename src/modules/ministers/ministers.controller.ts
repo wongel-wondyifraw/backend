@@ -36,6 +36,7 @@ export class MinistersController {
       query.page,
       query.limit,
       query.search,
+      query.status,
     );
   }
 

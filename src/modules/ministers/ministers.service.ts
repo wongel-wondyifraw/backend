@@ -103,6 +103,7 @@ export class MinistersService {
     page = 1,
     limit = 20,
     search?: string,
+    status?: string,
   ): Promise<PaginatedResult<Minister>> {
     const qb = this.ministersRepository.createQueryBuilder("minister");
 
@@ -112,6 +113,12 @@ export class MinistersService {
         "LOWER(minister.first_name) LIKE :pattern OR LOWER(minister.last_name) LIKE :pattern OR LOWER(minister.email) LIKE :pattern OR minister.phone LIKE :pattern OR LOWER(minister.title) LIKE :pattern",
         { pattern },
       );
+    }
+
+    if (status?.trim()) {
+      qb.andWhere("LOWER(minister.status) = :status", {
+        status: status.trim().toLowerCase(),
+      });
     }
 
     qb.orderBy("minister.created_at", "DESC");
