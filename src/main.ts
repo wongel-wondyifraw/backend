@@ -3,6 +3,7 @@ import { NestFactory } from "@nestjs/core";
 import { VersioningType, ValidationPipe } from "@nestjs/common";
 import { NestExpressApplication } from "@nestjs/platform-express";
 import { Logger } from "nestjs-pino";
+import compression from "compression";
 import helmet from "helmet";
 import { ConfigService } from "@nestjs/config";
 import { SwaggerModule, DocumentBuilder } from "@nestjs/swagger";
@@ -50,7 +51,25 @@ async function bootstrap() {
   // Register Global Exception Filter
   app.useGlobalFilters(new HttpExceptionFilter(logger));
 
-  // 2. Security: Set security headers (MUST come before static assets)
+  // 2. Compression & Security headers (skip compression for SSE event streams)
+  app.use(
+    compression({
+      filter: (req, res) => {
+        if (req.headers["x-no-compression"]) return false;
+        const accept = String(req.headers["accept"] || "");
+        const contentType = String(res.getHeader("Content-Type") || "");
+        if (
+          req.path?.endsWith("/stream") ||
+          accept.includes("text/event-stream") ||
+          contentType.includes("text/event-stream")
+        ) {
+          return false;
+        }
+        return compression.filter(req, res);
+      },
+    }),
+  );
+
   app.use(
     helmet({
       crossOriginResourcePolicy: { policy: "cross-origin" },

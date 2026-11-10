@@ -7,6 +7,7 @@ require("reflect-metadata");
 const core_1 = require("@nestjs/core");
 const common_1 = require("@nestjs/common");
 const nestjs_pino_1 = require("nestjs-pino");
+const compression_1 = __importDefault(require("compression"));
 const helmet_1 = __importDefault(require("helmet"));
 const config_1 = require("@nestjs/config");
 const swagger_1 = require("@nestjs/swagger");
@@ -44,7 +45,22 @@ async function bootstrap() {
     app.useLogger(logger);
     // Register Global Exception Filter
     app.useGlobalFilters(new http_exception_filter_1.HttpExceptionFilter(logger));
-    // 2. Security: Set security headers (MUST come before static assets)
+    // 2. Compression & Security headers (skip compression for SSE event streams)
+    app.use((0, compression_1.default)({
+        filter: (req, res) => {
+            var _a;
+            if (req.headers["x-no-compression"])
+                return false;
+            const accept = String(req.headers["accept"] || "");
+            const contentType = String(res.getHeader("Content-Type") || "");
+            if (((_a = req.path) === null || _a === void 0 ? void 0 : _a.endsWith("/stream")) ||
+                accept.includes("text/event-stream") ||
+                contentType.includes("text/event-stream")) {
+                return false;
+            }
+            return compression_1.default.filter(req, res);
+        },
+    }));
     app.use((0, helmet_1.default)({
         crossOriginResourcePolicy: { policy: "cross-origin" },
         crossOriginEmbedderPolicy: false,
