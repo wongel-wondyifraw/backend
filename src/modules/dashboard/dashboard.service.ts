@@ -1,10 +1,12 @@
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
+import { OnEvent } from "@nestjs/event-emitter";
 import { Repository } from "typeorm";
 import { Member } from "../members/entities/member.entity";
 import { Ministry } from "../ministries/entities/ministry.entity";
 import { Minister } from "../ministers/entities/minister.entity";
 import { User } from "../users/entities/user.entity";
+import { NOTIFICATION_EVENT } from "../notifications/notification-events";
 
 export interface MinistryShareItem {
   name: string;
@@ -63,6 +65,12 @@ export class DashboardService {
   private statsCache: { value: DashboardStats; expiresAt: number } | null =
     null;
   private static readonly STATS_TTL_MS = 60_000;
+
+  @OnEvent("dashboard.invalidate")
+  @OnEvent(NOTIFICATION_EVENT)
+  invalidateStatsCache(): void {
+    this.statsCache = null;
+  }
 
   constructor(
     @InjectRepository(Member)

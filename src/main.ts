@@ -1,4 +1,5 @@
 import "reflect-metadata";
+import type { NextFunction, Request, Response } from "express";
 import { NestFactory } from "@nestjs/core";
 import { VersioningType, ValidationPipe } from "@nestjs/common";
 import { NestExpressApplication } from "@nestjs/platform-express";
@@ -14,30 +15,37 @@ import {
   getUploadsRoot,
 } from "./common/config/multer.config";
 
+const normalizeOrigin = (value: string): string =>
+  value.trim().replace(/\/+$/, "");
+
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
     bufferLogs: true,
   });
 
+  // Disable weak ETags and trust Render/proxy headers so dynamic API responses are never served stale.
+  app.set("etag", false);
+  app.set("trust proxy", 1);
+
   const config = app.get(ConfigService);
   const port = config.get<number>("PORT", 3001);
-  const frontendUrl = config.get<string>(
-    "FRONTEND_URL",
-    "http://localhost:3000",
+  const frontendUrl = normalizeOrigin(
+    config.get<string>("FRONTEND_URL", "http://localhost:3000"),
   );
   const frontendUrls = (config.get<string>("FRONTEND_URLS") || "")
     .split(",")
-    .map((value) => value.trim())
+    .map(normalizeOrigin)
     .filter(Boolean);
   const allowedOrigins = new Set([frontendUrl, ...frontendUrls]);
 
   const isAllowedOrigin = (origin: string): boolean => {
-    if (allowedOrigins.has(origin)) return true;
+    const normalized = normalizeOrigin(origin);
+    if (allowedOrigins.has(normalized)) return true;
     const isDevLocalhost =
       process.env.NODE_ENV !== "production" &&
-      /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin);
+      /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(normalized);
     try {
-      if (/\.vercel\.app$/.test(new URL(origin).hostname)) return true;
+      if (/\.vercel\.app$/.test(new URL(normalized).hostname)) return true;
     } catch {
       /* keep false */
     }
@@ -92,6 +100,21 @@ async function bootstrap() {
       callback(null, false);
     },
     credentials: true,
+  });
+
+  // Ensure API responses are never cached by browsers, Cloudflare, or Render reverse proxies.
+  app.use("/api", (_req: Request, res: Response, next: NextFunction) => {
+    res.setHeader(
+      "Cache-Control",
+      "no-store, no-cache, must-revalidate, private",
+    );
+    res.setHeader("Pragma", "no-cache");
+    res.setHeader("Expires", "0");
+    res.setHeader("Surrogate-Control", "no-store");
+    res.setHeader("CDN-Cache-Control", "no-store");
+    res.vary("Origin");
+    res.vary("Authorization");
+    next();
   });
 
   // 3. Static Assets: local uploads/ (override with UPLOADS_DIR)

@@ -16,11 +16,13 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.DashboardService = void 0;
 const common_1 = require("@nestjs/common");
 const typeorm_1 = require("@nestjs/typeorm");
+const event_emitter_1 = require("@nestjs/event-emitter");
 const typeorm_2 = require("typeorm");
 const member_entity_1 = require("../members/entities/member.entity");
 const ministry_entity_1 = require("../ministries/entities/ministry.entity");
 const minister_entity_1 = require("../ministers/entities/minister.entity");
 const user_entity_1 = require("../users/entities/user.entity");
+const notification_events_1 = require("../notifications/notification-events");
 const MONTH_LABELS = [
     "Jan",
     "Feb",
@@ -36,6 +38,9 @@ const MONTH_LABELS = [
     "Dec",
 ];
 let DashboardService = DashboardService_1 = class DashboardService {
+    invalidateStatsCache() {
+        this.statsCache = null;
+    }
     constructor(membersRepository, ministriesRepository, ministersRepository, usersRepository) {
         this.membersRepository = membersRepository;
         this.ministriesRepository = ministriesRepository;
@@ -235,6 +240,13 @@ let DashboardService = DashboardService_1 = class DashboardService {
 };
 exports.DashboardService = DashboardService;
 DashboardService.STATS_TTL_MS = 60000;
+__decorate([
+    (0, event_emitter_1.OnEvent)("dashboard.invalidate"),
+    (0, event_emitter_1.OnEvent)(notification_events_1.NOTIFICATION_EVENT),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", void 0)
+], DashboardService.prototype, "invalidateStatsCache", null);
 exports.DashboardService = DashboardService = DashboardService_1 = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, typeorm_1.InjectRepository)(member_entity_1.Member)),

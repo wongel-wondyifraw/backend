@@ -47,6 +47,9 @@ let MembersService = class MembersService {
         await this.assertEmailAvailable(memberData.email);
         const normalizedPayload = {
             ...memberData,
+            ...(memberData.status !== undefined
+                ? { status: memberData.status.trim().toLowerCase() }
+                : {}),
             first_name: (0, name_normalizer_1.normalizePersonName)(memberData.first_name),
             ...(memberData.middle_name !== undefined
                 ? { middle_name: (0, name_normalizer_1.normalizePersonName)(memberData.middle_name) }
@@ -110,10 +113,11 @@ let MembersService = class MembersService {
             severity: "success",
             title: "New member added",
             message: `${name} was added to the directory.`,
-            href: `/members/${saved.id}`,
+            href: `/members/details/${saved.id}`,
             dedupeKey: `member.created:${saved.id}`,
             targetRoles: ["admin", "minister"],
         });
+        this.events.emit("dashboard.invalidate");
         return saved;
     }
     async createBulk(items) {
@@ -159,13 +163,15 @@ let MembersService = class MembersService {
         const sortBy = (filters === null || filters === void 0 ? void 0 : filters.sort_by) || "created_at";
         const sortOrder = ((filters === null || filters === void 0 ? void 0 : filters.sort_order) || "DESC").toUpperCase() === "ASC" ? "ASC" : "DESC";
         if (sortBy === "visit_count") {
-            qb.orderBy("member.visit_count", sortOrder).addOrderBy("member.created_at", "DESC");
+            qb.orderBy("member.visit_count", sortOrder)
+                .addOrderBy("member.created_at", "DESC")
+                .addOrderBy("member.id", "DESC");
         }
         else if (sortBy === "joined_date") {
-            qb.orderBy("COALESCE(member.joined_date, CAST(member.created_at AS date))", sortOrder);
+            qb.orderBy("COALESCE(member.joined_date, CAST(member.created_at AS date))", sortOrder).addOrderBy("member.id", sortOrder);
         }
         else {
-            qb.orderBy("member.created_at", sortOrder);
+            qb.orderBy("member.created_at", sortOrder).addOrderBy("member.id", sortOrder);
         }
         qb.skip((page - 1) * limit).take(limit);
         const [data, total] = await qb.getManyAndCount();
@@ -192,13 +198,23 @@ let MembersService = class MembersService {
         }
         return member;
     }
-    async update(id, updateMemberDto) {
+    async update(id, updateMemberDto, actorUserId) {
         const { ministry_ids, date_of_birth, date_of_birth_calendar, date_of_birth_precision, joined_date, joined_date_calendar, joined_date_precision, salvation_date, salvation_date_calendar, salvation_date_precision, ...memberData } = updateMemberDto;
         if (memberData.email !== undefined) {
             await this.assertEmailAvailable(memberData.email, id);
         }
+        const normalizedStatus = memberData.status !== undefined
+            ? memberData.status.trim().toLowerCase()
+            : undefined;
         const memberPatch = {
             ...memberData,
+            ...(normalizedStatus !== undefined ? { status: normalizedStatus } : {}),
+            ...(normalizedStatus === "active"
+                ? {
+                    approved_at: new Date(),
+                    ...(actorUserId ? { approved_by_user_id: actorUserId } : {}),
+                }
+                : {}),
             ...(memberData.first_name !== undefined
                 ? { first_name: (0, name_normalizer_1.normalizePersonName)(memberData.first_name) }
                 : {}),
@@ -273,10 +289,11 @@ let MembersService = class MembersService {
             severity: "info",
             title: "Member updated",
             message: `${name}'s profile was updated.`,
-            href: `/members/${id}`,
+            href: `/members/details/${id}`,
             dedupeKey: `member.updated:${id}:${Date.now()}`,
             targetRoles: ["admin", "minister"],
         });
+        this.events.emit("dashboard.invalidate");
         return member;
     }
     async remove(id) {
@@ -285,6 +302,7 @@ let MembersService = class MembersService {
         if (result.affected === 0) {
             throw new common_1.NotFoundException(`Member with ID ${id} not found`);
         }
+        this.events.emit("dashboard.invalidate");
         if (member) {
             const name = `${member.first_name} ${member.last_name}`.trim();
             this.events.emit(notification_events_1.NOTIFICATION_EVENT, {

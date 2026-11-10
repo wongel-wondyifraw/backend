@@ -83,9 +83,11 @@ describe("MembersService", () => {
       NOTIFICATION_EVENT,
       expect.objectContaining({
         eventName: "member.created",
+        href: "/members/details/member-1",
         targetRoles: ["admin", "minister"],
       }),
     );
+    expect(events.emit).toHaveBeenCalledWith("dashboard.invalidate");
   });
 
   it("normalizes names and resolves partial/EC dates on create", async () => {
@@ -205,6 +207,36 @@ describe("MembersService", () => {
       expect.stringContaining("<= :joinedTo"),
       { joinedTo: "2023-09-11" },
     );
+    expect(qb.orderBy).toHaveBeenCalledWith("member.created_at", "DESC");
+    expect(qb.addOrderBy).toHaveBeenCalledWith("member.id", "DESC");
+  });
+
+  it("sets approval metadata and invalidates dashboard cache on approval", async () => {
+    repository.update.mockResolvedValue({ affected: 1, raw: [], generatedMaps: [] });
+    repository.findOne.mockResolvedValue({
+      ...member,
+      status: "active",
+      approved_by_user_id: "user-admin-1",
+    } as unknown as Member);
+
+    await service.update("member-1", { status: "ACTIVE" }, "user-admin-1");
+
+    expect(repository.update).toHaveBeenCalledWith(
+      "member-1",
+      expect.objectContaining({
+        status: "active",
+        approved_by_user_id: "user-admin-1",
+        approved_at: expect.any(Date),
+      }),
+    );
+    expect(events.emit).toHaveBeenCalledWith(
+      NOTIFICATION_EVENT,
+      expect.objectContaining({
+        eventName: "member.updated",
+        href: "/members/details/member-1",
+      }),
+    );
+    expect(events.emit).toHaveBeenCalledWith("dashboard.invalidate");
   });
 
   it("deletes member and emits notification", async () => {
@@ -213,6 +245,7 @@ describe("MembersService", () => {
 
     await service.remove("member-1");
 
+    expect(events.emit).toHaveBeenCalledWith("dashboard.invalidate");
     expect(events.emit).toHaveBeenCalledWith(
       NOTIFICATION_EVENT,
       expect.objectContaining({ eventName: "member.deleted" }),

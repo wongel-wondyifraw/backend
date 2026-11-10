@@ -66,6 +66,9 @@ export class MembersService {
 
     const normalizedPayload: Partial<Member> = {
       ...memberData,
+      ...(memberData.status !== undefined
+        ? { status: memberData.status.trim().toLowerCase() }
+        : {}),
       first_name: normalizePersonName(memberData.first_name),
       ...(memberData.middle_name !== undefined
         ? { middle_name: normalizePersonName(memberData.middle_name) }
@@ -146,10 +149,11 @@ export class MembersService {
       severity: "success",
       title: "New member added",
       message: `${name} was added to the directory.`,
-      href: `/members/${saved.id}`,
+      href: `/members/details/${saved.id}`,
       dedupeKey: `member.created:${saved.id}`,
       targetRoles: ["admin", "minister"],
     });
+    this.events.emit("dashboard.invalidate");
     return saved;
   }
 
@@ -238,17 +242,19 @@ export class MembersService {
       (filters?.sort_order || "DESC").toUpperCase() === "ASC" ? "ASC" : "DESC";
 
     if (sortBy === "visit_count") {
-      qb.orderBy("member.visit_count", sortOrder).addOrderBy(
-        "member.created_at",
-        "DESC",
-      );
+      qb.orderBy("member.visit_count", sortOrder)
+        .addOrderBy("member.created_at", "DESC")
+        .addOrderBy("member.id", "DESC");
     } else if (sortBy === "joined_date") {
       qb.orderBy(
         "COALESCE(member.joined_date, CAST(member.created_at AS date))",
         sortOrder,
-      );
+      ).addOrderBy("member.id", sortOrder);
     } else {
-      qb.orderBy("member.created_at", sortOrder);
+      qb.orderBy("member.created_at", sortOrder).addOrderBy(
+        "member.id",
+        sortOrder,
+      );
     }
 
     qb.skip((page - 1) * limit).take(limit);
@@ -281,7 +287,11 @@ export class MembersService {
     return member;
   }
 
-  async update(id: string, updateMemberDto: UpdateMemberDto): Promise<Member> {
+  async update(
+    id: string,
+    updateMemberDto: UpdateMemberDto,
+    actorUserId?: string,
+  ): Promise<Member> {
     const {
       ministry_ids,
       date_of_birth,
@@ -299,8 +309,20 @@ export class MembersService {
       await this.assertEmailAvailable(memberData.email, id);
     }
 
+    const normalizedStatus =
+      memberData.status !== undefined
+        ? memberData.status.trim().toLowerCase()
+        : undefined;
+
     const memberPatch: Partial<Member> = {
       ...memberData,
+      ...(normalizedStatus !== undefined ? { status: normalizedStatus } : {}),
+      ...(normalizedStatus === "active"
+        ? {
+            approved_at: new Date(),
+            ...(actorUserId ? { approved_by_user_id: actorUserId } : {}),
+          }
+        : {}),
       ...(memberData.first_name !== undefined
         ? { first_name: normalizePersonName(memberData.first_name) }
         : {}),
@@ -394,10 +416,11 @@ export class MembersService {
       severity: "info",
       title: "Member updated",
       message: `${name}'s profile was updated.`,
-      href: `/members/${id}`,
+      href: `/members/details/${id}`,
       dedupeKey: `member.updated:${id}:${Date.now()}`,
       targetRoles: ["admin", "minister"],
     });
+    this.events.emit("dashboard.invalidate");
     return member;
   }
 
@@ -407,6 +430,7 @@ export class MembersService {
     if (result.affected === 0) {
       throw new NotFoundException(`Member with ID ${id} not found`);
     }
+    this.events.emit("dashboard.invalidate");
     if (member) {
       const name = `${member.first_name} ${member.last_name}`.trim();
       this.events.emit(NOTIFICATION_EVENT, {

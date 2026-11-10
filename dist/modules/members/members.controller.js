@@ -21,6 +21,7 @@ const update_member_dto_1 = require("./dto/update-member.dto");
 const member_list_query_dto_1 = require("./dto/member-list-query.dto");
 const ministries_service_1 = require("../ministries/ministries.service");
 const permissions_decorator_1 = require("../../common/decorators/permissions.decorator");
+const APPROVE_ONLY_ALLOWED_FIELDS = new Set(["status", "status_reason"]);
 let MembersController = class MembersController {
     constructor(membersService, ministriesService) {
         this.membersService = membersService;
@@ -46,8 +47,17 @@ let MembersController = class MembersController {
     async findOne(id) {
         return this.membersService.findOne(id);
     }
-    async update(id, updateMemberDto) {
-        return this.membersService.update(id, updateMemberDto);
+    async update(id, updateMemberDto, req) {
+        var _a, _b, _c, _d;
+        const granted = new Set(((_c = (_b = (_a = req.user) === null || _a === void 0 ? void 0 : _a.roleEntity) === null || _b === void 0 ? void 0 : _b.permissions) !== null && _c !== void 0 ? _c : []).map((p) => p.slug));
+        if (!granted.has("members.update")) {
+            const updatedKeys = Object.keys(updateMemberDto).filter((key) => updateMemberDto[key] !== undefined);
+            const hasDisallowed = updatedKeys.some((key) => !APPROVE_ONLY_ALLOWED_FIELDS.has(key));
+            if (hasDisallowed || updatedKeys.length === 0) {
+                throw new common_1.ForbiddenException("Missing permission: members.update");
+            }
+        }
+        return this.membersService.update(id, updateMemberDto, (_d = req.user) === null || _d === void 0 ? void 0 : _d.id);
     }
     async remove(id) {
         return this.membersService.remove(id);
@@ -91,11 +101,12 @@ __decorate([
 ], MembersController.prototype, "findOne", null);
 __decorate([
     (0, common_1.Patch)(":id"),
-    (0, permissions_decorator_1.RequiresPermissions)("members.update"),
+    (0, permissions_decorator_1.RequiresPermissions)("members.update", "members.approve"),
     __param(0, (0, common_1.Param)("id", common_1.ParseUUIDPipe)),
     __param(1, (0, common_1.Body)()),
+    __param(2, (0, common_1.Req)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, update_member_dto_1.UpdateMemberDto]),
+    __metadata("design:paramtypes", [String, update_member_dto_1.UpdateMemberDto, Object]),
     __metadata("design:returntype", Promise)
 ], MembersController.prototype, "update", null);
 __decorate([
