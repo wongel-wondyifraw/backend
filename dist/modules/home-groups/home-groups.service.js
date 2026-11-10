@@ -21,6 +21,7 @@ const home_group_entity_1 = require("./entities/home-group.entity");
 const home_group_member_entity_1 = require("./entities/home-group-member.entity");
 const notification_events_1 = require("../notifications/notification-events");
 const leader_resolver_service_1 = require("../../common/leadership/leader-resolver.service");
+const name_normalizer_1 = require("../../common/utils/name-normalizer");
 let HomeGroupsService = class HomeGroupsService {
     constructor(homeGroupsRepository, homeGroupMembersRepository, events, leaders) {
         this.homeGroupsRepository = homeGroupsRepository;
@@ -42,10 +43,10 @@ let HomeGroupsService = class HomeGroupsService {
         const leader = this.normalizeLeader(dto);
         await this.leaders.assertExists(leader.leader_id, leader.leader_type);
         const homeGroup = this.homeGroupsRepository.create({
-            name: dto.name,
+            name: (0, name_normalizer_1.normalizeTitleInitials)(dto.name),
             about: (_a = dto.about) !== null && _a !== void 0 ? _a : null,
             schedule: (_b = dto.schedule) !== null && _b !== void 0 ? _b : null,
-            location: dto.location,
+            location: (0, name_normalizer_1.normalizeTitleInitials)(dto.location),
             ...leader,
         });
         const saved = await this.homeGroupsRepository.save(homeGroup);
@@ -90,7 +91,15 @@ let HomeGroupsService = class HomeGroupsService {
         return withLeader;
     }
     async update(id, dto) {
-        const patch = { ...dto };
+        const patch = {
+            ...dto,
+            ...(dto.name !== undefined
+                ? { name: (0, name_normalizer_1.normalizeTitleInitials)(dto.name) }
+                : {}),
+            ...(dto.location !== undefined
+                ? { location: (0, name_normalizer_1.normalizeTitleInitials)(dto.location) }
+                : {}),
+        };
         if ("leader_id" in dto || "leader_type" in dto) {
             const leader = this.normalizeLeader(dto);
             await this.leaders.assertExists(leader.leader_id, leader.leader_type);

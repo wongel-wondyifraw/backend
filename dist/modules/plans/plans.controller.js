@@ -35,6 +35,7 @@ let PlansController = class PlansController {
             type: query.type,
             from: query.from,
             to: query.to,
+            calendar: query.calendar,
             status: query.status,
         });
     }

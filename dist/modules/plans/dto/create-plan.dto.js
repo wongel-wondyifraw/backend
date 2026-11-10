@@ -10,7 +10,10 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CreatePlanDto = exports.PLAN_STATUSES = exports.PLAN_TYPES = void 0;
+const class_transformer_1 = require("class-transformer");
 const class_validator_1 = require("class-validator");
+const flexible_date_validator_1 = require("../../../common/validators/flexible-date.validator");
+const normalize_name_decorator_1 = require("../../../common/transformers/normalize-name.decorator");
 exports.PLAN_TYPES = [
     "program",
     "crusade",
@@ -26,6 +29,7 @@ class CreatePlanDto {
 }
 exports.CreatePlanDto = CreatePlanDto;
 __decorate([
+    (0, normalize_name_decorator_1.NormalizeTitleInitials)(),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsNotEmpty)(),
     __metadata("design:type", String)
@@ -35,9 +39,17 @@ __decorate([
     __metadata("design:type", Object)
 ], CreatePlanDto.prototype, "type", void 0);
 __decorate([
-    (0, class_validator_1.IsDateString)(),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsNotEmpty)(),
+    (0, flexible_date_validator_1.IsFlexibleDate)({ allowPartial: false }),
     __metadata("design:type", String)
 ], CreatePlanDto.prototype, "plan_date", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_transformer_1.Transform)(({ value }) => typeof value === "string" ? value.trim().toLowerCase() : value),
+    (0, class_validator_1.IsIn)(["gc", "ec"]),
+    __metadata("design:type", String)
+], CreatePlanDto.prototype, "plan_date_calendar", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
@@ -51,6 +63,7 @@ __decorate([
     __metadata("design:type", Object)
 ], CreatePlanDto.prototype, "end_time", void 0);
 __decorate([
+    (0, normalize_name_decorator_1.NormalizeTitleInitials)(),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", Object)

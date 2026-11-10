@@ -1,7 +1,7 @@
+import { Transform } from "class-transformer";
 import {
   ArrayUnique,
   IsArray,
-  IsDateString,
   IsIn,
   IsNotEmpty,
   IsOptional,
@@ -9,6 +9,9 @@ import {
   IsUUID,
   Matches,
 } from "class-validator";
+import { IsFlexibleDate } from "../../../common/validators/flexible-date.validator";
+import { NormalizeTitleInitials } from "../../../common/transformers/normalize-name.decorator";
+import type { CalendarSystem } from "../../../common/utils/ethiopian-calendar";
 
 export const PLAN_TYPES = [
   "program",
@@ -25,6 +28,7 @@ export const PLAN_STATUSES = ["planned", "completed", "cancelled"] as const;
 const TIME_PATTERN = /^([01]\d|2[0-3]):[0-5]\d(:[0-5]\d)?$/;
 
 export class CreatePlanDto {
+  @NormalizeTitleInitials()
   @IsString()
   @IsNotEmpty()
   title: string;
@@ -32,8 +36,17 @@ export class CreatePlanDto {
   @IsIn(PLAN_TYPES)
   type: (typeof PLAN_TYPES)[number];
 
-  @IsDateString()
+  @IsString()
+  @IsNotEmpty()
+  @IsFlexibleDate({ allowPartial: false })
   plan_date: string;
+
+  @IsOptional()
+  @Transform(({ value }) =>
+    typeof value === "string" ? value.trim().toLowerCase() : value,
+  )
+  @IsIn(["gc", "ec"])
+  plan_date_calendar?: CalendarSystem;
 
   @IsOptional()
   @IsString()
@@ -45,6 +58,7 @@ export class CreatePlanDto {
   @Matches(TIME_PATTERN, { message: "end_time must be HH:mm or HH:mm:ss" })
   end_time?: string | null;
 
+  @NormalizeTitleInitials()
   @IsOptional()
   @IsString()
   location?: string | null;

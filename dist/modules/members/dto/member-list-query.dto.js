@@ -10,8 +10,10 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.MemberListQueryDto = void 0;
+const class_transformer_1 = require("class-transformer");
 const class_validator_1 = require("class-validator");
 const pagination_query_dto_1 = require("../../../common/dto/pagination-query.dto");
+const flexible_date_validator_1 = require("../../../common/validators/flexible-date.validator");
 class MemberListQueryDto extends pagination_query_dto_1.PaginationQueryDto {
 }
 exports.MemberListQueryDto = MemberListQueryDto;
@@ -27,14 +29,20 @@ __decorate([
 ], MemberListQueryDto.prototype, "marital_status", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsDateString)(),
+    (0, flexible_date_validator_1.IsFlexibleDate)({ allowPartial: true, calendarField: "joined_calendar" }),
     __metadata("design:type", String)
 ], MemberListQueryDto.prototype, "joined_from", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsDateString)(),
+    (0, flexible_date_validator_1.IsFlexibleDate)({ allowPartial: true, calendarField: "joined_calendar" }),
     __metadata("design:type", String)
 ], MemberListQueryDto.prototype, "joined_to", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_transformer_1.Transform)(({ value }) => typeof value === "string" ? value.trim().toLowerCase() : value),
+    (0, class_validator_1.IsIn)(["gc", "ec"]),
+    __metadata("design:type", String)
+], MemberListQueryDto.prototype, "joined_calendar", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsIn)(["created_at", "joined_date", "visit_count"]),

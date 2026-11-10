@@ -5,8 +5,10 @@ import {
   IsString,
   Length,
 } from "class-validator";
+import { NormalizeTitleInitials } from "../../../common/transformers/normalize-name.decorator";
 
 export class UpdateRoleDto {
+  @NormalizeTitleInitials()
   @IsOptional()
   @IsString()
   @Length(1, 128)

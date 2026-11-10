@@ -12,6 +12,15 @@ import { UpdateMemberDto } from "./dto/update-member.dto";
 import { PaginatedResult } from "../../common/interfaces/paginated-result.interface";
 import { BulkCreateResult } from "../../common/interfaces/bulk-create-result.interface";
 import { NOTIFICATION_EVENT } from "../notifications/notification-events";
+import {
+  normalizePersonName,
+  normalizeTitleInitials,
+} from "../../common/utils/name-normalizer";
+import {
+  type CalendarSystem,
+  resolveFilterDateBound,
+} from "../../common/utils/ethiopian-calendar";
+import { resolveDateFieldForWrite } from "../../common/utils/calendar-dto.helper";
 
 @Injectable()
 export class MembersService {
@@ -40,9 +49,85 @@ export class MembersService {
   }
 
   async create(createMemberDto: CreateMemberDto): Promise<Member> {
-    const { ministry_ids, ...memberData } = createMemberDto;
+    const {
+      ministry_ids,
+      date_of_birth,
+      date_of_birth_calendar,
+      date_of_birth_precision,
+      joined_date,
+      joined_date_calendar,
+      joined_date_precision,
+      salvation_date,
+      salvation_date_calendar,
+      salvation_date_precision,
+      ...memberData
+    } = createMemberDto;
     await this.assertEmailAvailable(memberData.email);
-    const member = this.membersRepository.create(memberData);
+
+    const normalizedPayload: Partial<Member> = {
+      ...memberData,
+      first_name: normalizePersonName(memberData.first_name),
+      ...(memberData.middle_name !== undefined
+        ? { middle_name: normalizePersonName(memberData.middle_name) }
+        : {}),
+      last_name: normalizePersonName(memberData.last_name),
+      ...(memberData.profession !== undefined
+        ? { profession: normalizeTitleInitials(memberData.profession) }
+        : {}),
+      ...(memberData.employer !== undefined
+        ? { employer: normalizeTitleInitials(memberData.employer) }
+        : {}),
+      ...(memberData.education_field !== undefined
+        ? { education_field: normalizeTitleInitials(memberData.education_field) }
+        : {}),
+    };
+
+    const resolvedDob = resolveDateFieldForWrite(
+      "date_of_birth",
+      date_of_birth,
+      {
+        calendar: date_of_birth_calendar,
+        precision: date_of_birth_precision,
+        allowPartial: true,
+      },
+    );
+    if (resolvedDob !== undefined) {
+      normalizedPayload.date_of_birth = resolvedDob.value;
+      normalizedPayload.date_of_birth_precision = resolvedDob.precision;
+      normalizedPayload.date_of_birth_calendar = resolvedDob.calendar;
+    }
+
+    const resolvedJoined = resolveDateFieldForWrite(
+      "joined_date",
+      joined_date,
+      {
+        calendar: joined_date_calendar,
+        precision: joined_date_precision,
+        allowPartial: true,
+      },
+    );
+    if (resolvedJoined !== undefined) {
+      normalizedPayload.joined_date = resolvedJoined.value;
+      normalizedPayload.joined_date_precision = resolvedJoined.precision;
+      normalizedPayload.joined_date_calendar = resolvedJoined.calendar;
+    }
+
+    const resolvedSalvation = resolveDateFieldForWrite(
+      "salvation_date",
+      salvation_date,
+      {
+        calendar: salvation_date_calendar,
+        precision: salvation_date_precision,
+        allowPartial: true,
+      },
+    );
+    if (resolvedSalvation !== undefined) {
+      normalizedPayload.salvation_date = resolvedSalvation.value;
+      normalizedPayload.salvation_date_precision = resolvedSalvation.precision;
+      normalizedPayload.salvation_date_calendar = resolvedSalvation.calendar;
+    }
+
+    const member = this.membersRepository.create(normalizedPayload);
     const saved = await this.membersRepository.save(member);
 
     if (ministry_ids && ministry_ids.length > 0) {
@@ -95,6 +180,7 @@ export class MembersService {
       marital_status?: string;
       joined_from?: string;
       joined_to?: string;
+      joined_calendar?: CalendarSystem;
       sort_by?: "created_at" | "joined_date" | "visit_count";
       sort_order?: string;
     },
@@ -122,16 +208,28 @@ export class MembersService {
     }
 
     if (filters?.joined_from) {
+      const boundFrom =
+        resolveFilterDateBound(
+          filters.joined_from,
+          "start",
+          filters.joined_calendar,
+        ) ?? filters.joined_from;
       qb.andWhere(
         "COALESCE(member.joined_date, CAST(member.created_at AS date)) >= :joinedFrom",
-        { joinedFrom: filters.joined_from },
+        { joinedFrom: boundFrom },
       );
     }
 
     if (filters?.joined_to) {
+      const boundTo =
+        resolveFilterDateBound(
+          filters.joined_to,
+          "end",
+          filters.joined_calendar,
+        ) ?? filters.joined_to;
       qb.andWhere(
         "COALESCE(member.joined_date, CAST(member.created_at AS date)) <= :joinedTo",
-        { joinedTo: filters.joined_to },
+        { joinedTo: boundTo },
       );
     }
 
@@ -184,11 +282,93 @@ export class MembersService {
   }
 
   async update(id: string, updateMemberDto: UpdateMemberDto): Promise<Member> {
-    const { ministry_ids, ...memberData } = updateMemberDto;
+    const {
+      ministry_ids,
+      date_of_birth,
+      date_of_birth_calendar,
+      date_of_birth_precision,
+      joined_date,
+      joined_date_calendar,
+      joined_date_precision,
+      salvation_date,
+      salvation_date_calendar,
+      salvation_date_precision,
+      ...memberData
+    } = updateMemberDto;
     if (memberData.email !== undefined) {
       await this.assertEmailAvailable(memberData.email, id);
     }
-    await this.membersRepository.update(id, memberData);
+
+    const memberPatch: Partial<Member> = {
+      ...memberData,
+      ...(memberData.first_name !== undefined
+        ? { first_name: normalizePersonName(memberData.first_name) }
+        : {}),
+      ...(memberData.middle_name !== undefined
+        ? { middle_name: normalizePersonName(memberData.middle_name) }
+        : {}),
+      ...(memberData.last_name !== undefined
+        ? { last_name: normalizePersonName(memberData.last_name) }
+        : {}),
+      ...(memberData.profession !== undefined
+        ? { profession: normalizeTitleInitials(memberData.profession) }
+        : {}),
+      ...(memberData.employer !== undefined
+        ? { employer: normalizeTitleInitials(memberData.employer) }
+        : {}),
+      ...(memberData.education_field !== undefined
+        ? { education_field: normalizeTitleInitials(memberData.education_field) }
+        : {}),
+    };
+
+    const resolvedDob = resolveDateFieldForWrite(
+      "date_of_birth",
+      date_of_birth,
+      {
+        calendar: date_of_birth_calendar,
+        precision: date_of_birth_precision,
+        allowPartial: true,
+      },
+    );
+    if (resolvedDob !== undefined) {
+      memberPatch.date_of_birth = resolvedDob.value;
+      memberPatch.date_of_birth_precision = resolvedDob.precision;
+      memberPatch.date_of_birth_calendar = resolvedDob.calendar;
+    }
+
+    const resolvedJoined = resolveDateFieldForWrite(
+      "joined_date",
+      joined_date,
+      {
+        calendar: joined_date_calendar,
+        precision: joined_date_precision,
+        allowPartial: true,
+      },
+    );
+    if (resolvedJoined !== undefined) {
+      memberPatch.joined_date = resolvedJoined.value;
+      memberPatch.joined_date_precision = resolvedJoined.precision;
+      memberPatch.joined_date_calendar = resolvedJoined.calendar;
+    }
+
+    const resolvedSalvation = resolveDateFieldForWrite(
+      "salvation_date",
+      salvation_date,
+      {
+        calendar: salvation_date_calendar,
+        precision: salvation_date_precision,
+        allowPartial: true,
+      },
+    );
+    if (resolvedSalvation !== undefined) {
+      memberPatch.salvation_date = resolvedSalvation.value;
+      memberPatch.salvation_date_precision = resolvedSalvation.precision;
+      memberPatch.salvation_date_calendar = resolvedSalvation.calendar;
+    }
+
+    if (Object.keys(memberPatch).length > 0) {
+      await this.membersRepository.update(id, memberPatch);
+    }
 
     if (ministry_ids !== undefined) {
       await this.membersRepository.manager

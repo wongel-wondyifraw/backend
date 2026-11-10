@@ -4,6 +4,7 @@ import { Repository, ILike } from "typeorm";
 import { Location } from "./entities/location.entity";
 import { CreateLocationDto } from "./dto/create-location.dto";
 import { UpdateLocationDto } from "./dto/update-location.dto";
+import { normalizeTitleInitials } from "../../common/utils/name-normalizer";
 
 @Injectable()
 export class LocationsService {
@@ -29,7 +30,7 @@ export class LocationsService {
   }
 
   async create(dto: CreateLocationDto): Promise<Location> {
-    const trimmedName = dto.name.trim();
+    const trimmedName = normalizeTitleInitials(dto.name);
     // Check for existing location (case-insensitive)
     const existing = await this.locationRepo.findOne({
       where: { name: ILike(trimmedName) },
@@ -51,7 +52,7 @@ export class LocationsService {
     const location = await this.findOne(id);
 
     if (dto.name) {
-      location.name = dto.name.trim();
+      location.name = normalizeTitleInitials(dto.name);
     }
     if (dto.status) {
       location.status = dto.status;

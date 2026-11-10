@@ -11,10 +11,12 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CreateContactRequestDto = void 0;
 const class_validator_1 = require("class-validator");
+const normalize_name_decorator_1 = require("../../../common/transformers/normalize-name.decorator");
 class CreateContactRequestDto {
 }
 exports.CreateContactRequestDto = CreateContactRequestDto;
 __decorate([
+    (0, normalize_name_decorator_1.NormalizePersonName)(),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsNotEmpty)(),
     (0, class_validator_1.MaxLength)(200),

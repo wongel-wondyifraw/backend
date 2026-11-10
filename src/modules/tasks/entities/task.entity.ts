@@ -7,6 +7,7 @@ import {
   JoinColumn,
 } from "typeorm";
 import { UuidPrimary } from "../../../common/entities/uuid-primary";
+import type { CalendarSystem } from "../../../common/utils/ethiopian-calendar";
 import { TaskDefinition } from "./task-definition.entity";
 import { Minister } from "../../ministers/entities/minister.entity";
 import { Member } from "../../members/entities/member.entity";
@@ -50,6 +51,9 @@ export class Task extends UuidPrimary {
 
   @Column({ type: "date" })
   end_date: string;
+
+  @Column({ type: "varchar", length: 4, default: "gc" })
+  date_calendar: CalendarSystem;
 
   @Column({ type: "varchar", length: 32, default: "pending" })
   status: TaskStatus;

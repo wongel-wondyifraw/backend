@@ -8,8 +8,10 @@ import {
   MaxLength,
 } from "class-validator";
 import type { ContactRequestCategory } from "../entities/contact-request.entity";
+import { NormalizePersonName } from "../../../common/transformers/normalize-name.decorator";
 
 export class CreateContactRequestDto {
+  @NormalizePersonName()
   @IsString()
   @IsNotEmpty()
   @MaxLength(200)

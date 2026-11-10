@@ -21,6 +21,8 @@ const crypto_1 = require("crypto");
 const minister_entity_1 = require("./entities/minister.entity");
 const users_service_1 = require("../users/users.service");
 const notification_events_1 = require("../notifications/notification-events");
+const name_normalizer_1 = require("../../common/utils/name-normalizer");
+const calendar_dto_helper_1 = require("../../common/utils/calendar-dto.helper");
 let MinistersService = class MinistersService {
     constructor(ministersRepository, usersService, events) {
         this.ministersRepository = ministersRepository;
@@ -33,7 +35,7 @@ let MinistersService = class MinistersService {
         return Array.from(bytes, (b) => chars[b % chars.length]).join("");
     }
     async create(dto, actingUser) {
-        var _a, _b, _c, _d, _e;
+        var _a, _b, _c;
         const email = dto.email.trim().toLowerCase();
         if (!email) {
             throw new common_1.BadRequestException("Email is required to create a minister login");
@@ -50,23 +52,56 @@ let MinistersService = class MinistersService {
         }
         const temporaryPassword = this.generatePassword();
         const isActive = ((_a = dto.status) !== null && _a !== void 0 ? _a : "active").toLowerCase() !== "inactive";
+        const firstName = (0, name_normalizer_1.normalizePersonName)(dto.first_name);
+        const middleName = dto.middle_name !== undefined ? (0, name_normalizer_1.normalizePersonName)(dto.middle_name) : "";
+        const lastName = (0, name_normalizer_1.normalizePersonName)(dto.last_name);
+        const normalizedTitle = dto.title !== undefined ? (0, name_normalizer_1.normalizeTitleInitials)(dto.title) : undefined;
+        const { date_of_birth, date_of_birth_calendar, date_of_birth_precision, joined_date, joined_date_calendar, joined_date_precision, ...ministerRest } = dto;
+        const resolvedDob = (0, calendar_dto_helper_1.resolveDateFieldForWrite)("date_of_birth", date_of_birth, {
+            calendar: date_of_birth_calendar,
+            precision: date_of_birth_precision,
+            allowPartial: true,
+        });
+        const resolvedJoined = (0, calendar_dto_helper_1.resolveDateFieldForWrite)("joined_date", joined_date, {
+            calendar: joined_date_calendar,
+            precision: joined_date_precision,
+            allowPartial: true,
+        });
         const user = await this.usersService.create({
-            first_name: dto.first_name,
-            middle_name: (_b = dto.middle_name) !== null && _b !== void 0 ? _b : "",
-            last_name: dto.last_name,
+            first_name: firstName,
+            middle_name: middleName,
+            last_name: lastName,
             email,
             password: temporaryPassword,
             role: "minister",
-            title: (_c = dto.title) !== null && _c !== void 0 ? _c : undefined,
-            avatar_url: (_d = dto.image_url) !== null && _d !== void 0 ? _d : undefined,
+            title: normalizedTitle !== null && normalizedTitle !== void 0 ? normalizedTitle : undefined,
+            avatar_url: (_b = dto.image_url) !== null && _b !== void 0 ? _b : undefined,
             is_active: isActive,
             created_via: "minister_module",
         }, actingUser);
         const minister = this.ministersRepository.create({
-            ...dto,
+            ...ministerRest,
+            first_name: firstName,
+            ...(dto.middle_name !== undefined ? { middle_name: middleName } : {}),
+            last_name: lastName,
+            ...(normalizedTitle !== undefined ? { title: normalizedTitle } : {}),
+            ...(resolvedDob !== undefined
+                ? {
+                    date_of_birth: resolvedDob.value,
+                    date_of_birth_precision: resolvedDob.precision,
+                    date_of_birth_calendar: resolvedDob.calendar,
+                }
+                : {}),
+            ...(resolvedJoined !== undefined
+                ? {
+                    joined_date: resolvedJoined.value,
+                    joined_date_precision: resolvedJoined.precision,
+                    joined_date_calendar: resolvedJoined.calendar,
+                }
+                : {}),
             email,
             user_id: user.id,
-            status: (_e = dto.status) !== null && _e !== void 0 ? _e : "active",
+            status: (_c = dto.status) !== null && _c !== void 0 ? _c : "active",
         });
         const saved = await this.ministersRepository.save(minister);
         const name = `${saved.first_name} ${saved.last_name}`.trim();
@@ -122,16 +157,54 @@ let MinistersService = class MinistersService {
     }
     async update(id, dto, actingUser) {
         const minister = await this.findOne(id);
-        await this.ministersRepository.update(id, dto);
+        const { date_of_birth, date_of_birth_calendar, date_of_birth_precision, joined_date, joined_date_calendar, joined_date_precision, ...ministerRest } = dto;
+        const ministerPatch = {
+            ...ministerRest,
+            ...(ministerRest.first_name !== undefined
+                ? { first_name: (0, name_normalizer_1.normalizePersonName)(ministerRest.first_name) }
+                : {}),
+            ...(ministerRest.middle_name !== undefined
+                ? { middle_name: (0, name_normalizer_1.normalizePersonName)(ministerRest.middle_name) }
+                : {}),
+            ...(ministerRest.last_name !== undefined
+                ? { last_name: (0, name_normalizer_1.normalizePersonName)(ministerRest.last_name) }
+                : {}),
+            ...(ministerRest.title !== undefined
+                ? { title: (0, name_normalizer_1.normalizeTitleInitials)(ministerRest.title) }
+                : {}),
+        };
+        const resolvedDob = (0, calendar_dto_helper_1.resolveDateFieldForWrite)("date_of_birth", date_of_birth, {
+            calendar: date_of_birth_calendar,
+            precision: date_of_birth_precision,
+            allowPartial: true,
+        });
+        if (resolvedDob !== undefined) {
+            ministerPatch.date_of_birth = resolvedDob.value;
+            ministerPatch.date_of_birth_precision = resolvedDob.precision;
+            ministerPatch.date_of_birth_calendar = resolvedDob.calendar;
+        }
+        const resolvedJoined = (0, calendar_dto_helper_1.resolveDateFieldForWrite)("joined_date", joined_date, {
+            calendar: joined_date_calendar,
+            precision: joined_date_precision,
+            allowPartial: true,
+        });
+        if (resolvedJoined !== undefined) {
+            ministerPatch.joined_date = resolvedJoined.value;
+            ministerPatch.joined_date_precision = resolvedJoined.precision;
+            ministerPatch.joined_date_calendar = resolvedJoined.calendar;
+        }
+        if (Object.keys(ministerPatch).length > 0) {
+            await this.ministersRepository.update(id, ministerPatch);
+        }
         const userPatch = {};
-        if (dto.first_name !== undefined)
-            userPatch.first_name = dto.first_name;
-        if (dto.middle_name !== undefined)
-            userPatch.middle_name = dto.middle_name;
-        if (dto.last_name !== undefined)
-            userPatch.last_name = dto.last_name;
-        if (dto.title !== undefined)
-            userPatch.title = dto.title;
+        if (ministerPatch.first_name !== undefined)
+            userPatch.first_name = ministerPatch.first_name;
+        if (ministerPatch.middle_name !== undefined)
+            userPatch.middle_name = ministerPatch.middle_name;
+        if (ministerPatch.last_name !== undefined)
+            userPatch.last_name = ministerPatch.last_name;
+        if (ministerPatch.title !== undefined)
+            userPatch.title = ministerPatch.title;
         if (dto.image_url !== undefined)
             userPatch.avatar_url = dto.image_url;
         if (dto.status !== undefined) {

@@ -19,6 +19,9 @@ const typeorm_2 = require("typeorm");
 const event_emitter_1 = require("@nestjs/event-emitter");
 const member_entity_1 = require("./entities/member.entity");
 const notification_events_1 = require("../notifications/notification-events");
+const name_normalizer_1 = require("../../common/utils/name-normalizer");
+const ethiopian_calendar_1 = require("../../common/utils/ethiopian-calendar");
+const calendar_dto_helper_1 = require("../../common/utils/calendar-dto.helper");
 let MembersService = class MembersService {
     constructor(membersRepository, events) {
         this.membersRepository = membersRepository;
@@ -40,9 +43,56 @@ let MembersService = class MembersService {
         }
     }
     async create(createMemberDto) {
-        const { ministry_ids, ...memberData } = createMemberDto;
+        const { ministry_ids, date_of_birth, date_of_birth_calendar, date_of_birth_precision, joined_date, joined_date_calendar, joined_date_precision, salvation_date, salvation_date_calendar, salvation_date_precision, ...memberData } = createMemberDto;
         await this.assertEmailAvailable(memberData.email);
-        const member = this.membersRepository.create(memberData);
+        const normalizedPayload = {
+            ...memberData,
+            first_name: (0, name_normalizer_1.normalizePersonName)(memberData.first_name),
+            ...(memberData.middle_name !== undefined
+                ? { middle_name: (0, name_normalizer_1.normalizePersonName)(memberData.middle_name) }
+                : {}),
+            last_name: (0, name_normalizer_1.normalizePersonName)(memberData.last_name),
+            ...(memberData.profession !== undefined
+                ? { profession: (0, name_normalizer_1.normalizeTitleInitials)(memberData.profession) }
+                : {}),
+            ...(memberData.employer !== undefined
+                ? { employer: (0, name_normalizer_1.normalizeTitleInitials)(memberData.employer) }
+                : {}),
+            ...(memberData.education_field !== undefined
+                ? { education_field: (0, name_normalizer_1.normalizeTitleInitials)(memberData.education_field) }
+                : {}),
+        };
+        const resolvedDob = (0, calendar_dto_helper_1.resolveDateFieldForWrite)("date_of_birth", date_of_birth, {
+            calendar: date_of_birth_calendar,
+            precision: date_of_birth_precision,
+            allowPartial: true,
+        });
+        if (resolvedDob !== undefined) {
+            normalizedPayload.date_of_birth = resolvedDob.value;
+            normalizedPayload.date_of_birth_precision = resolvedDob.precision;
+            normalizedPayload.date_of_birth_calendar = resolvedDob.calendar;
+        }
+        const resolvedJoined = (0, calendar_dto_helper_1.resolveDateFieldForWrite)("joined_date", joined_date, {
+            calendar: joined_date_calendar,
+            precision: joined_date_precision,
+            allowPartial: true,
+        });
+        if (resolvedJoined !== undefined) {
+            normalizedPayload.joined_date = resolvedJoined.value;
+            normalizedPayload.joined_date_precision = resolvedJoined.precision;
+            normalizedPayload.joined_date_calendar = resolvedJoined.calendar;
+        }
+        const resolvedSalvation = (0, calendar_dto_helper_1.resolveDateFieldForWrite)("salvation_date", salvation_date, {
+            calendar: salvation_date_calendar,
+            precision: salvation_date_precision,
+            allowPartial: true,
+        });
+        if (resolvedSalvation !== undefined) {
+            normalizedPayload.salvation_date = resolvedSalvation.value;
+            normalizedPayload.salvation_date_precision = resolvedSalvation.precision;
+            normalizedPayload.salvation_date_calendar = resolvedSalvation.calendar;
+        }
+        const member = this.membersRepository.create(normalizedPayload);
         const saved = await this.membersRepository.save(member);
         if (ministry_ids && ministry_ids.length > 0) {
             const ministryMembers = ministry_ids.map((ministry_id) => ({
@@ -82,7 +132,7 @@ let MembersService = class MembersService {
         return { created, failed: errors.length, errors };
     }
     async findAllPaginated(page = 1, limit = 20, search, filters) {
-        var _a, _b;
+        var _a, _b, _c, _d;
         const qb = this.membersRepository.createQueryBuilder("member");
         if (search === null || search === void 0 ? void 0 : search.trim()) {
             const pattern = `%${search.trim().toLowerCase()}%`;
@@ -99,10 +149,12 @@ let MembersService = class MembersService {
             });
         }
         if (filters === null || filters === void 0 ? void 0 : filters.joined_from) {
-            qb.andWhere("COALESCE(member.joined_date, CAST(member.created_at AS date)) >= :joinedFrom", { joinedFrom: filters.joined_from });
+            const boundFrom = (_c = (0, ethiopian_calendar_1.resolveFilterDateBound)(filters.joined_from, "start", filters.joined_calendar)) !== null && _c !== void 0 ? _c : filters.joined_from;
+            qb.andWhere("COALESCE(member.joined_date, CAST(member.created_at AS date)) >= :joinedFrom", { joinedFrom: boundFrom });
         }
         if (filters === null || filters === void 0 ? void 0 : filters.joined_to) {
-            qb.andWhere("COALESCE(member.joined_date, CAST(member.created_at AS date)) <= :joinedTo", { joinedTo: filters.joined_to });
+            const boundTo = (_d = (0, ethiopian_calendar_1.resolveFilterDateBound)(filters.joined_to, "end", filters.joined_calendar)) !== null && _d !== void 0 ? _d : filters.joined_to;
+            qb.andWhere("COALESCE(member.joined_date, CAST(member.created_at AS date)) <= :joinedTo", { joinedTo: boundTo });
         }
         const sortBy = (filters === null || filters === void 0 ? void 0 : filters.sort_by) || "created_at";
         const sortOrder = ((filters === null || filters === void 0 ? void 0 : filters.sort_order) || "DESC").toUpperCase() === "ASC" ? "ASC" : "DESC";
@@ -141,11 +193,64 @@ let MembersService = class MembersService {
         return member;
     }
     async update(id, updateMemberDto) {
-        const { ministry_ids, ...memberData } = updateMemberDto;
+        const { ministry_ids, date_of_birth, date_of_birth_calendar, date_of_birth_precision, joined_date, joined_date_calendar, joined_date_precision, salvation_date, salvation_date_calendar, salvation_date_precision, ...memberData } = updateMemberDto;
         if (memberData.email !== undefined) {
             await this.assertEmailAvailable(memberData.email, id);
         }
-        await this.membersRepository.update(id, memberData);
+        const memberPatch = {
+            ...memberData,
+            ...(memberData.first_name !== undefined
+                ? { first_name: (0, name_normalizer_1.normalizePersonName)(memberData.first_name) }
+                : {}),
+            ...(memberData.middle_name !== undefined
+                ? { middle_name: (0, name_normalizer_1.normalizePersonName)(memberData.middle_name) }
+                : {}),
+            ...(memberData.last_name !== undefined
+                ? { last_name: (0, name_normalizer_1.normalizePersonName)(memberData.last_name) }
+                : {}),
+            ...(memberData.profession !== undefined
+                ? { profession: (0, name_normalizer_1.normalizeTitleInitials)(memberData.profession) }
+                : {}),
+            ...(memberData.employer !== undefined
+                ? { employer: (0, name_normalizer_1.normalizeTitleInitials)(memberData.employer) }
+                : {}),
+            ...(memberData.education_field !== undefined
+                ? { education_field: (0, name_normalizer_1.normalizeTitleInitials)(memberData.education_field) }
+                : {}),
+        };
+        const resolvedDob = (0, calendar_dto_helper_1.resolveDateFieldForWrite)("date_of_birth", date_of_birth, {
+            calendar: date_of_birth_calendar,
+            precision: date_of_birth_precision,
+            allowPartial: true,
+        });
+        if (resolvedDob !== undefined) {
+            memberPatch.date_of_birth = resolvedDob.value;
+            memberPatch.date_of_birth_precision = resolvedDob.precision;
+            memberPatch.date_of_birth_calendar = resolvedDob.calendar;
+        }
+        const resolvedJoined = (0, calendar_dto_helper_1.resolveDateFieldForWrite)("joined_date", joined_date, {
+            calendar: joined_date_calendar,
+            precision: joined_date_precision,
+            allowPartial: true,
+        });
+        if (resolvedJoined !== undefined) {
+            memberPatch.joined_date = resolvedJoined.value;
+            memberPatch.joined_date_precision = resolvedJoined.precision;
+            memberPatch.joined_date_calendar = resolvedJoined.calendar;
+        }
+        const resolvedSalvation = (0, calendar_dto_helper_1.resolveDateFieldForWrite)("salvation_date", salvation_date, {
+            calendar: salvation_date_calendar,
+            precision: salvation_date_precision,
+            allowPartial: true,
+        });
+        if (resolvedSalvation !== undefined) {
+            memberPatch.salvation_date = resolvedSalvation.value;
+            memberPatch.salvation_date_precision = resolvedSalvation.precision;
+            memberPatch.salvation_date_calendar = resolvedSalvation.calendar;
+        }
+        if (Object.keys(memberPatch).length > 0) {
+            await this.membersRepository.update(id, memberPatch);
+        }
         if (ministry_ids !== undefined) {
             await this.membersRepository.manager
                 .getRepository("MinistryMember")

@@ -11,6 +11,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CreateRoleDto = void 0;
 const class_validator_1 = require("class-validator");
+const normalize_name_decorator_1 = require("../../../common/transformers/normalize-name.decorator");
 class CreateRoleDto {
 }
 exports.CreateRoleDto = CreateRoleDto;
@@ -23,6 +24,7 @@ __decorate([
     __metadata("design:type", String)
 ], CreateRoleDto.prototype, "key", void 0);
 __decorate([
+    (0, normalize_name_decorator_1.NormalizeTitleInitials)(),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.Length)(1, 128),
     __metadata("design:type", String)

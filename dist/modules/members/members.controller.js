@@ -38,6 +38,7 @@ let MembersController = class MembersController {
             marital_status: query.marital_status,
             joined_from: query.joined_from,
             joined_to: query.joined_to,
+            joined_calendar: query.joined_calendar,
             sort_by: query.sort_by,
             sort_order: query.sort_order,
         });

@@ -5,21 +5,33 @@ import {
   IsNotEmpty,
   IsOptional,
   IsString,
-  IsDateString,
   IsBoolean,
   IsArray,
+  IsIn,
 } from "class-validator";
 import { Transform } from "class-transformer";
+import {
+  NormalizePersonName,
+  NormalizeTitleInitials,
+} from "../../../common/transformers/normalize-name.decorator";
+import { IsFlexibleDate } from "../../../common/validators/flexible-date.validator";
+import type {
+  CalendarSystem,
+  DatePrecision,
+} from "../../../common/utils/ethiopian-calendar";
 
 export class CreateMemberDto {
+  @NormalizePersonName()
   @IsString()
   @IsNotEmpty()
   first_name: string;
 
+  @NormalizePersonName()
   @IsString()
   @IsOptional()
   middle_name?: string;
 
+  @NormalizePersonName()
   @IsString()
   @IsNotEmpty()
   last_name: string;
@@ -40,9 +52,23 @@ export class CreateMemberDto {
   @IsOptional()
   address?: string;
 
-  @IsDateString()
+  @IsFlexibleDate({ allowPartial: true })
   @IsOptional()
-  date_of_birth?: string;
+  date_of_birth?: string | null;
+
+  @Transform(({ value }) =>
+    typeof value === "string" ? value.trim().toLowerCase() : value,
+  )
+  @IsIn(["gc", "ec"])
+  @IsOptional()
+  date_of_birth_calendar?: CalendarSystem;
+
+  @Transform(({ value }) =>
+    typeof value === "string" ? value.trim().toLowerCase() : value,
+  )
+  @IsIn(["day", "month", "year"])
+  @IsOptional()
+  date_of_birth_precision?: DatePrecision;
 
   @IsString()
   @IsOptional()
@@ -69,9 +95,23 @@ export class CreateMemberDto {
   @IsBoolean()
   baptized?: boolean;
 
-  @IsDateString()
+  @IsFlexibleDate({ allowPartial: true })
   @IsOptional()
-  joined_date?: string;
+  joined_date?: string | null;
+
+  @Transform(({ value }) =>
+    typeof value === "string" ? value.trim().toLowerCase() : value,
+  )
+  @IsIn(["gc", "ec"])
+  @IsOptional()
+  joined_date_calendar?: CalendarSystem;
+
+  @Transform(({ value }) =>
+    typeof value === "string" ? value.trim().toLowerCase() : value,
+  )
+  @IsIn(["day", "month", "year"])
+  @IsOptional()
+  joined_date_precision?: DatePrecision;
 
   @IsString()
   @IsOptional()
@@ -115,9 +155,23 @@ export class CreateMemberDto {
   @IsBoolean()
   holy_spirit_baptized?: boolean;
 
-  @IsDateString()
+  @IsFlexibleDate({ allowPartial: true })
   @IsOptional()
-  salvation_date?: string;
+  salvation_date?: string | null;
+
+  @Transform(({ value }) =>
+    typeof value === "string" ? value.trim().toLowerCase() : value,
+  )
+  @IsIn(["gc", "ec"])
+  @IsOptional()
+  salvation_date_calendar?: CalendarSystem;
+
+  @Transform(({ value }) =>
+    typeof value === "string" ? value.trim().toLowerCase() : value,
+  )
+  @IsIn(["day", "month", "year"])
+  @IsOptional()
+  salvation_date_precision?: DatePrecision;
 
   @IsString()
   @IsOptional()
@@ -146,10 +200,12 @@ export class CreateMemberDto {
   @IsOptional()
   employment_status?: string;
 
+  @NormalizeTitleInitials()
   @IsString()
   @IsOptional()
   profession?: string;
 
+  @NormalizeTitleInitials()
   @IsString()
   @IsOptional()
   employer?: string;
@@ -158,6 +214,7 @@ export class CreateMemberDto {
   @IsOptional()
   education_level?: string;
 
+  @NormalizeTitleInitials()
   @IsString()
   @IsOptional()
   education_field?: string;

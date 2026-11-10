@@ -22,6 +22,8 @@ import {
   NotificationKind,
   NotificationSeverity,
 } from "../notifications/entities/notification.entity";
+import { resolveDateFieldForWrite } from "../../common/utils/calendar-dto.helper";
+import { normalizeTitleInitials } from "../../common/utils/name-normalizer";
 
 export const HOME_VISIT_CODE = "HOME_VISIT";
 
@@ -75,7 +77,7 @@ export class TasksService implements OnModuleInit {
     dto: CreateTaskDefinitionDto,
   ): Promise<TaskDefinition> {
     const def = this.definitions.create({
-      name: dto.name.trim(),
+      name: normalizeTitleInitials(dto.name),
       description: dto.description?.trim() || null,
       requires_visit_target: dto.requires_visit_target ?? false,
       is_active: dto.is_active ?? true,
@@ -94,7 +96,7 @@ export class TasksService implements OnModuleInit {
     if (def.is_system && dto.requires_visit_target === false) {
       throw new BadRequestException("Home Visit must require a visit target");
     }
-    if (dto.name !== undefined) def.name = dto.name.trim();
+    if (dto.name !== undefined) def.name = normalizeTitleInitials(dto.name);
     if (dto.description !== undefined)
       def.description = dto.description?.trim() || null;
     if (dto.requires_visit_target !== undefined && !def.is_system) {
@@ -141,7 +143,20 @@ export class TasksService implements OnModuleInit {
       throw new BadRequestException("Task definition not found or inactive");
     }
 
-    if (new Date(dto.end_date) < new Date(dto.start_date)) {
+    const resolvedStart = resolveDateFieldForWrite(
+      "start_date",
+      dto.start_date,
+      { calendar: dto.date_calendar, allowPartial: false },
+    );
+    const resolvedEnd = resolveDateFieldForWrite("end_date", dto.end_date, {
+      calendar: dto.date_calendar,
+      allowPartial: false,
+    });
+    if (!resolvedStart?.value || !resolvedEnd?.value) {
+      throw new BadRequestException("start_date and end_date are required");
+    }
+
+    if (resolvedEnd.value < resolvedStart.value) {
       throw new BadRequestException("End date must be on or after start date");
     }
 
@@ -156,12 +171,16 @@ export class TasksService implements OnModuleInit {
     });
     if (!minister) throw new BadRequestException("Minister not found");
 
+    const taskCalendar =
+      dto.date_calendar ?? resolvedStart.calendar ?? resolvedEnd.calendar;
+
     const task = this.tasks.create({
       definition_id: dto.definition_id,
       minister_id: dto.minister_id,
       assigned_by_user_id: assignedByUserId,
-      start_date: dto.start_date,
-      end_date: dto.end_date,
+      start_date: resolvedStart.value,
+      end_date: resolvedEnd.value,
+      date_calendar: taskCalendar,
       target_member_id: definition.requires_visit_target
         ? dto.target_member_id!
         : null,
@@ -177,7 +196,7 @@ export class TasksService implements OnModuleInit {
         kind: NotificationKind.SYSTEM,
         severity: NotificationSeverity.INFO,
         title: "New task assigned",
-        message: `${definition.name} was assigned to you (${dto.start_date} → ${dto.end_date}).`,
+        message: `${definition.name} was assigned to you (${resolvedStart.value} → ${resolvedEnd.value}).`,
         href: "/dashboard",
         dedupeKey: `task.assigned:${saved.id}`,
       });
@@ -314,8 +333,33 @@ export class TasksService implements OnModuleInit {
   async update(id: string, dto: UpdateTaskDto): Promise<Task> {
     const task = await this.findOne(id);
     if (dto.minister_id !== undefined) task.minister_id = dto.minister_id;
-    if (dto.start_date !== undefined) task.start_date = dto.start_date;
-    if (dto.end_date !== undefined) task.end_date = dto.end_date;
+    const cal = dto.date_calendar;
+    if (dto.start_date !== undefined) {
+      const resolvedStart = resolveDateFieldForWrite(
+        "start_date",
+        dto.start_date,
+        { calendar: cal, allowPartial: false },
+      );
+      if (!resolvedStart?.value) {
+        throw new BadRequestException("start_date cannot be empty");
+      }
+      task.start_date = resolvedStart.value;
+      task.date_calendar = resolvedStart.calendar;
+    }
+    if (dto.end_date !== undefined) {
+      const resolvedEnd = resolveDateFieldForWrite("end_date", dto.end_date, {
+        calendar: cal,
+        allowPartial: false,
+      });
+      if (!resolvedEnd?.value) {
+        throw new BadRequestException("end_date cannot be empty");
+      }
+      task.end_date = resolvedEnd.value;
+      task.date_calendar = resolvedEnd.calendar;
+    }
+    if (cal !== undefined && dto.start_date === undefined && dto.end_date === undefined) {
+      task.date_calendar = cal;
+    }
     if (dto.notes !== undefined) task.notes = dto.notes?.trim() || null;
     if (dto.target_member_id !== undefined)
       task.target_member_id = dto.target_member_id;
@@ -327,7 +371,7 @@ export class TasksService implements OnModuleInit {
       task.completed_at = dto.status === "completed" ? new Date() : null;
     }
 
-    if (new Date(task.end_date) < new Date(task.start_date)) {
+    if (String(task.end_date).slice(0, 10) < String(task.start_date).slice(0, 10)) {
       throw new BadRequestException("End date must be on or after start date");
     }
 

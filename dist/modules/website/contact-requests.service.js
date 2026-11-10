@@ -20,6 +20,7 @@ const typeorm_2 = require("typeorm");
 const event_emitter_1 = require("@nestjs/event-emitter");
 const contact_request_entity_1 = require("./entities/contact-request.entity");
 const notification_events_1 = require("../notifications/notification-events");
+const name_normalizer_1 = require("../../common/utils/name-normalizer");
 let ContactRequestsService = ContactRequestsService_1 = class ContactRequestsService {
     constructor(contactRepo, eventEmitter) {
         this.contactRepo = contactRepo;
@@ -28,7 +29,7 @@ let ContactRequestsService = ContactRequestsService_1 = class ContactRequestsSer
     }
     async create(dto) {
         const record = this.contactRepo.create({
-            full_name: dto.full_name.trim(),
+            full_name: (0, name_normalizer_1.normalizePersonName)(dto.full_name),
             phone: dto.phone.trim(),
             email: dto.email ? dto.email.trim().toLowerCase() : null,
             category: dto.category || "general",

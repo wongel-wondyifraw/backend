@@ -11,10 +11,12 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CreateTaskDefinitionDto = void 0;
 const class_validator_1 = require("class-validator");
+const normalize_name_decorator_1 = require("../../../common/transformers/normalize-name.decorator");
 class CreateTaskDefinitionDto {
 }
 exports.CreateTaskDefinitionDto = CreateTaskDefinitionDto;
 __decorate([
+    (0, normalize_name_decorator_1.NormalizeTitleInitials)(),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsNotEmpty)(),
     __metadata("design:type", String)

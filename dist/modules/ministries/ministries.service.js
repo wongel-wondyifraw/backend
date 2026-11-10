@@ -21,6 +21,7 @@ const ministry_entity_1 = require("./entities/ministry.entity");
 const ministry_member_entity_1 = require("./entities/ministry-member.entity");
 const notification_events_1 = require("../notifications/notification-events");
 const leader_resolver_service_1 = require("../../common/leadership/leader-resolver.service");
+const name_normalizer_1 = require("../../common/utils/name-normalizer");
 let MinistriesService = class MinistriesService {
     constructor(ministriesRepository, ministryMembersRepository, events, leaders) {
         this.ministriesRepository = ministriesRepository;
@@ -42,7 +43,7 @@ let MinistriesService = class MinistriesService {
         const leader = this.normalizeLeader(createMinistryDto);
         await this.leaders.assertExists(leader.leader_id, leader.leader_type);
         const ministry = this.ministriesRepository.create({
-            name: createMinistryDto.name,
+            name: (0, name_normalizer_1.normalizeTitleInitials)(createMinistryDto.name),
             about: (_a = createMinistryDto.about) !== null && _a !== void 0 ? _a : null,
             schedule: (_b = createMinistryDto.schedule) !== null && _b !== void 0 ? _b : null,
             ...leader,
@@ -93,7 +94,12 @@ let MinistriesService = class MinistriesService {
         return withLeader;
     }
     async update(id, updateMinistryDto) {
-        const patch = { ...updateMinistryDto };
+        const patch = {
+            ...updateMinistryDto,
+            ...(updateMinistryDto.name !== undefined
+                ? { name: (0, name_normalizer_1.normalizeTitleInitials)(updateMinistryDto.name) }
+                : {}),
+        };
         if ("leader_id" in updateMinistryDto ||
             "leader_type" in updateMinistryDto) {
             const leader = this.normalizeLeader(updateMinistryDto);

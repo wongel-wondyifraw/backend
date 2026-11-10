@@ -1,14 +1,21 @@
-import { Type } from "class-transformer";
+import { Transform, Type } from "class-transformer";
 import {
-  IsDateString,
+  IsIn,
   IsInt,
   IsOptional,
   IsString,
   Max,
   Min,
 } from "class-validator";
+import { NormalizePersonName } from "../../../common/transformers/normalize-name.decorator";
+import { IsFlexibleDate } from "../../../common/validators/flexible-date.validator";
+import type {
+  CalendarSystem,
+  DatePrecision,
+} from "../../../common/utils/ethiopian-calendar";
 
 export class UpdateFamilyChildDto {
+  @NormalizePersonName()
   @IsString()
   @IsOptional()
   name?: string;
@@ -21,6 +28,20 @@ export class UpdateFamilyChildDto {
   age?: number;
 
   @IsOptional()
-  @IsDateString()
-  date_of_birth?: string;
+  @IsFlexibleDate({ allowPartial: true })
+  date_of_birth?: string | null;
+
+  @Transform(({ value }) =>
+    typeof value === "string" ? value.trim().toLowerCase() : value,
+  )
+  @IsIn(["gc", "ec"])
+  @IsOptional()
+  date_of_birth_calendar?: CalendarSystem;
+
+  @Transform(({ value }) =>
+    typeof value === "string" ? value.trim().toLowerCase() : value,
+  )
+  @IsIn(["day", "month", "year"])
+  @IsOptional()
+  date_of_birth_precision?: DatePrecision;
 }

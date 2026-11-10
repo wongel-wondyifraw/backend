@@ -13,6 +13,7 @@ exports.UpdateUserDto = void 0;
 const swagger_1 = require("@nestjs/swagger");
 const create_user_dto_1 = require("./create-user.dto");
 const class_validator_1 = require("class-validator");
+const normalize_name_decorator_1 = require("../../../common/transformers/normalize-name.decorator");
 class UpdateUserDto extends (0, swagger_1.PartialType)(create_user_dto_1.CreateUserDto) {
 }
 exports.UpdateUserDto = UpdateUserDto;
@@ -32,16 +33,19 @@ __decorate([
     __metadata("design:type", String)
 ], UpdateUserDto.prototype, "password_hash", void 0);
 __decorate([
+    (0, normalize_name_decorator_1.NormalizePersonName)(),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], UpdateUserDto.prototype, "middle_name", void 0);
 __decorate([
+    (0, normalize_name_decorator_1.NormalizePersonName)(),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], UpdateUserDto.prototype, "first_name", void 0);
 __decorate([
+    (0, normalize_name_decorator_1.NormalizePersonName)(),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)

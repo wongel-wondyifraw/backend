@@ -22,6 +22,8 @@ const member_entity_1 = require("../members/entities/member.entity");
 const minister_entity_1 = require("../ministers/entities/minister.entity");
 const notifications_service_1 = require("../notifications/notifications.service");
 const notification_entity_1 = require("../notifications/entities/notification.entity");
+const calendar_dto_helper_1 = require("../../common/utils/calendar-dto.helper");
+const name_normalizer_1 = require("../../common/utils/name-normalizer");
 exports.HOME_VISIT_CODE = "HOME_VISIT";
 let TasksService = class TasksService {
     constructor(definitions, tasks, ministers, members, notifications) {
@@ -67,7 +69,7 @@ let TasksService = class TasksService {
     async createDefinition(dto) {
         var _a, _b, _c;
         const def = this.definitions.create({
-            name: dto.name.trim(),
+            name: (0, name_normalizer_1.normalizeTitleInitials)(dto.name),
             description: ((_a = dto.description) === null || _a === void 0 ? void 0 : _a.trim()) || null,
             requires_visit_target: (_b = dto.requires_visit_target) !== null && _b !== void 0 ? _b : false,
             is_active: (_c = dto.is_active) !== null && _c !== void 0 ? _c : true,
@@ -85,7 +87,7 @@ let TasksService = class TasksService {
             throw new common_1.BadRequestException("Home Visit must require a visit target");
         }
         if (dto.name !== undefined)
-            def.name = dto.name.trim();
+            def.name = (0, name_normalizer_1.normalizeTitleInitials)(dto.name);
         if (dto.description !== undefined)
             def.description = ((_a = dto.description) === null || _a === void 0 ? void 0 : _a.trim()) || null;
         if (dto.requires_visit_target !== undefined && !def.is_system) {
@@ -109,14 +111,22 @@ let TasksService = class TasksService {
         await this.definitions.delete(id);
     }
     async createTask(dto, assignedByUserId) {
-        var _a;
+        var _a, _b, _c;
         const definition = await this.definitions.findOne({
             where: { id: dto.definition_id },
         });
         if (!definition || !definition.is_active) {
             throw new common_1.BadRequestException("Task definition not found or inactive");
         }
-        if (new Date(dto.end_date) < new Date(dto.start_date)) {
+        const resolvedStart = (0, calendar_dto_helper_1.resolveDateFieldForWrite)("start_date", dto.start_date, { calendar: dto.date_calendar, allowPartial: false });
+        const resolvedEnd = (0, calendar_dto_helper_1.resolveDateFieldForWrite)("end_date", dto.end_date, {
+            calendar: dto.date_calendar,
+            allowPartial: false,
+        });
+        if (!(resolvedStart === null || resolvedStart === void 0 ? void 0 : resolvedStart.value) || !(resolvedEnd === null || resolvedEnd === void 0 ? void 0 : resolvedEnd.value)) {
+            throw new common_1.BadRequestException("start_date and end_date are required");
+        }
+        if (resolvedEnd.value < resolvedStart.value) {
             throw new common_1.BadRequestException("End date must be on or after start date");
         }
         if (definition.requires_visit_target && !dto.target_member_id) {
@@ -127,16 +137,18 @@ let TasksService = class TasksService {
         });
         if (!minister)
             throw new common_1.BadRequestException("Minister not found");
+        const taskCalendar = (_b = (_a = dto.date_calendar) !== null && _a !== void 0 ? _a : resolvedStart.calendar) !== null && _b !== void 0 ? _b : resolvedEnd.calendar;
         const task = this.tasks.create({
             definition_id: dto.definition_id,
             minister_id: dto.minister_id,
             assigned_by_user_id: assignedByUserId,
-            start_date: dto.start_date,
-            end_date: dto.end_date,
+            start_date: resolvedStart.value,
+            end_date: resolvedEnd.value,
+            date_calendar: taskCalendar,
             target_member_id: definition.requires_visit_target
                 ? dto.target_member_id
                 : null,
-            notes: ((_a = dto.notes) === null || _a === void 0 ? void 0 : _a.trim()) || null,
+            notes: ((_c = dto.notes) === null || _c === void 0 ? void 0 : _c.trim()) || null,
             status: "pending",
             visitation_methods: dto.visitation_methods || [],
         });
@@ -147,7 +159,7 @@ let TasksService = class TasksService {
                 kind: notification_entity_1.NotificationKind.SYSTEM,
                 severity: notification_entity_1.NotificationSeverity.INFO,
                 title: "New task assigned",
-                message: `${definition.name} was assigned to you (${dto.start_date} → ${dto.end_date}).`,
+                message: `${definition.name} was assigned to you (${resolvedStart.value} → ${resolvedEnd.value}).`,
                 href: "/dashboard",
                 dedupeKey: `task.assigned:${saved.id}`,
             });
@@ -265,10 +277,29 @@ let TasksService = class TasksService {
         const task = await this.findOne(id);
         if (dto.minister_id !== undefined)
             task.minister_id = dto.minister_id;
-        if (dto.start_date !== undefined)
-            task.start_date = dto.start_date;
-        if (dto.end_date !== undefined)
-            task.end_date = dto.end_date;
+        const cal = dto.date_calendar;
+        if (dto.start_date !== undefined) {
+            const resolvedStart = (0, calendar_dto_helper_1.resolveDateFieldForWrite)("start_date", dto.start_date, { calendar: cal, allowPartial: false });
+            if (!(resolvedStart === null || resolvedStart === void 0 ? void 0 : resolvedStart.value)) {
+                throw new common_1.BadRequestException("start_date cannot be empty");
+            }
+            task.start_date = resolvedStart.value;
+            task.date_calendar = resolvedStart.calendar;
+        }
+        if (dto.end_date !== undefined) {
+            const resolvedEnd = (0, calendar_dto_helper_1.resolveDateFieldForWrite)("end_date", dto.end_date, {
+                calendar: cal,
+                allowPartial: false,
+            });
+            if (!(resolvedEnd === null || resolvedEnd === void 0 ? void 0 : resolvedEnd.value)) {
+                throw new common_1.BadRequestException("end_date cannot be empty");
+            }
+            task.end_date = resolvedEnd.value;
+            task.date_calendar = resolvedEnd.calendar;
+        }
+        if (cal !== undefined && dto.start_date === undefined && dto.end_date === undefined) {
+            task.date_calendar = cal;
+        }
         if (dto.notes !== undefined)
             task.notes = ((_a = dto.notes) === null || _a === void 0 ? void 0 : _a.trim()) || null;
         if (dto.target_member_id !== undefined)
@@ -279,7 +310,7 @@ let TasksService = class TasksService {
             task.status = dto.status;
             task.completed_at = dto.status === "completed" ? new Date() : null;
         }
-        if (new Date(task.end_date) < new Date(task.start_date)) {
+        if (String(task.end_date).slice(0, 10) < String(task.start_date).slice(0, 10)) {
             throw new common_1.BadRequestException("End date must be on or after start date");
         }
         if (task.definition.requires_visit_target && !task.target_member_id) {

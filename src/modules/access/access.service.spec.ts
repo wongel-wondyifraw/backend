@@ -34,6 +34,7 @@ describe("AccessService", () => {
     users: [],
     created_at: new Date(),
     updated_at: new Date(),
+    ensureId: jest.fn(),
   };
 
   beforeEach(() => {
@@ -86,6 +87,7 @@ describe("AccessService", () => {
       ...adminRole,
       key: "custom",
       is_system: false,
+      ensureId: jest.fn(),
     });
     users.count.mockResolvedValue(2);
 
@@ -99,6 +101,7 @@ describe("AccessService", () => {
       ...adminRole,
       key: "custom",
       is_system: false,
+      ensureId: jest.fn(),
     });
 
     const qb = {
@@ -132,5 +135,38 @@ describe("AccessService", () => {
 
     expect(grouped.Members).toHaveLength(1);
     expect(grouped.Users).toHaveLength(1);
+  });
+
+  it("normalizes role display names on create and update", async () => {
+    roles.findOne.mockResolvedValueOnce(null);
+    const qb = {
+      where: jest.fn().mockReturnThis(),
+      getMany: jest
+        .fn()
+        .mockResolvedValue([{ slug: "members.read" } as Permission]),
+    };
+    permissions.createQueryBuilder.mockReturnValue(qb as never);
+    roles.create.mockImplementation((input) => input as Role);
+    roles.save.mockImplementation(async (input) => input as Role);
+
+    const created = await service.createRole({
+      key: "volunteer_coordinator",
+      name: "vOLunteer COordINator",
+      permissionSlugs: ["members.read"],
+    });
+    expect(created.name).toBe("Volunteer Coordinator");
+
+    roles.findOne.mockResolvedValueOnce({
+      ...adminRole,
+      id: "role-custom",
+      key: "volunteer_coordinator",
+      name: "Volunteer Coordinator",
+      is_system: false,
+      ensureId: jest.fn(),
+    });
+    const updated = await service.updateRole("role-custom", {
+      name: "IT cOOrdINator",
+    });
+    expect(updated.name).toBe("IT Coordinator");
   });
 });

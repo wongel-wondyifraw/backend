@@ -21,6 +21,7 @@ const permission_entity_1 = require("./entities/permission.entity");
 const user_entity_1 = require("../users/entities/user.entity");
 const access_seeder_service_1 = require("./access.seeder.service");
 const access_types_1 = require("./access.types");
+const name_normalizer_1 = require("../../common/utils/name-normalizer");
 let AccessService = class AccessService {
     constructor(roles, permissions, users, seeder) {
         this.roles = roles;
@@ -69,7 +70,7 @@ let AccessService = class AccessService {
         const perms = await this.resolvePermissionSlugs(dto.permissionSlugs);
         const role = this.roles.create({
             key: dto.key,
-            name: dto.name,
+            name: (0, name_normalizer_1.normalizeTitleInitials)(dto.name),
             description: (_a = dto.description) !== null && _a !== void 0 ? _a : null,
             is_system: false,
             permissions: perms,
@@ -80,7 +81,7 @@ let AccessService = class AccessService {
         var _a;
         const role = await this.findRole(id);
         if (dto.name !== undefined)
-            role.name = dto.name;
+            role.name = (0, name_normalizer_1.normalizeTitleInitials)(dto.name);
         if (dto.description !== undefined)
             role.description = (_a = dto.description) !== null && _a !== void 0 ? _a : null;
         if (dto.permissionSlugs !== undefined) {

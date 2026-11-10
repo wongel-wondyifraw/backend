@@ -1,6 +1,8 @@
 import { IsBoolean, IsNotEmpty, IsOptional, IsString } from "class-validator";
+import { NormalizeTitleInitials } from "../../../common/transformers/normalize-name.decorator";
 
 export class CreateTaskDefinitionDto {
+  @NormalizeTitleInitials()
   @IsString()
   @IsNotEmpty()
   name: string;

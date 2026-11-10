@@ -13,20 +13,25 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.CreateMemberDto = void 0;
 const class_validator_1 = require("class-validator");
 const class_transformer_1 = require("class-transformer");
+const normalize_name_decorator_1 = require("../../../common/transformers/normalize-name.decorator");
+const flexible_date_validator_1 = require("../../../common/validators/flexible-date.validator");
 class CreateMemberDto {
 }
 exports.CreateMemberDto = CreateMemberDto;
 __decorate([
+    (0, normalize_name_decorator_1.NormalizePersonName)(),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsNotEmpty)(),
     __metadata("design:type", String)
 ], CreateMemberDto.prototype, "first_name", void 0);
 __decorate([
+    (0, normalize_name_decorator_1.NormalizePersonName)(),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], CreateMemberDto.prototype, "middle_name", void 0);
 __decorate([
+    (0, normalize_name_decorator_1.NormalizePersonName)(),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsNotEmpty)(),
     __metadata("design:type", String)
@@ -52,10 +57,22 @@ __decorate([
     __metadata("design:type", String)
 ], CreateMemberDto.prototype, "address", void 0);
 __decorate([
-    (0, class_validator_1.IsDateString)(),
+    (0, flexible_date_validator_1.IsFlexibleDate)({ allowPartial: true }),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Object)
+], CreateMemberDto.prototype, "date_of_birth", void 0);
+__decorate([
+    (0, class_transformer_1.Transform)(({ value }) => typeof value === "string" ? value.trim().toLowerCase() : value),
+    (0, class_validator_1.IsIn)(["gc", "ec"]),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
-], CreateMemberDto.prototype, "date_of_birth", void 0);
+], CreateMemberDto.prototype, "date_of_birth_calendar", void 0);
+__decorate([
+    (0, class_transformer_1.Transform)(({ value }) => typeof value === "string" ? value.trim().toLowerCase() : value),
+    (0, class_validator_1.IsIn)(["day", "month", "year"]),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], CreateMemberDto.prototype, "date_of_birth_precision", void 0);
 __decorate([
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsOptional)(),
@@ -84,10 +101,22 @@ __decorate([
     __metadata("design:type", Boolean)
 ], CreateMemberDto.prototype, "baptized", void 0);
 __decorate([
-    (0, class_validator_1.IsDateString)(),
+    (0, flexible_date_validator_1.IsFlexibleDate)({ allowPartial: true }),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Object)
+], CreateMemberDto.prototype, "joined_date", void 0);
+__decorate([
+    (0, class_transformer_1.Transform)(({ value }) => typeof value === "string" ? value.trim().toLowerCase() : value),
+    (0, class_validator_1.IsIn)(["gc", "ec"]),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
-], CreateMemberDto.prototype, "joined_date", void 0);
+], CreateMemberDto.prototype, "joined_date_calendar", void 0);
+__decorate([
+    (0, class_transformer_1.Transform)(({ value }) => typeof value === "string" ? value.trim().toLowerCase() : value),
+    (0, class_validator_1.IsIn)(["day", "month", "year"]),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], CreateMemberDto.prototype, "joined_date_precision", void 0);
 __decorate([
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsOptional)(),
@@ -143,10 +172,22 @@ __decorate([
     __metadata("design:type", Boolean)
 ], CreateMemberDto.prototype, "holy_spirit_baptized", void 0);
 __decorate([
-    (0, class_validator_1.IsDateString)(),
+    (0, flexible_date_validator_1.IsFlexibleDate)({ allowPartial: true }),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Object)
+], CreateMemberDto.prototype, "salvation_date", void 0);
+__decorate([
+    (0, class_transformer_1.Transform)(({ value }) => typeof value === "string" ? value.trim().toLowerCase() : value),
+    (0, class_validator_1.IsIn)(["gc", "ec"]),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
-], CreateMemberDto.prototype, "salvation_date", void 0);
+], CreateMemberDto.prototype, "salvation_date_calendar", void 0);
+__decorate([
+    (0, class_transformer_1.Transform)(({ value }) => typeof value === "string" ? value.trim().toLowerCase() : value),
+    (0, class_validator_1.IsIn)(["day", "month", "year"]),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], CreateMemberDto.prototype, "salvation_date_precision", void 0);
 __decorate([
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsOptional)(),
@@ -182,11 +223,13 @@ __decorate([
     __metadata("design:type", String)
 ], CreateMemberDto.prototype, "employment_status", void 0);
 __decorate([
+    (0, normalize_name_decorator_1.NormalizeTitleInitials)(),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], CreateMemberDto.prototype, "profession", void 0);
 __decorate([
+    (0, normalize_name_decorator_1.NormalizeTitleInitials)(),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
@@ -197,6 +240,7 @@ __decorate([
     __metadata("design:type", String)
 ], CreateMemberDto.prototype, "education_level", void 0);
 __decorate([
+    (0, normalize_name_decorator_1.NormalizeTitleInitials)(),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)

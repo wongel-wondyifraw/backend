@@ -13,6 +13,7 @@ import { AccessSeederService } from "./access.seeder.service";
 import { CreateRoleDto } from "./dto/create-role.dto";
 import { UpdateRoleDto } from "./dto/update-role.dto";
 import { SYSTEM_ROLE_ADMIN_KEY } from "./access.types";
+import { normalizeTitleInitials } from "../../common/utils/name-normalizer";
 
 @Injectable()
 export class AccessService {
@@ -70,7 +71,7 @@ export class AccessService {
     const perms = await this.resolvePermissionSlugs(dto.permissionSlugs);
     const role = this.roles.create({
       key: dto.key,
-      name: dto.name,
+      name: normalizeTitleInitials(dto.name),
       description: dto.description ?? null,
       is_system: false,
       permissions: perms,
@@ -81,7 +82,7 @@ export class AccessService {
   async updateRole(id: string, dto: UpdateRoleDto) {
     const role = await this.findRole(id);
 
-    if (dto.name !== undefined) role.name = dto.name;
+    if (dto.name !== undefined) role.name = normalizeTitleInitials(dto.name);
     if (dto.description !== undefined)
       role.description = dto.description ?? null;
 

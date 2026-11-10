@@ -19,6 +19,9 @@ const typeorm_2 = require("typeorm");
 const plan_entity_1 = require("./entities/plan.entity");
 const plan_minister_entity_1 = require("./entities/plan-minister.entity");
 const minister_entity_1 = require("../ministers/entities/minister.entity");
+const ethiopian_calendar_1 = require("../../common/utils/ethiopian-calendar");
+const calendar_dto_helper_1 = require("../../common/utils/calendar-dto.helper");
+const name_normalizer_1 = require("../../common/utils/name-normalizer");
 let PlansService = class PlansService {
     constructor(plansRepository, planMinistersRepository, ministersRepository) {
         this.plansRepository = plansRepository;
@@ -47,20 +50,28 @@ let PlansService = class PlansService {
         await this.planMinistersRepository.save(rows);
     }
     async create(dto) {
-        var _a, _b, _c;
+        var _a, _b;
         const ministerIds = (_a = dto.minister_ids) !== null && _a !== void 0 ? _a : [];
         await this.assertMinistersExist(ministerIds);
         if (dto.start_time && dto.end_time && dto.end_time < dto.start_time) {
             throw new common_1.BadRequestException("end_time must be after start_time");
         }
+        const resolvedDate = (0, calendar_dto_helper_1.resolveDateFieldForWrite)("plan_date", dto.plan_date, {
+            calendar: dto.plan_date_calendar,
+            allowPartial: false,
+        });
+        if (!(resolvedDate === null || resolvedDate === void 0 ? void 0 : resolvedDate.value)) {
+            throw new common_1.BadRequestException("plan_date is required");
+        }
         const plan = this.plansRepository.create({
-            title: dto.title.trim(),
+            title: (0, name_normalizer_1.normalizeTitleInitials)(dto.title),
             type: dto.type,
-            plan_date: dto.plan_date,
+            plan_date: resolvedDate.value,
+            plan_date_calendar: resolvedDate.calendar,
             start_time: dto.start_time || null,
             end_time: dto.end_time || null,
-            location: ((_b = dto.location) === null || _b === void 0 ? void 0 : _b.trim()) || null,
-            notes: ((_c = dto.notes) === null || _c === void 0 ? void 0 : _c.trim()) || null,
+            location: dto.location ? (0, name_normalizer_1.normalizeTitleInitials)(dto.location) || null : null,
+            notes: ((_b = dto.notes) === null || _b === void 0 ? void 0 : _b.trim()) || null,
             status: dto.status || "planned",
         });
         const saved = await this.plansRepository.save(plan);
@@ -83,6 +94,7 @@ let PlansService = class PlansService {
         return { created, failed: errors.length, errors };
     }
     async findAllPaginated(page = 1, limit = 20, search, filters) {
+        var _a, _b;
         const qb = this.plansRepository
             .createQueryBuilder("plan")
             .leftJoinAndSelect("plan.plan_ministers", "pm")
@@ -98,10 +110,12 @@ let PlansService = class PlansService {
             qb.andWhere("plan.status = :status", { status: filters.status });
         }
         if (filters === null || filters === void 0 ? void 0 : filters.from) {
-            qb.andWhere("plan.plan_date >= :from", { from: filters.from });
+            const boundFrom = (_a = (0, ethiopian_calendar_1.resolveFilterDateBound)(filters.from, "start", filters.calendar)) !== null && _a !== void 0 ? _a : filters.from;
+            qb.andWhere("plan.plan_date >= :from", { from: boundFrom });
         }
         if (filters === null || filters === void 0 ? void 0 : filters.to) {
-            qb.andWhere("plan.plan_date <= :to", { to: filters.to });
+            const boundTo = (_b = (0, ethiopian_calendar_1.resolveFilterDateBound)(filters.to, "end", filters.calendar)) !== null && _b !== void 0 ? _b : filters.to;
+            qb.andWhere("plan.plan_date <= :to", { to: boundTo });
         }
         qb.orderBy("plan.plan_date", "ASC")
             .addOrderBy("plan.start_time", "ASC", "NULLS LAST")
@@ -126,22 +140,34 @@ let PlansService = class PlansService {
         return plan;
     }
     async update(id, dto) {
-        var _a, _b;
+        var _a;
         const plan = await this.findOne(id);
         if (dto.title !== undefined)
-            plan.title = dto.title.trim();
+            plan.title = (0, name_normalizer_1.normalizeTitleInitials)(dto.title);
         if (dto.type !== undefined)
             plan.type = dto.type;
-        if (dto.plan_date !== undefined)
-            plan.plan_date = dto.plan_date;
+        if (dto.plan_date !== undefined) {
+            const resolvedDate = (0, calendar_dto_helper_1.resolveDateFieldForWrite)("plan_date", dto.plan_date, {
+                calendar: dto.plan_date_calendar,
+                allowPartial: false,
+            });
+            if (!(resolvedDate === null || resolvedDate === void 0 ? void 0 : resolvedDate.value)) {
+                throw new common_1.BadRequestException("plan_date cannot be empty");
+            }
+            plan.plan_date = resolvedDate.value;
+            plan.plan_date_calendar = resolvedDate.calendar;
+        }
+        else if (dto.plan_date_calendar !== undefined) {
+            plan.plan_date_calendar = dto.plan_date_calendar;
+        }
         if (dto.start_time !== undefined)
             plan.start_time = dto.start_time || null;
         if (dto.end_time !== undefined)
             plan.end_time = dto.end_time || null;
         if (dto.location !== undefined)
-            plan.location = ((_a = dto.location) === null || _a === void 0 ? void 0 : _a.trim()) || null;
+            plan.location = dto.location ? (0, name_normalizer_1.normalizeTitleInitials)(dto.location) || null : null;
         if (dto.notes !== undefined)
-            plan.notes = ((_b = dto.notes) === null || _b === void 0 ? void 0 : _b.trim()) || null;
+            plan.notes = ((_a = dto.notes) === null || _a === void 0 ? void 0 : _a.trim()) || null;
         if (dto.status !== undefined)
             plan.status = dto.status;
         const start = dto.start_time !== undefined ? plan.start_time : plan.start_time;

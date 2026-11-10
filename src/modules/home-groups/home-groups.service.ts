@@ -14,6 +14,7 @@ import { PaginatedResult } from "../../common/interfaces/paginated-result.interf
 import { NOTIFICATION_EVENT } from "../notifications/notification-events";
 import { LeaderResolverService } from "../../common/leadership/leader-resolver.service";
 import type { LeaderType } from "../../common/leadership/leader.types";
+import { normalizeTitleInitials } from "../../common/utils/name-normalizer";
 
 @Injectable()
 export class HomeGroupsService {
@@ -43,10 +44,10 @@ export class HomeGroupsService {
     const leader = this.normalizeLeader(dto);
     await this.leaders.assertExists(leader.leader_id, leader.leader_type);
     const homeGroup = this.homeGroupsRepository.create({
-      name: dto.name,
+      name: normalizeTitleInitials(dto.name),
       about: dto.about ?? null,
       schedule: dto.schedule ?? null,
-      location: dto.location,
+      location: normalizeTitleInitials(dto.location),
       ...leader,
     });
     const saved = await this.homeGroupsRepository.save(homeGroup);
@@ -105,7 +106,15 @@ export class HomeGroupsService {
   }
 
   async update(id: string, dto: UpdateHomeGroupDto): Promise<HomeGroup> {
-    const patch: Partial<HomeGroup> = { ...dto };
+    const patch: Partial<HomeGroup> = {
+      ...dto,
+      ...(dto.name !== undefined
+        ? { name: normalizeTitleInitials(dto.name) }
+        : {}),
+      ...(dto.location !== undefined
+        ? { location: normalizeTitleInitials(dto.location) }
+        : {}),
+    };
     if ("leader_id" in dto || "leader_type" in dto) {
       const leader = this.normalizeLeader(dto);
       await this.leaders.assertExists(leader.leader_id, leader.leader_type);

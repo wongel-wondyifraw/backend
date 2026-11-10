@@ -29,6 +29,10 @@ __decorate([
     __metadata("design:type", String)
 ], Plan.prototype, "plan_date", void 0);
 __decorate([
+    (0, typeorm_1.Column)({ type: "varchar", length: 4, default: "gc" }),
+    __metadata("design:type", String)
+], Plan.prototype, "plan_date_calendar", void 0);
+__decorate([
     (0, typeorm_1.Column)({ type: "time", nullable: true }),
     __metadata("design:type", Object)
 ], Plan.prototype, "start_time", void 0);

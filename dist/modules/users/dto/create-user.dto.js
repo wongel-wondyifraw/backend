@@ -12,20 +12,24 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.CreateUserDto = void 0;
 const class_validator_1 = require("class-validator");
 const password_strength_validator_1 = require("../../../common/validators/password-strength.validator");
+const normalize_name_decorator_1 = require("../../../common/transformers/normalize-name.decorator");
 class CreateUserDto {
 }
 exports.CreateUserDto = CreateUserDto;
 __decorate([
+    (0, normalize_name_decorator_1.NormalizePersonName)(),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsNotEmpty)(),
     __metadata("design:type", String)
 ], CreateUserDto.prototype, "first_name", void 0);
 __decorate([
+    (0, normalize_name_decorator_1.NormalizePersonName)(),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], CreateUserDto.prototype, "middle_name", void 0);
 __decorate([
+    (0, normalize_name_decorator_1.NormalizePersonName)(),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsNotEmpty)(),
     __metadata("design:type", String)
@@ -47,6 +51,7 @@ __decorate([
     __metadata("design:type", String)
 ], CreateUserDto.prototype, "role", void 0);
 __decorate([
+    (0, normalize_name_decorator_1.NormalizeTitleInitials)(),
     (0, class_validator_1.ValidateIf)((o) => o.role === "minister" || o.role === "staff"),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsNotEmpty)({ message: "Title is mandatory for Ministers and Staff" }),

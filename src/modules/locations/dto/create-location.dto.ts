@@ -5,8 +5,10 @@ import {
   IsUUID,
   IsEnum,
 } from "class-validator";
+import { NormalizeTitleInitials } from "../../../common/transformers/normalize-name.decorator";
 
 export class CreateLocationDto {
+  @NormalizeTitleInitials()
   @IsString()
   @IsNotEmpty()
   name: string;

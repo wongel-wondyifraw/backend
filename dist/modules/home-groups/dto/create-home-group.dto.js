@@ -11,10 +11,12 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CreateHomeGroupDto = void 0;
 const class_validator_1 = require("class-validator");
+const normalize_name_decorator_1 = require("../../../common/transformers/normalize-name.decorator");
 class CreateHomeGroupDto {
 }
 exports.CreateHomeGroupDto = CreateHomeGroupDto;
 __decorate([
+    (0, normalize_name_decorator_1.NormalizeTitleInitials)(),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsNotEmpty)(),
     __metadata("design:type", String)
@@ -30,6 +32,7 @@ __decorate([
     __metadata("design:type", String)
 ], CreateHomeGroupDto.prototype, "schedule", void 0);
 __decorate([
+    (0, normalize_name_decorator_1.NormalizeTitleInitials)(),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsNotEmpty)(),
     __metadata("design:type", String)

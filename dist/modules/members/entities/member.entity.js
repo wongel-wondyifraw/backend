@@ -47,8 +47,16 @@ __decorate([
 ], Member.prototype, "address", void 0);
 __decorate([
     (0, typeorm_1.Column)({ type: "date", nullable: true }),
-    __metadata("design:type", Date)
+    __metadata("design:type", Object)
 ], Member.prototype, "date_of_birth", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: "varchar", length: 10, default: "day" }),
+    __metadata("design:type", String)
+], Member.prototype, "date_of_birth_precision", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: "varchar", length: 4, default: "gc" }),
+    __metadata("design:type", String)
+], Member.prototype, "date_of_birth_calendar", void 0);
 __decorate([
     (0, typeorm_1.Column)({ nullable: true }),
     __metadata("design:type", String)
@@ -79,8 +87,16 @@ __decorate([
 ], Member.prototype, "baptized", void 0);
 __decorate([
     (0, typeorm_1.Column)({ type: "date", nullable: true }),
-    __metadata("design:type", Date)
+    __metadata("design:type", Object)
 ], Member.prototype, "joined_date", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: "varchar", length: 10, default: "day" }),
+    __metadata("design:type", String)
+], Member.prototype, "joined_date_precision", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: "varchar", length: 4, default: "gc" }),
+    __metadata("design:type", String)
+], Member.prototype, "joined_date_calendar", void 0);
 __decorate([
     (0, typeorm_1.Column)({ type: "varchar", nullable: true }),
     __metadata("design:type", Object)
@@ -117,6 +133,14 @@ __decorate([
     (0, typeorm_1.Column)({ type: "date", nullable: true }),
     __metadata("design:type", Object)
 ], Member.prototype, "salvation_date", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: "varchar", length: 10, default: "day" }),
+    __metadata("design:type", String)
+], Member.prototype, "salvation_date_precision", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: "varchar", length: 4, default: "gc" }),
+    __metadata("design:type", String)
+], Member.prototype, "salvation_date_calendar", void 0);
 __decorate([
     (0, typeorm_1.Column)({ type: "uuid", nullable: true }),
     __metadata("design:type", Object)

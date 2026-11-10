@@ -12,10 +12,13 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.CreateFamilyChildDto = void 0;
 const class_transformer_1 = require("class-transformer");
 const class_validator_1 = require("class-validator");
+const normalize_name_decorator_1 = require("../../../common/transformers/normalize-name.decorator");
+const flexible_date_validator_1 = require("../../../common/validators/flexible-date.validator");
 class CreateFamilyChildDto {
 }
 exports.CreateFamilyChildDto = CreateFamilyChildDto;
 __decorate([
+    (0, normalize_name_decorator_1.NormalizePersonName)(),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsNotEmpty)(),
     __metadata("design:type", String)
@@ -30,7 +33,18 @@ __decorate([
 ], CreateFamilyChildDto.prototype, "age", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsString)() // Can also use @IsDateString() if preferred
-    ,
-    __metadata("design:type", String)
+    (0, flexible_date_validator_1.IsFlexibleDate)({ allowPartial: true }),
+    __metadata("design:type", Object)
 ], CreateFamilyChildDto.prototype, "date_of_birth", void 0);
+__decorate([
+    (0, class_transformer_1.Transform)(({ value }) => typeof value === "string" ? value.trim().toLowerCase() : value),
+    (0, class_validator_1.IsIn)(["gc", "ec"]),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], CreateFamilyChildDto.prototype, "date_of_birth_calendar", void 0);
+__decorate([
+    (0, class_transformer_1.Transform)(({ value }) => typeof value === "string" ? value.trim().toLowerCase() : value),
+    (0, class_validator_1.IsIn)(["day", "month", "year"]),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], CreateFamilyChildDto.prototype, "date_of_birth_precision", void 0);

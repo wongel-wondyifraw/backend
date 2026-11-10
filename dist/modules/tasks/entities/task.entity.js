@@ -64,6 +64,10 @@ __decorate([
     __metadata("design:type", String)
 ], Task.prototype, "end_date", void 0);
 __decorate([
+    (0, typeorm_1.Column)({ type: "varchar", length: 4, default: "gc" }),
+    __metadata("design:type", String)
+], Task.prototype, "date_calendar", void 0);
+__decorate([
     (0, typeorm_1.Column)({ type: "varchar", length: 32, default: "pending" }),
     __metadata("design:type", String)
 ], Task.prototype, "status", void 0);

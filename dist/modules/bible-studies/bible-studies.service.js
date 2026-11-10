@@ -22,6 +22,7 @@ const bible_study_member_entity_1 = require("./entities/bible-study-member.entit
 const notification_events_1 = require("../notifications/notification-events");
 const bible_books_1 = require("../../common/constants/bible-books");
 const leader_resolver_service_1 = require("../../common/leadership/leader-resolver.service");
+const name_normalizer_1 = require("../../common/utils/name-normalizer");
 let BibleStudiesService = class BibleStudiesService {
     constructor(bibleStudiesRepository, bibleStudyMembersRepository, events, leaders) {
         this.bibleStudiesRepository = bibleStudiesRepository;
@@ -48,10 +49,10 @@ let BibleStudiesService = class BibleStudiesService {
         const leader = this.normalizeLeader(dto);
         await this.leaders.assertExists(leader.leader_id, leader.leader_type);
         const study = this.bibleStudiesRepository.create({
-            name: dto.name,
+            name: (0, name_normalizer_1.normalizeTitleInitials)(dto.name),
             about: (_a = dto.about) !== null && _a !== void 0 ? _a : null,
             schedule: (_b = dto.schedule) !== null && _b !== void 0 ? _b : null,
-            location: dto.location,
+            location: (0, name_normalizer_1.normalizeTitleInitials)(dto.location),
             content_type: dto.content_type,
             ...leader,
             bible_book: dto.content_type === "book" ? ((_c = dto.bible_book) !== null && _c !== void 0 ? _c : null) : null,
@@ -112,13 +113,13 @@ let BibleStudiesService = class BibleStudiesService {
             content_type: contentType,
         };
         if (dto.name !== undefined)
-            patch.name = dto.name;
+            patch.name = (0, name_normalizer_1.normalizeTitleInitials)(dto.name);
         if (dto.about !== undefined)
             patch.about = (_c = dto.about) !== null && _c !== void 0 ? _c : null;
         if (dto.schedule !== undefined)
             patch.schedule = (_d = dto.schedule) !== null && _d !== void 0 ? _d : null;
         if (dto.location !== undefined)
-            patch.location = dto.location;
+            patch.location = (0, name_normalizer_1.normalizeTitleInitials)(dto.location);
         if ("leader_id" in dto || "leader_type" in dto) {
             const leader = this.normalizeLeader(dto);
             await this.leaders.assertExists(leader.leader_id, leader.leader_type);

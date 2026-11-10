@@ -7,16 +7,23 @@ import {
   ValidateIf,
 } from "class-validator";
 import { IsStrongPassword } from "../../../common/validators/password-strength.validator";
+import {
+  NormalizePersonName,
+  NormalizeTitleInitials,
+} from "../../../common/transformers/normalize-name.decorator";
 
 export class CreateUserDto {
+  @NormalizePersonName()
   @IsString()
   @IsNotEmpty()
   first_name: string;
 
+  @NormalizePersonName()
   @IsString()
   @IsOptional()
   middle_name?: string;
 
+  @NormalizePersonName()
   @IsString()
   @IsNotEmpty()
   last_name: string;
@@ -34,6 +41,7 @@ export class CreateUserDto {
   @IsNotEmpty()
   role: string;
 
+  @NormalizeTitleInitials()
   @ValidateIf((o) => o.role === "minister" || o.role === "staff")
   @IsString()
   @IsNotEmpty({ message: "Title is mandatory for Ministers and Staff" })

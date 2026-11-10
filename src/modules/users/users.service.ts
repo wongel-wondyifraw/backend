@@ -21,6 +21,10 @@ import { AuditLogsService } from "../audit-logs/audit-logs.service";
 import { AuditLog } from "../audit-logs/entities/audit-log.entity";
 import { PaginatedResult } from "../../common/interfaces/paginated-result.interface";
 import { randomBytes } from "crypto";
+import {
+  normalizePersonName,
+  normalizeTitleInitials,
+} from "../../common/utils/name-normalizer";
 
 type CreateUserInput = Omit<CreateUserDto, "password_hash" | "avatar"> & {
   password_hash?: string;
@@ -83,6 +87,14 @@ export class UsersService {
 
     const userData: Partial<User> = {
       ...rest,
+      first_name: normalizePersonName(rest.first_name),
+      middle_name: rest.middle_name
+        ? normalizePersonName(rest.middle_name)
+        : "",
+      last_name: normalizePersonName(rest.last_name),
+      ...(rest.title !== undefined
+        ? { title: normalizeTitleInitials(rest.title) }
+        : {}),
       email: rest.email?.trim().toLowerCase(),
       avatar_url: avatar_url ?? undefined,
       role: roleEntity.key,
@@ -257,6 +269,18 @@ export class UsersService {
     } = userData;
     const updateObject: Partial<User> = {
       ...otherData,
+      ...(otherData.first_name !== undefined
+        ? { first_name: normalizePersonName(otherData.first_name) }
+        : {}),
+      ...(otherData.middle_name !== undefined
+        ? { middle_name: normalizePersonName(otherData.middle_name) }
+        : {}),
+      ...(otherData.last_name !== undefined
+        ? { last_name: normalizePersonName(otherData.last_name) }
+        : {}),
+      ...(otherData.title !== undefined
+        ? { title: normalizeTitleInitials(otherData.title) }
+        : {}),
       ...(avatar_url !== undefined
         ? { avatar_url: avatar_url ?? undefined }
         : {}),

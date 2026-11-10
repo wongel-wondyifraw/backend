@@ -58,6 +58,7 @@ const user_mapper_1 = require("./user.mapper");
 const notification_events_1 = require("../notifications/notification-events");
 const audit_logs_service_1 = require("../audit-logs/audit-logs.service");
 const crypto_1 = require("crypto");
+const name_normalizer_1 = require("../../common/utils/name-normalizer");
 let UsersService = class UsersService {
     constructor(usersRepository, accessSeeder, events, auditLogsService, passwordResetTokenRepository) {
         this.usersRepository = usersRepository;
@@ -81,6 +82,14 @@ let UsersService = class UsersService {
         }
         const userData = {
             ...rest,
+            first_name: (0, name_normalizer_1.normalizePersonName)(rest.first_name),
+            middle_name: rest.middle_name
+                ? (0, name_normalizer_1.normalizePersonName)(rest.middle_name)
+                : "",
+            last_name: (0, name_normalizer_1.normalizePersonName)(rest.last_name),
+            ...(rest.title !== undefined
+                ? { title: (0, name_normalizer_1.normalizeTitleInitials)(rest.title) }
+                : {}),
             email: (_a = rest.email) === null || _a === void 0 ? void 0 : _a.trim().toLowerCase(),
             avatar_url: avatar_url !== null && avatar_url !== void 0 ? avatar_url : undefined,
             role: roleEntity.key,
@@ -204,6 +213,18 @@ let UsersService = class UsersService {
         const { currentPassword, newPassword, role, avatar: _avatar, avatar_url, ...otherData } = userData;
         const updateObject = {
             ...otherData,
+            ...(otherData.first_name !== undefined
+                ? { first_name: (0, name_normalizer_1.normalizePersonName)(otherData.first_name) }
+                : {}),
+            ...(otherData.middle_name !== undefined
+                ? { middle_name: (0, name_normalizer_1.normalizePersonName)(otherData.middle_name) }
+                : {}),
+            ...(otherData.last_name !== undefined
+                ? { last_name: (0, name_normalizer_1.normalizePersonName)(otherData.last_name) }
+                : {}),
+            ...(otherData.title !== undefined
+                ? { title: (0, name_normalizer_1.normalizeTitleInitials)(otherData.title) }
+                : {}),
             ...(avatar_url !== undefined
                 ? { avatar_url: avatar_url !== null && avatar_url !== void 0 ? avatar_url : undefined }
                 : {}),

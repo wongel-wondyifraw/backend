@@ -20,6 +20,9 @@ const family_entity_1 = require("./entities/family.entity");
 const family_child_entity_1 = require("./entities/family-child.entity");
 const member_entity_1 = require("../members/entities/member.entity");
 const minister_entity_1 = require("../ministers/entities/minister.entity");
+const name_normalizer_1 = require("../../common/utils/name-normalizer");
+const ethiopian_calendar_1 = require("../../common/utils/ethiopian-calendar");
+const calendar_dto_helper_1 = require("../../common/utils/calendar-dto.helper");
 let FamiliesService = class FamiliesService {
     constructor(families, children, members, ministers, dataSource) {
         this.families = families;
@@ -214,8 +217,8 @@ let FamiliesService = class FamiliesService {
             const isDuplicate = targetChildren.some((tc) => {
                 const sameName = normalize(tc.name) === normalize(sourceChild.name);
                 const sameDob = tc.date_of_birth && sourceChild.date_of_birth
-                    ? new Date(tc.date_of_birth).getTime() ===
-                        new Date(sourceChild.date_of_birth).getTime()
+                    ? String(tc.date_of_birth).slice(0, 10) ===
+                        String(sourceChild.date_of_birth).slice(0, 10)
                     : false;
                 const sameAge = tc.age !== null &&
                     tc.age !== undefined &&
@@ -348,10 +351,16 @@ let FamiliesService = class FamiliesService {
                 wife_id: dto.wife_id || null,
                 wife_type: dto.wife_type || "member",
                 spouse_status: spouseStatus,
-                external_spouse_name: ((_b = dto.external_spouse_name) === null || _b === void 0 ? void 0 : _b.trim()) || null,
+                external_spouse_name: ((_b = dto.external_spouse_name) === null || _b === void 0 ? void 0 : _b.trim())
+                    ? (0, name_normalizer_1.normalizePersonName)(dto.external_spouse_name)
+                    : null,
                 external_spouse_phone: ((_c = dto.external_spouse_phone) === null || _c === void 0 ? void 0 : _c.trim()) || null,
-                external_spouse_church: ((_d = dto.external_spouse_church) === null || _d === void 0 ? void 0 : _d.trim()) || null,
-                name: ((_e = dto.name) === null || _e === void 0 ? void 0 : _e.trim()) || this.defaultFamilyName(husband, wife),
+                external_spouse_church: ((_d = dto.external_spouse_church) === null || _d === void 0 ? void 0 : _d.trim())
+                    ? (0, name_normalizer_1.normalizeTitleInitials)(dto.external_spouse_church)
+                    : null,
+                name: ((_e = dto.name) === null || _e === void 0 ? void 0 : _e.trim())
+                    ? (0, name_normalizer_1.normalizeTitleInitials)(dto.name)
+                    : this.defaultFamilyName(husband, wife),
                 notes: ((_f = dto.notes) === null || _f === void 0 ? void 0 : _f.trim()) || null,
             });
             const saved = await queryRunner.manager.save(family_entity_1.Family, family);
@@ -476,18 +485,22 @@ let FamiliesService = class FamiliesService {
             if (dto.spouse_status !== undefined)
                 family.spouse_status = nextStatus;
             if (dto.external_spouse_name !== undefined) {
-                family.external_spouse_name = ((_c = dto.external_spouse_name) === null || _c === void 0 ? void 0 : _c.trim()) || null;
+                family.external_spouse_name = ((_c = dto.external_spouse_name) === null || _c === void 0 ? void 0 : _c.trim())
+                    ? (0, name_normalizer_1.normalizePersonName)(dto.external_spouse_name)
+                    : null;
             }
             if (dto.external_spouse_phone !== undefined) {
                 family.external_spouse_phone =
                     ((_d = dto.external_spouse_phone) === null || _d === void 0 ? void 0 : _d.trim()) || null;
             }
             if (dto.external_spouse_church !== undefined) {
-                family.external_spouse_church =
-                    ((_e = dto.external_spouse_church) === null || _e === void 0 ? void 0 : _e.trim()) || null;
+                family.external_spouse_church = ((_e = dto.external_spouse_church) === null || _e === void 0 ? void 0 : _e.trim())
+                    ? (0, name_normalizer_1.normalizeTitleInitials)(dto.external_spouse_church)
+                    : null;
             }
-            if (dto.name !== undefined)
-                family.name = ((_f = dto.name) === null || _f === void 0 ? void 0 : _f.trim()) || null;
+            if (dto.name !== undefined) {
+                family.name = ((_f = dto.name) === null || _f === void 0 ? void 0 : _f.trim()) ? (0, name_normalizer_1.normalizeTitleInitials)(dto.name) : null;
+            }
             if (dto.notes !== undefined)
                 family.notes = ((_g = dto.notes) === null || _g === void 0 ? void 0 : _g.trim()) || null;
             delete family.children;
@@ -511,21 +524,24 @@ let FamiliesService = class FamiliesService {
             throw new common_1.NotFoundException("Family not found");
     }
     async addChild(familyId, dto) {
-        var _a;
+        var _a, _b, _c, _d;
         await this.findOne(familyId);
+        const resolvedDob = (0, calendar_dto_helper_1.resolveDateFieldForWrite)("date_of_birth", dto.date_of_birth, {
+            calendar: dto.date_of_birth_calendar,
+            precision: dto.date_of_birth_precision,
+            allowPartial: true,
+        });
         let age = (_a = dto.age) !== null && _a !== void 0 ? _a : null;
-        if (dto.date_of_birth && (age === null || age === undefined)) {
-            const dob = new Date(dto.date_of_birth);
-            if (!Number.isNaN(dob.getTime())) {
-                const now = new Date();
-                age = Math.max(0, now.getFullYear() - dob.getFullYear());
-            }
+        if ((resolvedDob === null || resolvedDob === void 0 ? void 0 : resolvedDob.value) && (age === null || age === undefined)) {
+            age = (0, ethiopian_calendar_1.computeAgeFromIsoDate)(resolvedDob.value);
         }
         const child = this.children.create({
             family_id: familyId,
-            name: dto.name.trim(),
+            name: (0, name_normalizer_1.normalizePersonName)(dto.name),
             age,
-            date_of_birth: dto.date_of_birth ? new Date(dto.date_of_birth) : null,
+            date_of_birth: (_b = resolvedDob === null || resolvedDob === void 0 ? void 0 : resolvedDob.value) !== null && _b !== void 0 ? _b : null,
+            date_of_birth_precision: (_c = resolvedDob === null || resolvedDob === void 0 ? void 0 : resolvedDob.precision) !== null && _c !== void 0 ? _c : "day",
+            date_of_birth_calendar: (_d = resolvedDob === null || resolvedDob === void 0 ? void 0 : resolvedDob.calendar) !== null && _d !== void 0 ? _d : "gc",
         });
         return this.children.save(child);
     }
@@ -536,13 +552,21 @@ let FamiliesService = class FamiliesService {
         if (!child)
             throw new common_1.NotFoundException("Child not found");
         if (dto.name !== undefined)
-            child.name = dto.name.trim();
+            child.name = (0, name_normalizer_1.normalizePersonName)(dto.name);
         if (dto.age !== undefined)
             child.age = dto.age;
-        if (dto.date_of_birth !== undefined) {
-            child.date_of_birth = dto.date_of_birth
-                ? new Date(dto.date_of_birth)
-                : null;
+        const resolvedDob = (0, calendar_dto_helper_1.resolveDateFieldForWrite)("date_of_birth", dto.date_of_birth, {
+            calendar: dto.date_of_birth_calendar,
+            precision: dto.date_of_birth_precision,
+            allowPartial: true,
+        });
+        if (resolvedDob !== undefined) {
+            child.date_of_birth = resolvedDob.value;
+            child.date_of_birth_precision = resolvedDob.precision;
+            child.date_of_birth_calendar = resolvedDob.calendar;
+            if (resolvedDob.value && dto.age === undefined) {
+                child.age = (0, ethiopian_calendar_1.computeAgeFromIsoDate)(resolvedDob.value);
+            }
         }
         return this.children.save(child);
     }

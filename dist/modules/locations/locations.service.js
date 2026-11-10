@@ -17,6 +17,7 @@ const common_1 = require("@nestjs/common");
 const typeorm_1 = require("@nestjs/typeorm");
 const typeorm_2 = require("typeorm");
 const location_entity_1 = require("./entities/location.entity");
+const name_normalizer_1 = require("../../common/utils/name-normalizer");
 let LocationsService = class LocationsService {
     constructor(locationRepo) {
         this.locationRepo = locationRepo;
@@ -37,7 +38,7 @@ let LocationsService = class LocationsService {
         return location;
     }
     async create(dto) {
-        const trimmedName = dto.name.trim();
+        const trimmedName = (0, name_normalizer_1.normalizeTitleInitials)(dto.name);
         // Check for existing location (case-insensitive)
         const existing = await this.locationRepo.findOne({
             where: { name: (0, typeorm_2.ILike)(trimmedName) },
@@ -55,7 +56,7 @@ let LocationsService = class LocationsService {
     async update(id, dto) {
         const location = await this.findOne(id);
         if (dto.name) {
-            location.name = dto.name.trim();
+            location.name = (0, name_normalizer_1.normalizeTitleInitials)(dto.name);
         }
         if (dto.status) {
             location.status = dto.status;

@@ -14,6 +14,7 @@ import { PaginatedResult } from "../../common/interfaces/paginated-result.interf
 import { NOTIFICATION_EVENT } from "../notifications/notification-events";
 import { LeaderResolverService } from "../../common/leadership/leader-resolver.service";
 import type { LeaderType } from "../../common/leadership/leader.types";
+import { normalizeTitleInitials } from "../../common/utils/name-normalizer";
 
 @Injectable()
 export class MinistriesService {
@@ -43,7 +44,7 @@ export class MinistriesService {
     const leader = this.normalizeLeader(createMinistryDto);
     await this.leaders.assertExists(leader.leader_id, leader.leader_type);
     const ministry = this.ministriesRepository.create({
-      name: createMinistryDto.name,
+      name: normalizeTitleInitials(createMinistryDto.name),
       about: createMinistryDto.about ?? null,
       schedule: createMinistryDto.schedule ?? null,
       ...leader,
@@ -109,7 +110,12 @@ export class MinistriesService {
     id: string,
     updateMinistryDto: UpdateMinistryDto,
   ): Promise<Ministry> {
-    const patch: Partial<Ministry> = { ...updateMinistryDto };
+    const patch: Partial<Ministry> = {
+      ...updateMinistryDto,
+      ...(updateMinistryDto.name !== undefined
+        ? { name: normalizeTitleInitials(updateMinistryDto.name) }
+        : {}),
+    };
     if (
       "leader_id" in updateMinistryDto ||
       "leader_type" in updateMinistryDto

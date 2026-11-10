@@ -9,6 +9,7 @@ import {
   NOTIFICATION_EVENT,
   NotificationDomainEvent,
 } from "../notifications/notification-events";
+import { normalizePersonName } from "../../common/utils/name-normalizer";
 
 @Injectable()
 export class ContactRequestsService {
@@ -22,7 +23,7 @@ export class ContactRequestsService {
 
   async create(dto: CreateContactRequestDto): Promise<ContactRequest> {
     const record = this.contactRepo.create({
-      full_name: dto.full_name.trim(),
+      full_name: normalizePersonName(dto.full_name),
       phone: dto.phone.trim(),
       email: dto.email ? dto.email.trim().toLowerCase() : null,
       category: dto.category || "general",

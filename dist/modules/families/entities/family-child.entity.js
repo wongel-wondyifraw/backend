@@ -38,6 +38,14 @@ __decorate([
     __metadata("design:type", Object)
 ], FamilyChild.prototype, "date_of_birth", void 0);
 __decorate([
+    (0, typeorm_1.Column)({ type: "varchar", length: 10, default: "day" }),
+    __metadata("design:type", String)
+], FamilyChild.prototype, "date_of_birth_precision", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: "varchar", length: 4, default: "gc" }),
+    __metadata("design:type", String)
+], FamilyChild.prototype, "date_of_birth_calendar", void 0);
+__decorate([
     (0, typeorm_1.CreateDateColumn)(),
     __metadata("design:type", Date)
 ], FamilyChild.prototype, "created_at", void 0);

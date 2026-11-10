@@ -10,8 +10,10 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.PlanListQueryDto = void 0;
+const class_transformer_1 = require("class-transformer");
 const class_validator_1 = require("class-validator");
 const pagination_query_dto_1 = require("../../../common/dto/pagination-query.dto");
+const flexible_date_validator_1 = require("../../../common/validators/flexible-date.validator");
 const create_plan_dto_1 = require("./create-plan.dto");
 class PlanListQueryDto extends pagination_query_dto_1.PaginationQueryDto {
 }
@@ -23,14 +25,20 @@ __decorate([
 ], PlanListQueryDto.prototype, "type", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsDateString)(),
+    (0, flexible_date_validator_1.IsFlexibleDate)({ allowPartial: true, calendarField: "calendar" }),
     __metadata("design:type", String)
 ], PlanListQueryDto.prototype, "from", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsDateString)(),
+    (0, flexible_date_validator_1.IsFlexibleDate)({ allowPartial: true, calendarField: "calendar" }),
     __metadata("design:type", String)
 ], PlanListQueryDto.prototype, "to", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_transformer_1.Transform)(({ value }) => typeof value === "string" ? value.trim().toLowerCase() : value),
+    (0, class_validator_1.IsIn)(["gc", "ec"]),
+    __metadata("design:type", String)
+], PlanListQueryDto.prototype, "calendar", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),

@@ -61,6 +61,7 @@ const password_reset_token_entity_1 = require("./entities/password-reset-token.e
 const email_verification_token_entity_1 = require("./entities/email-verification-token.entity");
 const crypto = __importStar(require("crypto"));
 const otplib_1 = require("otplib");
+const name_normalizer_1 = require("../../common/utils/name-normalizer");
 let AuthService = class AuthService {
     constructor(usersService, jwtService, config, auditLogsService, refreshTokenRepository, passwordResetTokenRepository, emailVerificationTokenRepository) {
         this.usersService = usersService;
@@ -72,7 +73,8 @@ let AuthService = class AuthService {
         this.emailVerificationTokenRepository = emailVerificationTokenRepository;
     }
     parseFullName(fullName) {
-        const parts = fullName.trim().split(/\s+/).filter(Boolean);
+        const normalized = (0, name_normalizer_1.normalizePersonName)(fullName);
+        const parts = normalized.split(/\s+/).filter(Boolean);
         if (parts.length === 0) {
             return { first_name: "User", middle_name: "", last_name: "User" };
         }
