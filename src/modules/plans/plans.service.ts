@@ -11,6 +11,12 @@ import { CreatePlanDto } from "./dto/create-plan.dto";
 import { UpdatePlanDto } from "./dto/update-plan.dto";
 import { Minister } from "../ministers/entities/minister.entity";
 import { PaginatedResult } from "../../common/interfaces/paginated-result.interface";
+import {
+  type CalendarSystem,
+  resolveFilterDateBound,
+} from "../../common/utils/ethiopian-calendar";
+import { resolveDateFieldForWrite } from "../../common/utils/calendar-dto.helper";
+import { normalizeTitleInitials } from "../../common/utils/name-normalizer";
 
 @Injectable()
 export class PlansService {
@@ -58,13 +64,26 @@ export class PlansService {
       throw new BadRequestException("end_time must be after start_time");
     }
 
+    const resolvedDate = resolveDateFieldForWrite(
+      "plan_date",
+      dto.plan_date,
+      {
+        calendar: dto.plan_date_calendar,
+        allowPartial: false,
+      },
+    );
+    if (!resolvedDate?.value) {
+      throw new BadRequestException("plan_date is required");
+    }
+
     const plan = this.plansRepository.create({
-      title: dto.title.trim(),
+      title: normalizeTitleInitials(dto.title),
       type: dto.type,
-      plan_date: dto.plan_date,
+      plan_date: resolvedDate.value,
+      plan_date_calendar: resolvedDate.calendar,
       start_time: dto.start_time || null,
       end_time: dto.end_time || null,
-      location: dto.location?.trim() || null,
+      location: dto.location ? normalizeTitleInitials(dto.location) || null : null,
       notes: dto.notes?.trim() || null,
       status: dto.status || "planned",
     });
@@ -99,7 +118,13 @@ export class PlansService {
     page = 1,
     limit = 20,
     search?: string,
-    filters?: { type?: string; from?: string; to?: string; status?: string },
+    filters?: {
+      type?: string;
+      from?: string;
+      to?: string;
+      calendar?: CalendarSystem;
+      status?: string;
+    },
   ): Promise<PaginatedResult<Plan>> {
     const qb = this.plansRepository
       .createQueryBuilder("plan")
@@ -123,11 +148,17 @@ export class PlansService {
     }
 
     if (filters?.from) {
-      qb.andWhere("plan.plan_date >= :from", { from: filters.from });
+      const boundFrom =
+        resolveFilterDateBound(filters.from, "start", filters.calendar) ??
+        filters.from;
+      qb.andWhere("plan.plan_date >= :from", { from: boundFrom });
     }
 
     if (filters?.to) {
-      qb.andWhere("plan.plan_date <= :to", { to: filters.to });
+      const boundTo =
+        resolveFilterDateBound(filters.to, "end", filters.calendar) ??
+        filters.to;
+      qb.andWhere("plan.plan_date <= :to", { to: boundTo });
     }
 
     qb.orderBy("plan.plan_date", "ASC")
@@ -158,13 +189,29 @@ export class PlansService {
   async update(id: string, dto: UpdatePlanDto): Promise<Plan> {
     const plan = await this.findOne(id);
 
-    if (dto.title !== undefined) plan.title = dto.title.trim();
+    if (dto.title !== undefined) plan.title = normalizeTitleInitials(dto.title);
     if (dto.type !== undefined) plan.type = dto.type;
-    if (dto.plan_date !== undefined) plan.plan_date = dto.plan_date;
+    if (dto.plan_date !== undefined) {
+      const resolvedDate = resolveDateFieldForWrite(
+        "plan_date",
+        dto.plan_date,
+        {
+          calendar: dto.plan_date_calendar,
+          allowPartial: false,
+        },
+      );
+      if (!resolvedDate?.value) {
+        throw new BadRequestException("plan_date cannot be empty");
+      }
+      plan.plan_date = resolvedDate.value;
+      plan.plan_date_calendar = resolvedDate.calendar;
+    } else if (dto.plan_date_calendar !== undefined) {
+      plan.plan_date_calendar = dto.plan_date_calendar;
+    }
     if (dto.start_time !== undefined) plan.start_time = dto.start_time || null;
     if (dto.end_time !== undefined) plan.end_time = dto.end_time || null;
     if (dto.location !== undefined)
-      plan.location = dto.location?.trim() || null;
+      plan.location = dto.location ? normalizeTitleInitials(dto.location) || null : null;
     if (dto.notes !== undefined) plan.notes = dto.notes?.trim() || null;
     if (dto.status !== undefined) plan.status = dto.status;
 

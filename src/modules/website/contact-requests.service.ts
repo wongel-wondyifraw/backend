@@ -9,6 +9,7 @@ import {
   NOTIFICATION_EVENT,
   NotificationDomainEvent,
 } from "../notifications/notification-events";
+import { normalizePersonName } from "../../common/utils/name-normalizer";
 
 @Injectable()
 export class ContactRequestsService {
@@ -22,7 +23,7 @@ export class ContactRequestsService {
 
   async create(dto: CreateContactRequestDto): Promise<ContactRequest> {
     const record = this.contactRepo.create({
-      full_name: dto.full_name.trim(),
+      full_name: normalizePersonName(dto.full_name),
       phone: dto.phone.trim(),
       email: dto.email ? dto.email.trim().toLowerCase() : null,
       category: dto.category || "general",
@@ -50,7 +51,7 @@ export class ContactRequestsService {
         severity: isConfidential ? "warning" : "info",
         title,
         message: `${saved.full_name} (${saved.phone}): "${snippet}"`,
-        href: "/settings",
+        href: "/dashboard?tab=requests",
         targetRoles: isConfidential ? ["admin"] : ["admin", "minister"],
         includeAdmins: true,
         payload: {
@@ -70,18 +71,24 @@ export class ContactRequestsService {
     return saved;
   }
 
-  async findAll(status?: string): Promise<ContactRequest[]> {
+  async findAll(status?: string, isAdmin = false): Promise<ContactRequest[]> {
     const query = this.contactRepo.createQueryBuilder("cr");
     if (status) {
       query.where("cr.status = :status", { status });
+    }
+    if (!isAdmin) {
+      query.andWhere("cr.is_confidential = false");
     }
     query.orderBy("cr.created_at", "DESC");
     return query.getMany();
   }
 
-  async findOne(id: string): Promise<ContactRequest> {
+  async findOne(id: string, isAdmin = false): Promise<ContactRequest> {
     const found = await this.contactRepo.findOne({ where: { id } });
     if (!found) {
+      throw new NotFoundException(`Contact request with id ${id} not found`);
+    }
+    if (found.is_confidential && !isAdmin) {
       throw new NotFoundException(`Contact request with id ${id} not found`);
     }
     return found;
@@ -90,8 +97,9 @@ export class ContactRequestsService {
   async update(
     id: string,
     dto: UpdateContactRequestDto,
+    isAdmin = false,
   ): Promise<ContactRequest> {
-    const existing = await this.findOne(id);
+    const existing = await this.findOne(id, isAdmin);
 
     if (dto.status !== undefined) existing.status = dto.status;
     if (dto.assigned_to !== undefined) existing.assigned_to = dto.assigned_to;
@@ -106,7 +114,10 @@ export class ContactRequestsService {
   }
 
   async delete(id: string): Promise<void> {
-    const found = await this.findOne(id);
+    const found = await this.contactRepo.findOne({ where: { id } });
+    if (!found) {
+      throw new NotFoundException(`Contact request with id ${id} not found`);
+    }
     await this.contactRepo.remove(found);
   }
 }

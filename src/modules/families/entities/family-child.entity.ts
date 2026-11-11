@@ -7,6 +7,10 @@ import {
   JoinColumn,
 } from "typeorm";
 import { UuidPrimary } from "../../../common/entities/uuid-primary";
+import type {
+  CalendarSystem,
+  DatePrecision,
+} from "../../../common/utils/ethiopian-calendar";
 import { Family } from "./family.entity";
 
 @Entity("family_children")
@@ -25,7 +29,13 @@ export class FamilyChild extends UuidPrimary {
   age: number | null;
 
   @Column({ type: "date", nullable: true })
-  date_of_birth: Date | null;
+  date_of_birth: Date | string | null;
+
+  @Column({ type: "varchar", length: 10, default: "day" })
+  date_of_birth_precision: DatePrecision;
+
+  @Column({ type: "varchar", length: 4, default: "gc" })
+  date_of_birth_calendar: CalendarSystem;
 
   @CreateDateColumn()
   created_at: Date;

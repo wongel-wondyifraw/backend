@@ -7,7 +7,10 @@ import {
   ValidateIf,
 } from "class-validator";
 
+import { NormalizeTitleInitials } from "../../../common/transformers/normalize-name.decorator";
+
 export class CreateMinistryDto {
+  @NormalizeTitleInitials()
   @IsString()
   @IsNotEmpty()
   name: string;

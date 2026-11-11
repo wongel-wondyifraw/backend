@@ -15,6 +15,12 @@ import { CreateFamilyChildDto } from "./dto/create-family-child.dto";
 import { UpdateFamilyChildDto } from "./dto/update-family-child.dto";
 import { PaginatedResult } from "../../common/interfaces/paginated-result.interface";
 import { LeaderType } from "../../common/leadership/leader.types";
+import {
+  normalizePersonName,
+  normalizeTitleInitials,
+} from "../../common/utils/name-normalizer";
+import { computeAgeFromIsoDate } from "../../common/utils/ethiopian-calendar";
+import { resolveDateFieldForWrite } from "../../common/utils/calendar-dto.helper";
 
 type PersonType = LeaderType;
 
@@ -295,8 +301,8 @@ export class FamiliesService {
         const sameName = normalize(tc.name) === normalize(sourceChild.name);
         const sameDob =
           tc.date_of_birth && sourceChild.date_of_birth
-            ? new Date(tc.date_of_birth).getTime() ===
-              new Date(sourceChild.date_of_birth).getTime()
+            ? String(tc.date_of_birth).slice(0, 10) ===
+              String(sourceChild.date_of_birth).slice(0, 10)
             : false;
         const sameAge =
           tc.age !== null &&
@@ -463,10 +469,16 @@ export class FamiliesService {
         wife_id: dto.wife_id || null,
         wife_type: dto.wife_type || "member",
         spouse_status: spouseStatus,
-        external_spouse_name: dto.external_spouse_name?.trim() || null,
+        external_spouse_name: dto.external_spouse_name?.trim()
+          ? normalizePersonName(dto.external_spouse_name)
+          : null,
         external_spouse_phone: dto.external_spouse_phone?.trim() || null,
-        external_spouse_church: dto.external_spouse_church?.trim() || null,
-        name: dto.name?.trim() || this.defaultFamilyName(husband, wife),
+        external_spouse_church: dto.external_spouse_church?.trim()
+          ? normalizeTitleInitials(dto.external_spouse_church)
+          : null,
+        name: dto.name?.trim()
+          ? normalizeTitleInitials(dto.name)
+          : this.defaultFamilyName(husband, wife),
         notes: dto.notes?.trim() || null,
       });
       const saved = await queryRunner.manager.save(Family, family);
@@ -657,17 +669,22 @@ export class FamiliesService {
 
       if (dto.spouse_status !== undefined) family.spouse_status = nextStatus;
       if (dto.external_spouse_name !== undefined) {
-        family.external_spouse_name = dto.external_spouse_name?.trim() || null;
+        family.external_spouse_name = dto.external_spouse_name?.trim()
+          ? normalizePersonName(dto.external_spouse_name)
+          : null;
       }
       if (dto.external_spouse_phone !== undefined) {
         family.external_spouse_phone =
           dto.external_spouse_phone?.trim() || null;
       }
       if (dto.external_spouse_church !== undefined) {
-        family.external_spouse_church =
-          dto.external_spouse_church?.trim() || null;
+        family.external_spouse_church = dto.external_spouse_church?.trim()
+          ? normalizeTitleInitials(dto.external_spouse_church)
+          : null;
       }
-      if (dto.name !== undefined) family.name = dto.name?.trim() || null;
+      if (dto.name !== undefined) {
+        family.name = dto.name?.trim() ? normalizeTitleInitials(dto.name) : null;
+      }
       if (dto.notes !== undefined) family.notes = dto.notes?.trim() || null;
 
       delete (family as unknown as Record<string, unknown>).children;
@@ -695,19 +712,28 @@ export class FamiliesService {
     dto: CreateFamilyChildDto,
   ): Promise<FamilyChild> {
     await this.findOne(familyId);
+    const resolvedDob = resolveDateFieldForWrite(
+      "date_of_birth",
+      dto.date_of_birth,
+      {
+        calendar: dto.date_of_birth_calendar,
+        precision: dto.date_of_birth_precision,
+        allowPartial: true,
+      },
+    );
+
     let age = dto.age ?? null;
-    if (dto.date_of_birth && (age === null || age === undefined)) {
-      const dob = new Date(dto.date_of_birth);
-      if (!Number.isNaN(dob.getTime())) {
-        const now = new Date();
-        age = Math.max(0, now.getFullYear() - dob.getFullYear());
-      }
+    if (resolvedDob?.value && (age === null || age === undefined)) {
+      age = computeAgeFromIsoDate(resolvedDob.value);
     }
+
     const child = this.children.create({
       family_id: familyId,
-      name: dto.name.trim(),
+      name: normalizePersonName(dto.name),
       age,
-      date_of_birth: dto.date_of_birth ? new Date(dto.date_of_birth) : null,
+      date_of_birth: resolvedDob?.value ?? null,
+      date_of_birth_precision: resolvedDob?.precision ?? "day",
+      date_of_birth_calendar: resolvedDob?.calendar ?? "gc",
     });
     return this.children.save(child);
   }
@@ -721,12 +747,25 @@ export class FamiliesService {
       where: { id: childId, family_id: familyId },
     });
     if (!child) throw new NotFoundException("Child not found");
-    if (dto.name !== undefined) child.name = dto.name.trim();
+    if (dto.name !== undefined) child.name = normalizePersonName(dto.name);
     if (dto.age !== undefined) child.age = dto.age;
-    if (dto.date_of_birth !== undefined) {
-      child.date_of_birth = dto.date_of_birth
-        ? new Date(dto.date_of_birth)
-        : null;
+
+    const resolvedDob = resolveDateFieldForWrite(
+      "date_of_birth",
+      dto.date_of_birth,
+      {
+        calendar: dto.date_of_birth_calendar,
+        precision: dto.date_of_birth_precision,
+        allowPartial: true,
+      },
+    );
+    if (resolvedDob !== undefined) {
+      child.date_of_birth = resolvedDob.value;
+      child.date_of_birth_precision = resolvedDob.precision;
+      child.date_of_birth_calendar = resolvedDob.calendar;
+      if (resolvedDob.value && dto.age === undefined) {
+        child.age = computeAgeFromIsoDate(resolvedDob.value);
+      }
     }
     return this.children.save(child);
   }

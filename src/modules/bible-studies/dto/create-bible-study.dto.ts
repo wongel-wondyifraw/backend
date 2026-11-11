@@ -7,8 +7,10 @@ import {
   ValidateIf,
 } from "class-validator";
 import { BIBLE_BOOKS } from "../../../common/constants/bible-books";
+import { NormalizeTitleInitials } from "../../../common/transformers/normalize-name.decorator";
 
 export class CreateBibleStudyDto {
+  @NormalizeTitleInitials()
   @IsString()
   @IsNotEmpty()
   name: string;
@@ -21,6 +23,7 @@ export class CreateBibleStudyDto {
   @IsOptional()
   schedule?: string;
 
+  @NormalizeTitleInitials()
   @IsString()
   @IsNotEmpty()
   location: string;

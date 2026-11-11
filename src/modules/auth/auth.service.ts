@@ -25,6 +25,7 @@ import { ResetPasswordDto } from "./dto/reset-password.dto";
 import * as crypto from "crypto";
 import { User } from "../users/entities/user.entity";
 import { authenticator } from "otplib";
+import { normalizePersonName } from "../../common/utils/name-normalizer";
 
 @Injectable()
 export class AuthService {
@@ -42,7 +43,8 @@ export class AuthService {
   ) {}
 
   private parseFullName(fullName: string) {
-    const parts = fullName.trim().split(/\s+/).filter(Boolean);
+    const normalized = normalizePersonName(fullName);
+    const parts = normalized.split(/\s+/).filter(Boolean);
     if (parts.length === 0) {
       return { first_name: "User", middle_name: "", last_name: "User" };
     }

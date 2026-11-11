@@ -1,4 +1,8 @@
 import { IsIn, IsOptional, IsString, IsUUID } from "class-validator";
+import {
+  NormalizePersonName,
+  NormalizeTitleInitials,
+} from "../../../common/transformers/normalize-name.decorator";
 
 export class CreateFamilyDto {
   @IsOptional()
@@ -21,6 +25,7 @@ export class CreateFamilyDto {
   @IsIn(["registered", "pending", "external", "none"])
   spouse_status?: string;
 
+  @NormalizePersonName()
   @IsOptional()
   @IsString()
   external_spouse_name?: string;
@@ -29,10 +34,12 @@ export class CreateFamilyDto {
   @IsString()
   external_spouse_phone?: string;
 
+  @NormalizeTitleInitials()
   @IsOptional()
   @IsString()
   external_spouse_church?: string;
 
+  @NormalizeTitleInitials()
   @IsString()
   @IsOptional()
   name?: string;

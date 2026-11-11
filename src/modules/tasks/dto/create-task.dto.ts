@@ -1,10 +1,14 @@
+import { Transform } from "class-transformer";
 import {
-  IsDateString,
+  IsIn,
+  IsNotEmpty,
   IsOptional,
   IsString,
   IsUUID,
   ValidateIf,
 } from "class-validator";
+import { IsFlexibleDate } from "../../../common/validators/flexible-date.validator";
+import type { CalendarSystem } from "../../../common/utils/ethiopian-calendar";
 
 export class CreateTaskDto {
   @IsUUID()
@@ -13,11 +17,22 @@ export class CreateTaskDto {
   @IsUUID()
   minister_id: string;
 
-  @IsDateString()
+  @IsString()
+  @IsNotEmpty()
+  @IsFlexibleDate({ allowPartial: false, calendarField: "date_calendar" })
   start_date: string;
 
-  @IsDateString()
+  @IsString()
+  @IsNotEmpty()
+  @IsFlexibleDate({ allowPartial: false, calendarField: "date_calendar" })
   end_date: string;
+
+  @Transform(({ value }) =>
+    typeof value === "string" ? value.trim().toLowerCase() : value,
+  )
+  @IsIn(["gc", "ec"])
+  @IsOptional()
+  date_calendar?: CalendarSystem;
 
   @ValidateIf((o: CreateTaskDto) => !!o.target_member_id)
   @IsUUID()

@@ -15,6 +15,11 @@ import { UsersService } from "../users/users.service";
 import { User } from "../users/entities/user.entity";
 import { PaginatedResult } from "../../common/interfaces/paginated-result.interface";
 import { NOTIFICATION_EVENT } from "../notifications/notification-events";
+import {
+  normalizePersonName,
+  normalizeTitleInitials,
+} from "../../common/utils/name-normalizer";
+import { resolveDateFieldForWrite } from "../../common/utils/calendar-dto.helper";
 
 export type MinisterCreateResult = Minister & { temporary_password: string };
 
@@ -59,16 +64,51 @@ export class MinistersService {
 
     const temporaryPassword = this.generatePassword();
     const isActive = (dto.status ?? "active").toLowerCase() !== "inactive";
+    const firstName = normalizePersonName(dto.first_name);
+    const middleName =
+      dto.middle_name !== undefined ? normalizePersonName(dto.middle_name) : "";
+    const lastName = normalizePersonName(dto.last_name);
+    const normalizedTitle =
+      dto.title !== undefined ? normalizeTitleInitials(dto.title) : undefined;
+
+    const {
+      date_of_birth,
+      date_of_birth_calendar,
+      date_of_birth_precision,
+      joined_date,
+      joined_date_calendar,
+      joined_date_precision,
+      ...ministerRest
+    } = dto;
+
+    const resolvedDob = resolveDateFieldForWrite(
+      "date_of_birth",
+      date_of_birth,
+      {
+        calendar: date_of_birth_calendar,
+        precision: date_of_birth_precision,
+        allowPartial: true,
+      },
+    );
+    const resolvedJoined = resolveDateFieldForWrite(
+      "joined_date",
+      joined_date,
+      {
+        calendar: joined_date_calendar,
+        precision: joined_date_precision,
+        allowPartial: true,
+      },
+    );
 
     const user = await this.usersService.create(
       {
-        first_name: dto.first_name,
-        middle_name: dto.middle_name ?? "",
-        last_name: dto.last_name,
+        first_name: firstName,
+        middle_name: middleName,
+        last_name: lastName,
         email,
         password: temporaryPassword,
         role: "minister",
-        title: dto.title ?? undefined,
+        title: normalizedTitle ?? undefined,
         avatar_url: dto.image_url ?? undefined,
         is_active: isActive,
         created_via: "minister_module",
@@ -77,7 +117,25 @@ export class MinistersService {
     );
 
     const minister = this.ministersRepository.create({
-      ...dto,
+      ...ministerRest,
+      first_name: firstName,
+      ...(dto.middle_name !== undefined ? { middle_name: middleName } : {}),
+      last_name: lastName,
+      ...(normalizedTitle !== undefined ? { title: normalizedTitle } : {}),
+      ...(resolvedDob !== undefined
+        ? {
+            date_of_birth: resolvedDob.value,
+            date_of_birth_precision: resolvedDob.precision,
+            date_of_birth_calendar: resolvedDob.calendar,
+          }
+        : {}),
+      ...(resolvedJoined !== undefined
+        ? {
+            joined_date: resolvedJoined.value,
+            joined_date_precision: resolvedJoined.precision,
+            joined_date_calendar: resolvedJoined.calendar,
+          }
+        : {}),
       email,
       user_id: user.id,
       status: dto.status ?? "active",
@@ -103,6 +161,7 @@ export class MinistersService {
     page = 1,
     limit = 20,
     search?: string,
+    status?: string,
   ): Promise<PaginatedResult<Minister>> {
     const qb = this.ministersRepository.createQueryBuilder("minister");
 
@@ -112,6 +171,12 @@ export class MinistersService {
         "LOWER(minister.first_name) LIKE :pattern OR LOWER(minister.last_name) LIKE :pattern OR LOWER(minister.email) LIKE :pattern OR minister.phone LIKE :pattern OR LOWER(minister.title) LIKE :pattern",
         { pattern },
       );
+    }
+
+    if (status?.trim()) {
+      qb.andWhere("LOWER(minister.status) = :status", {
+        status: status.trim().toLowerCase(),
+      });
     }
 
     qb.orderBy("minister.created_at", "DESC");
@@ -151,13 +216,74 @@ export class MinistersService {
     actingUser?: Partial<User>,
   ): Promise<Minister> {
     const minister = await this.findOne(id);
-    await this.ministersRepository.update(id, dto);
+    const {
+      date_of_birth,
+      date_of_birth_calendar,
+      date_of_birth_precision,
+      joined_date,
+      joined_date_calendar,
+      joined_date_precision,
+      ...ministerRest
+    } = dto;
+
+    const ministerPatch: Partial<Minister> = {
+      ...ministerRest,
+      ...(ministerRest.first_name !== undefined
+        ? { first_name: normalizePersonName(ministerRest.first_name) }
+        : {}),
+      ...(ministerRest.middle_name !== undefined
+        ? { middle_name: normalizePersonName(ministerRest.middle_name) }
+        : {}),
+      ...(ministerRest.last_name !== undefined
+        ? { last_name: normalizePersonName(ministerRest.last_name) }
+        : {}),
+      ...(ministerRest.title !== undefined
+        ? { title: normalizeTitleInitials(ministerRest.title) }
+        : {}),
+    };
+
+    const resolvedDob = resolveDateFieldForWrite(
+      "date_of_birth",
+      date_of_birth,
+      {
+        calendar: date_of_birth_calendar,
+        precision: date_of_birth_precision,
+        allowPartial: true,
+      },
+    );
+    if (resolvedDob !== undefined) {
+      ministerPatch.date_of_birth = resolvedDob.value;
+      ministerPatch.date_of_birth_precision = resolvedDob.precision;
+      ministerPatch.date_of_birth_calendar = resolvedDob.calendar;
+    }
+
+    const resolvedJoined = resolveDateFieldForWrite(
+      "joined_date",
+      joined_date,
+      {
+        calendar: joined_date_calendar,
+        precision: joined_date_precision,
+        allowPartial: true,
+      },
+    );
+    if (resolvedJoined !== undefined) {
+      ministerPatch.joined_date = resolvedJoined.value;
+      ministerPatch.joined_date_precision = resolvedJoined.precision;
+      ministerPatch.joined_date_calendar = resolvedJoined.calendar;
+    }
+
+    if (Object.keys(ministerPatch).length > 0) {
+      await this.ministersRepository.update(id, ministerPatch);
+    }
 
     const userPatch: Record<string, unknown> = {};
-    if (dto.first_name !== undefined) userPatch.first_name = dto.first_name;
-    if (dto.middle_name !== undefined) userPatch.middle_name = dto.middle_name;
-    if (dto.last_name !== undefined) userPatch.last_name = dto.last_name;
-    if (dto.title !== undefined) userPatch.title = dto.title;
+    if (ministerPatch.first_name !== undefined)
+      userPatch.first_name = ministerPatch.first_name;
+    if (ministerPatch.middle_name !== undefined)
+      userPatch.middle_name = ministerPatch.middle_name;
+    if (ministerPatch.last_name !== undefined)
+      userPatch.last_name = ministerPatch.last_name;
+    if (ministerPatch.title !== undefined) userPatch.title = ministerPatch.title;
     if (dto.image_url !== undefined) userPatch.avatar_url = dto.image_url;
     if (dto.status !== undefined) {
       userPatch.is_active = dto.status.toLowerCase() !== "inactive";

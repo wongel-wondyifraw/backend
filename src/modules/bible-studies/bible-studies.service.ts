@@ -16,6 +16,7 @@ import { NOTIFICATION_EVENT } from "../notifications/notification-events";
 import { BIBLE_BOOK_SET } from "../../common/constants/bible-books";
 import { LeaderResolverService } from "../../common/leadership/leader-resolver.service";
 import type { LeaderType } from "../../common/leadership/leader.types";
+import { normalizeTitleInitials } from "../../common/utils/name-normalizer";
 
 @Injectable()
 export class BibleStudiesService {
@@ -53,10 +54,10 @@ export class BibleStudiesService {
     const leader = this.normalizeLeader(dto);
     await this.leaders.assertExists(leader.leader_id, leader.leader_type);
     const study = this.bibleStudiesRepository.create({
-      name: dto.name,
+      name: normalizeTitleInitials(dto.name),
       about: dto.about ?? null,
       schedule: dto.schedule ?? null,
-      location: dto.location,
+      location: normalizeTitleInitials(dto.location),
       content_type: dto.content_type,
       ...leader,
       bible_book: dto.content_type === "book" ? (dto.bible_book ?? null) : null,
@@ -135,10 +136,11 @@ export class BibleStudiesService {
       content_type: contentType,
     };
 
-    if (dto.name !== undefined) patch.name = dto.name;
+    if (dto.name !== undefined) patch.name = normalizeTitleInitials(dto.name);
     if (dto.about !== undefined) patch.about = dto.about ?? null;
     if (dto.schedule !== undefined) patch.schedule = dto.schedule ?? null;
-    if (dto.location !== undefined) patch.location = dto.location;
+    if (dto.location !== undefined)
+      patch.location = normalizeTitleInitials(dto.location);
     if ("leader_id" in dto || "leader_type" in dto) {
       const leader = this.normalizeLeader(dto);
       await this.leaders.assertExists(leader.leader_id, leader.leader_type);

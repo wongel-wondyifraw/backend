@@ -12,6 +12,15 @@ import { UpdateMemberDto } from "./dto/update-member.dto";
 import { PaginatedResult } from "../../common/interfaces/paginated-result.interface";
 import { BulkCreateResult } from "../../common/interfaces/bulk-create-result.interface";
 import { NOTIFICATION_EVENT } from "../notifications/notification-events";
+import {
+  normalizePersonName,
+  normalizeTitleInitials,
+} from "../../common/utils/name-normalizer";
+import {
+  type CalendarSystem,
+  resolveFilterDateBound,
+} from "../../common/utils/ethiopian-calendar";
+import { resolveDateFieldForWrite } from "../../common/utils/calendar-dto.helper";
 
 @Injectable()
 export class MembersService {
@@ -40,9 +49,88 @@ export class MembersService {
   }
 
   async create(createMemberDto: CreateMemberDto): Promise<Member> {
-    const { ministry_ids, ...memberData } = createMemberDto;
+    const {
+      ministry_ids,
+      date_of_birth,
+      date_of_birth_calendar,
+      date_of_birth_precision,
+      joined_date,
+      joined_date_calendar,
+      joined_date_precision,
+      salvation_date,
+      salvation_date_calendar,
+      salvation_date_precision,
+      ...memberData
+    } = createMemberDto;
     await this.assertEmailAvailable(memberData.email);
-    const member = this.membersRepository.create(memberData);
+
+    const normalizedPayload: Partial<Member> = {
+      ...memberData,
+      ...(memberData.status !== undefined
+        ? { status: memberData.status.trim().toLowerCase() }
+        : {}),
+      first_name: normalizePersonName(memberData.first_name),
+      ...(memberData.middle_name !== undefined
+        ? { middle_name: normalizePersonName(memberData.middle_name) }
+        : {}),
+      last_name: normalizePersonName(memberData.last_name),
+      ...(memberData.profession !== undefined
+        ? { profession: normalizeTitleInitials(memberData.profession) }
+        : {}),
+      ...(memberData.employer !== undefined
+        ? { employer: normalizeTitleInitials(memberData.employer) }
+        : {}),
+      ...(memberData.education_field !== undefined
+        ? { education_field: normalizeTitleInitials(memberData.education_field) }
+        : {}),
+    };
+
+    const resolvedDob = resolveDateFieldForWrite(
+      "date_of_birth",
+      date_of_birth,
+      {
+        calendar: date_of_birth_calendar,
+        precision: date_of_birth_precision,
+        allowPartial: true,
+      },
+    );
+    if (resolvedDob !== undefined) {
+      normalizedPayload.date_of_birth = resolvedDob.value;
+      normalizedPayload.date_of_birth_precision = resolvedDob.precision;
+      normalizedPayload.date_of_birth_calendar = resolvedDob.calendar;
+    }
+
+    const resolvedJoined = resolveDateFieldForWrite(
+      "joined_date",
+      joined_date,
+      {
+        calendar: joined_date_calendar,
+        precision: joined_date_precision,
+        allowPartial: true,
+      },
+    );
+    if (resolvedJoined !== undefined) {
+      normalizedPayload.joined_date = resolvedJoined.value;
+      normalizedPayload.joined_date_precision = resolvedJoined.precision;
+      normalizedPayload.joined_date_calendar = resolvedJoined.calendar;
+    }
+
+    const resolvedSalvation = resolveDateFieldForWrite(
+      "salvation_date",
+      salvation_date,
+      {
+        calendar: salvation_date_calendar,
+        precision: salvation_date_precision,
+        allowPartial: true,
+      },
+    );
+    if (resolvedSalvation !== undefined) {
+      normalizedPayload.salvation_date = resolvedSalvation.value;
+      normalizedPayload.salvation_date_precision = resolvedSalvation.precision;
+      normalizedPayload.salvation_date_calendar = resolvedSalvation.calendar;
+    }
+
+    const member = this.membersRepository.create(normalizedPayload);
     const saved = await this.membersRepository.save(member);
 
     if (ministry_ids && ministry_ids.length > 0) {
@@ -61,10 +149,11 @@ export class MembersService {
       severity: "success",
       title: "New member added",
       message: `${name} was added to the directory.`,
-      href: `/members/${saved.id}`,
+      href: `/members/details/${saved.id}`,
       dedupeKey: `member.created:${saved.id}`,
       targetRoles: ["admin", "minister"],
     });
+    this.events.emit("dashboard.invalidate");
     return saved;
   }
 
@@ -95,6 +184,7 @@ export class MembersService {
       marital_status?: string;
       joined_from?: string;
       joined_to?: string;
+      joined_calendar?: CalendarSystem;
       sort_by?: "created_at" | "joined_date" | "visit_count";
       sort_order?: string;
     },
@@ -122,16 +212,28 @@ export class MembersService {
     }
 
     if (filters?.joined_from) {
+      const boundFrom =
+        resolveFilterDateBound(
+          filters.joined_from,
+          "start",
+          filters.joined_calendar,
+        ) ?? filters.joined_from;
       qb.andWhere(
         "COALESCE(member.joined_date, CAST(member.created_at AS date)) >= :joinedFrom",
-        { joinedFrom: filters.joined_from },
+        { joinedFrom: boundFrom },
       );
     }
 
     if (filters?.joined_to) {
+      const boundTo =
+        resolveFilterDateBound(
+          filters.joined_to,
+          "end",
+          filters.joined_calendar,
+        ) ?? filters.joined_to;
       qb.andWhere(
         "COALESCE(member.joined_date, CAST(member.created_at AS date)) <= :joinedTo",
-        { joinedTo: filters.joined_to },
+        { joinedTo: boundTo },
       );
     }
 
@@ -140,17 +242,19 @@ export class MembersService {
       (filters?.sort_order || "DESC").toUpperCase() === "ASC" ? "ASC" : "DESC";
 
     if (sortBy === "visit_count") {
-      qb.orderBy("member.visit_count", sortOrder).addOrderBy(
-        "member.created_at",
-        "DESC",
-      );
+      qb.orderBy("member.visit_count", sortOrder)
+        .addOrderBy("member.created_at", "DESC")
+        .addOrderBy("member.id", "DESC");
     } else if (sortBy === "joined_date") {
       qb.orderBy(
         "COALESCE(member.joined_date, CAST(member.created_at AS date))",
         sortOrder,
-      );
+      ).addOrderBy("member.id", sortOrder);
     } else {
-      qb.orderBy("member.created_at", sortOrder);
+      qb.orderBy("member.created_at", sortOrder).addOrderBy(
+        "member.id",
+        sortOrder,
+      );
     }
 
     qb.skip((page - 1) * limit).take(limit);
@@ -183,12 +287,110 @@ export class MembersService {
     return member;
   }
 
-  async update(id: string, updateMemberDto: UpdateMemberDto): Promise<Member> {
-    const { ministry_ids, ...memberData } = updateMemberDto;
+  async update(
+    id: string,
+    updateMemberDto: UpdateMemberDto,
+    actorUserId?: string,
+  ): Promise<Member> {
+    const {
+      ministry_ids,
+      date_of_birth,
+      date_of_birth_calendar,
+      date_of_birth_precision,
+      joined_date,
+      joined_date_calendar,
+      joined_date_precision,
+      salvation_date,
+      salvation_date_calendar,
+      salvation_date_precision,
+      ...memberData
+    } = updateMemberDto;
     if (memberData.email !== undefined) {
       await this.assertEmailAvailable(memberData.email, id);
     }
-    await this.membersRepository.update(id, memberData);
+
+    const normalizedStatus =
+      memberData.status !== undefined
+        ? memberData.status.trim().toLowerCase()
+        : undefined;
+
+    const memberPatch: Partial<Member> = {
+      ...memberData,
+      ...(normalizedStatus !== undefined ? { status: normalizedStatus } : {}),
+      ...(normalizedStatus === "active"
+        ? {
+            approved_at: new Date(),
+            ...(actorUserId ? { approved_by_user_id: actorUserId } : {}),
+          }
+        : {}),
+      ...(memberData.first_name !== undefined
+        ? { first_name: normalizePersonName(memberData.first_name) }
+        : {}),
+      ...(memberData.middle_name !== undefined
+        ? { middle_name: normalizePersonName(memberData.middle_name) }
+        : {}),
+      ...(memberData.last_name !== undefined
+        ? { last_name: normalizePersonName(memberData.last_name) }
+        : {}),
+      ...(memberData.profession !== undefined
+        ? { profession: normalizeTitleInitials(memberData.profession) }
+        : {}),
+      ...(memberData.employer !== undefined
+        ? { employer: normalizeTitleInitials(memberData.employer) }
+        : {}),
+      ...(memberData.education_field !== undefined
+        ? { education_field: normalizeTitleInitials(memberData.education_field) }
+        : {}),
+    };
+
+    const resolvedDob = resolveDateFieldForWrite(
+      "date_of_birth",
+      date_of_birth,
+      {
+        calendar: date_of_birth_calendar,
+        precision: date_of_birth_precision,
+        allowPartial: true,
+      },
+    );
+    if (resolvedDob !== undefined) {
+      memberPatch.date_of_birth = resolvedDob.value;
+      memberPatch.date_of_birth_precision = resolvedDob.precision;
+      memberPatch.date_of_birth_calendar = resolvedDob.calendar;
+    }
+
+    const resolvedJoined = resolveDateFieldForWrite(
+      "joined_date",
+      joined_date,
+      {
+        calendar: joined_date_calendar,
+        precision: joined_date_precision,
+        allowPartial: true,
+      },
+    );
+    if (resolvedJoined !== undefined) {
+      memberPatch.joined_date = resolvedJoined.value;
+      memberPatch.joined_date_precision = resolvedJoined.precision;
+      memberPatch.joined_date_calendar = resolvedJoined.calendar;
+    }
+
+    const resolvedSalvation = resolveDateFieldForWrite(
+      "salvation_date",
+      salvation_date,
+      {
+        calendar: salvation_date_calendar,
+        precision: salvation_date_precision,
+        allowPartial: true,
+      },
+    );
+    if (resolvedSalvation !== undefined) {
+      memberPatch.salvation_date = resolvedSalvation.value;
+      memberPatch.salvation_date_precision = resolvedSalvation.precision;
+      memberPatch.salvation_date_calendar = resolvedSalvation.calendar;
+    }
+
+    if (Object.keys(memberPatch).length > 0) {
+      await this.membersRepository.update(id, memberPatch);
+    }
 
     if (ministry_ids !== undefined) {
       await this.membersRepository.manager
@@ -214,10 +416,11 @@ export class MembersService {
       severity: "info",
       title: "Member updated",
       message: `${name}'s profile was updated.`,
-      href: `/members/${id}`,
+      href: `/members/details/${id}`,
       dedupeKey: `member.updated:${id}:${Date.now()}`,
       targetRoles: ["admin", "minister"],
     });
+    this.events.emit("dashboard.invalidate");
     return member;
   }
 
@@ -227,6 +430,7 @@ export class MembersService {
     if (result.affected === 0) {
       throw new NotFoundException(`Member with ID ${id} not found`);
     }
+    this.events.emit("dashboard.invalidate");
     if (member) {
       const name = `${member.first_name} ${member.last_name}`.trim();
       this.events.emit(NOTIFICATION_EVENT, {

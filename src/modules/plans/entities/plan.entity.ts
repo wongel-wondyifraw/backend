@@ -6,6 +6,7 @@ import {
   OneToMany,
 } from "typeorm";
 import { UuidPrimary } from "../../../common/entities/uuid-primary";
+import type { CalendarSystem } from "../../../common/utils/ethiopian-calendar";
 import { PlanMinister } from "./plan-minister.entity";
 
 export type PlanType =
@@ -28,6 +29,9 @@ export class Plan extends UuidPrimary {
 
   @Column({ type: "date" })
   plan_date: string;
+
+  @Column({ type: "varchar", length: 4, default: "gc" })
+  plan_date_calendar: CalendarSystem;
 
   @Column({ type: "time", nullable: true })
   start_time: string | null;

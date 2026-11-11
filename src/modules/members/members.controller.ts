@@ -8,6 +8,8 @@ import {
   Param,
   ParseUUIDPipe,
   Query,
+  Req,
+  ForbiddenException,
 } from "@nestjs/common";
 import { MembersService } from "./members.service";
 import { CreateMemberDto } from "./dto/create-member.dto";
@@ -16,6 +18,9 @@ import { UpdateMemberDto } from "./dto/update-member.dto";
 import { MemberListQueryDto } from "./dto/member-list-query.dto";
 import { MinistriesService } from "../ministries/ministries.service";
 import { RequiresPermissions } from "../../common/decorators/permissions.decorator";
+import type { User } from "../users/entities/user.entity";
+
+const APPROVE_ONLY_ALLOWED_FIELDS = new Set(["status", "status_reason"]);
 
 @Controller("members")
 export class MembersController {
@@ -48,6 +53,7 @@ export class MembersController {
         marital_status: query.marital_status,
         joined_from: query.joined_from,
         joined_to: query.joined_to,
+        joined_calendar: query.joined_calendar,
         sort_by: query.sort_by,
         sort_order: query.sort_order,
       },
@@ -61,12 +67,30 @@ export class MembersController {
   }
 
   @Patch(":id")
-  @RequiresPermissions("members.update")
+  @RequiresPermissions("members.update", "members.approve")
   async update(
     @Param("id", ParseUUIDPipe) id: string,
     @Body() updateMemberDto: UpdateMemberDto,
+    @Req() req: { user?: User },
   ) {
-    return this.membersService.update(id, updateMemberDto);
+    const granted = new Set(
+      (req.user?.roleEntity?.permissions ?? []).map((p) => p.slug),
+    );
+    if (!granted.has("members.update")) {
+      const updatedKeys = Object.keys(
+        updateMemberDto as Record<string, unknown>,
+      ).filter(
+        (key) =>
+          (updateMemberDto as Record<string, unknown>)[key] !== undefined,
+      );
+      const hasDisallowed = updatedKeys.some(
+        (key) => !APPROVE_ONLY_ALLOWED_FIELDS.has(key),
+      );
+      if (hasDisallowed || updatedKeys.length === 0) {
+        throw new ForbiddenException("Missing permission: members.update");
+      }
+    }
+    return this.membersService.update(id, updateMemberDto, req.user?.id);
   }
 
   @Delete(":id")
